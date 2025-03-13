@@ -1,82 +1,122 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>DwarfView</title>
-  <style>
-    /* Estilos generales */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      width: 230px;
-      padding: 15px;
-      background-color: #2d2d2d;
-      color: #f5f5f5;
-      text-align: center;
-      border: 2px solid #a17c47;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    /* Encabezado */
-    #header {
-      font-size: 20px;
-      font-weight: bold;
-      color: #d4af37; /* Dorado para un toque enano */
-      margin-bottom: 15px;
-    }
-
-    /* Botón de activación */
-    #toggleButton {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px;
-      width: 100%;
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffffff;
-      background-color: #4CAF50; /* Verde para indicar "Activado" */
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    #toggleButton.off {
-      background-color: #f44336; /* Rojo para indicar "Desactivado" */
-    }
-
-    /* Contador */
-    #countdownDisplay {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #c1c1c1;
-      background-color: #3e3e3e;
-      padding: 5px;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-
-    /* Iconos */
-    .icon {
-      width: 20px;
-      height: 20px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arriero's Wealth - Of Mules and Coins</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="header">🔨 DwarfView 🔨</div>
-
-  <!-- Botón de activación -->
-  <button id="toggleButton" class="off">
-    <img src="https://img.icons8.com/ios-glyphs/30/ffffff/refresh--v1.png" class="icon" alt="Recarga">
-    Activar Recarga
-  </button>
-
-  <!-- Contador -->
-  <div id="countdownDisplay">Siguiente recarga en: 30 segundos</div>
-
+  <h2>Arriero's Wealth <span style="color: #cccccc;">- Of Mules and Coins</span></h2>
+  
+  <div class="tab">
+    <button class="tablinks active" onclick="openTab(event, 'ingresos')">Ingresos</button>
+    <button class="tablinks" onclick="openTab(event, 'gastos')">Gastos</button>
+    <button class="tablinks" onclick="openTab(event, 'analisis')">Análisis</button>
+  </div>
+  
+  <!-- Pestaña de ingresos -->
+  <div id="ingresos" class="tabcontent active">
+    <h3>Mis Ingresos</h3>
+    <label for="ingreso">Ingreso mensual:</label>
+    <input type="number" id="ingreso" min="0">
+    <button id="guardarIngreso">Guardar</button>
+  </div>
+  
+  <!-- Pestaña de gastos -->
+  <div id="gastos" class="tabcontent">
+    <h3>Mis Gastos Mensuales</h3>
+    
+    <div class="categoria-gastos">
+      <h4>Esenciales para la vida</h4>
+      <div class="gasto-item">
+        <label for="vivienda">Vivienda:</label>
+        <input type="number" id="vivienda" min="0" class="gasto" data-categoria="esencial">
+      </div>
+      <div class="gasto-item">
+        <label for="alimentacion">Alimentación:</label>
+        <input type="number" id="alimentacion" min="0" class="gasto" data-categoria="esencial">
+      </div>
+      <div class="gasto-item">
+        <label for="servicios">Servicios:</label>
+        <input type="number" id="servicios" min="0" class="gasto" data-categoria="esencial">
+      </div>
+      <div class="gasto-item">
+        <label for="transporte">Transporte:</label>
+        <input type="number" id="transporte" min="0" class="gasto" data-categoria="esencial">
+      </div>
+      <div class="gasto-item">
+        <label for="salud">Salud:</label>
+        <input type="number" id="salud" min="0" class="gasto" data-categoria="esencial">
+      </div>
+    </div>
+    
+    <div class="categoria-gastos">
+      <h4>Importantes</h4>
+      <div class="gasto-item">
+        <label for="deudas">Deudas:</label>
+        <input type="number" id="deudas" min="0" class="gasto" data-categoria="importante">
+      </div>
+      <div class="gasto-item">
+        <label for="ahorro">Ahorro:</label>
+        <input type="number" id="ahorro" min="0" class="gasto" data-categoria="importante">
+      </div>
+      <div class="gasto-item">
+        <label for="estudio">Estudio:</label>
+        <input type="number" id="estudio" min="0" class="gasto" data-categoria="importante">
+      </div>
+      <div class="gasto-item">
+        <label for="mantenimiento">Mantenimiento del hogar:</label>
+        <input type="number" id="mantenimiento" min="0" class="gasto" data-categoria="importante">
+      </div>
+    </div>
+    
+    <div class="categoria-gastos">
+      <h4>Opcionales</h4>
+      <div class="gasto-item">
+        <label for="entretenimiento">Entretenimiento:</label>
+        <input type="number" id="entretenimiento" min="0" class="gasto" data-categoria="opcional">
+      </div>
+      <div class="gasto-item">
+        <label for="salidas">Salidas a comer:</label>
+        <input type="number" id="salidas" min="0" class="gasto" data-categoria="opcional">
+      </div>
+      <div class="gasto-item">
+        <label for="compras">Compras no esenciales:</label>
+        <input type="number" id="compras" min="0" class="gasto" data-categoria="opcional">
+      </div>
+      <div class="gasto-item">
+        <label for="viajes">Viajes:</label>
+        <input type="number" id="viajes" min="0" class="gasto" data-categoria="opcional">
+      </div>
+      <div class="gasto-item">
+        <label for="suscripciones">Suscripciones/membresías:</label>
+        <input type="number" id="suscripciones" min="0" class="gasto" data-categoria="opcional">
+      </div>
+    </div>
+    
+    <button id="guardarGastos">Guardar Gastos</button>
+  </div>
+  
+  <!-- Pestaña de análisis -->
+  <div id="analisis" class="tabcontent">
+    <h3>Análisis de Presupuesto</h3>
+    <div id="resumen-presupuesto">
+      <p><strong>Ingreso total:</strong> <span id="total-ingreso">$0</span></p>
+      <p><strong>Gastos esenciales:</strong> <span id="total-esencial">$0</span></p>
+      <p><strong>Gastos importantes:</strong> <span id="total-importante">$0</span></p>
+      <p><strong>Gastos opcionales:</strong> <span id="total-opcional">$0</span></p>
+      <p><strong>Total gastos:</strong> <span id="total-gastos">$0</span></p>
+      <hr>
+      <p><strong>Dinero disponible:</strong> <span id="dinero-disponible">$0</span></p>
+    </div>
+    
+    <div id="resultado-compra" class="oculto">
+      <h3>Análisis de compra</h3>
+      <p id="mensaje-compra"></p>
+    </div>
+  </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>
-

@@ -1,14 +1,23 @@
 {
-  "manifest_version": 3,
-  "name": "Auto Reloader",
-  "description": "Recarga la página automáticamente con intervalos aleatorios",
-  "version": "1.0",
-  "permissions": ["activeTab", "storage", "scripting" ,"contextMenus"],
-  "host_permissions": ["<all_urls>"],
-  "action": {
-    "default_popup": "popup.html"
-  },
-  "background": {
-    "service_worker": "background.js"
+    "manifest_version": 3,
+    "name": "Arriero's Wealth - Of Mules and Coins",
+    "version": "1.0",
+    "description": "Ayuda a decidir si puedes permitirte una compra",
+    "icons": {
+      "48": "icon48.png"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon48.png"
+    },
+    "permissions": ["storage", "contextMenus", "activeTab"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["contentScript.js"]
+      }
+    ]
   }
-}
