@@ -94,8 +94,13 @@
         <input type="number" id="suscripciones" min="0" class="gasto" data-categoria="opcional">
       </div>
     </div>
+
+    <p id="totalGastos">Total Gastado: $0.00</p>
     
     <button id="guardarGastos">Guardar Gastos</button>
+
+    <canvas id="graficoGastos" width="300" height="300"></canvas>
+    <div id="leyenda"></div>
   </div>
   
   <!-- Pestaña de análisis -->
@@ -118,5 +123,6 @@
   </div>
   
   <script src="popup.js"></script>
+
 </body>
 </html>
