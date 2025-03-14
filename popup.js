@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-   // Llamar la función al cargar la página
-   actualizarTotalGastos();
+  // Llamar la función al cargar la página
+  actualizarTotalGastos();
 
   // Guardar ingreso
   document.getElementById('guardarIngreso').addEventListener('click', function() {
@@ -35,9 +35,63 @@ document.addEventListener('DOMContentLoaded', function() {
       gastos[input.id] = parseFloat(valor) || 0;
     });
     
-    chrome.storage.sync.set({gastos: gastos}, function() {
-      alert('Gastos guardados correctamente');
-      actualizarResumen();
+    // Guardar los gastos personalizados también
+    chrome.storage.sync.get(['gastosPersonalizados'], function(data) {
+      const gastosPersonalizados = data.gastosPersonalizados || [];
+      
+      // Guardar todos los gastos
+      chrome.storage.sync.set({
+        gastos: gastos,
+        gastosPersonalizados: gastosPersonalizados
+      }, function() {
+        alert('Gastos guardados correctamente');
+        actualizarResumen();
+        actualizarGraficoGastos();
+      });
+    });
+  });
+  
+  // Evento para agregar gastos personalizados
+  document.getElementById('agregar-gasto-personalizado').addEventListener('click', function() {
+    const nombre = document.getElementById('nuevo-gasto-nombre').value.trim();
+    const montoTexto = document.getElementById('nuevo-gasto-monto').value.replace(/\./g, '');
+    const monto = parseFloat(montoTexto) || 0;
+    const categoria = document.getElementById('nuevo-gasto-categoria').value;
+    
+    if (nombre === '') {
+      alert('Por favor, ingrese un nombre para el gasto');
+      return;
+    }
+    
+    if (monto <= 0) {
+      alert('Por favor, ingrese un monto válido');
+      return;
+    }
+    
+    // Generar un ID único para el gasto personalizado
+    const id = 'gasto_' + Date.now();
+    
+    // Guardar el nuevo gasto personalizado
+    chrome.storage.sync.get(['gastosPersonalizados'], function(data) {
+      const gastosPersonalizados = data.gastosPersonalizados || [];
+      
+      gastosPersonalizados.push({
+        id: id,
+        nombre: nombre,
+        monto: monto,
+        categoria: categoria
+      });
+      
+      chrome.storage.sync.set({gastosPersonalizados: gastosPersonalizados}, function() {
+        // Limpiar los campos
+        document.getElementById('nuevo-gasto-nombre').value = '';
+        document.getElementById('nuevo-gasto-monto').value = '';
+        
+        // Actualizar la interfaz
+        mostrarGastosPersonalizados();
+        actualizarResumen();
+        actualizarGraficoGastos();
+      });
     });
   });
   
@@ -52,33 +106,119 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  actualizarGraficoGastos(); // Llama a la función al cargar la página
-
+  // Mostrar gastos personalizados guardados
+  mostrarGastosPersonalizados();
+  
+  // Actualizar gráfico
+  actualizarGraficoGastos();
 });
 
+// Función para mostrar los gastos personalizados guardados
+function mostrarGastosPersonalizados() {
+  const container = document.getElementById('gastos-personalizados-container');
+  container.innerHTML = ''; // Limpiar el contenedor
+  
+  chrome.storage.sync.get(['gastosPersonalizados'], function(data) {
+    const gastosPersonalizados = data.gastosPersonalizados || [];
+    
+    if (gastosPersonalizados.length === 0) {
+      container.innerHTML = '<p>No hay gastos personalizados. Agrega uno nuevo.</p>';
+      return;
+    }
+    
+    gastosPersonalizados.forEach(gasto => {
+      const gastoElement = document.createElement('div');
+      gastoElement.className = 'gasto-item';
+      gastoElement.dataset.id = gasto.id;
+      
+      gastoElement.innerHTML = `
+        <label>${gasto.nombre}:</label>
+        <input type="number" value="${gasto.monto}" class="gasto-personalizado" data-id="${gasto.id}" data-categoria="${gasto.categoria}" min="0">
+        <button class="eliminar-gasto" data-id="${gasto.id}">X</button>
+      `;
+      
+      container.appendChild(gastoElement);
+    });
+    
+    // Agregar evento para eliminar gastos
+    const botonesEliminar = document.querySelectorAll('.eliminar-gasto');
+    botonesEliminar.forEach(boton => {
+      boton.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        eliminarGastoPersonalizado(id);
+      });
+    });
+    
+    // Agregar evento para actualizar montos
+    const inputsGastos = document.querySelectorAll('.gasto-personalizado');
+    inputsGastos.forEach(input => {
+      input.addEventListener('change', function() {
+        const id = this.getAttribute('data-id');
+        const nuevoMonto = parseFloat(this.value) || 0;
+        actualizarMontoGastoPersonalizado(id, nuevoMonto);
+      });
+    });
+  });
+}
+
+// Función para eliminar un gasto personalizado
+function eliminarGastoPersonalizado(id) {
+  chrome.storage.sync.get(['gastosPersonalizados'], function(data) {
+    let gastosPersonalizados = data.gastosPersonalizados || [];
+    
+    // Filtrar el gasto a eliminar
+    gastosPersonalizados = gastosPersonalizados.filter(gasto => gasto.id !== id);
+    
+    chrome.storage.sync.set({gastosPersonalizados: gastosPersonalizados}, function() {
+      // Actualizar la interfaz
+      mostrarGastosPersonalizados();
+      actualizarResumen();
+      actualizarGraficoGastos();
+    });
+  });
+}
+
+// Función para actualizar el monto de un gasto personalizado
+function actualizarMontoGastoPersonalizado(id, nuevoMonto) {
+  chrome.storage.sync.get(['gastosPersonalizados'], function(data) {
+    let gastosPersonalizados = data.gastosPersonalizados || [];
+    
+    // Buscar y actualizar el gasto
+    gastosPersonalizados = gastosPersonalizados.map(gasto => {
+      if (gasto.id === id) {
+        return { ...gasto, monto: nuevoMonto };
+      }
+      return gasto;
+    });
+    
+    chrome.storage.sync.set({gastosPersonalizados: gastosPersonalizados}, function() {
+      // Actualizar la interfaz sin necesidad de recargar todos los gastos
+      actualizarResumen();
+      actualizarGraficoGastos(); 
+    });
+  });
+}
 
 // Función para actualizar el total de gastos
 function actualizarTotalGastos() {
-  chrome.storage.sync.get(["gastos"], function(data) {
+  chrome.storage.sync.get(["gastos", "gastosPersonalizados"], function(data) {
     let totalGastos = 0;
+    
+    // Sumar gastos predefinidos
     if (data.gastos) {
       for (const key in data.gastos) {
         totalGastos += data.gastos[key]; // Sumando los valores de los gastos
       }
     }
+    
+    // Sumar gastos personalizados
+    if (data.gastosPersonalizados) {
+      data.gastosPersonalizados.forEach(gasto => {
+        totalGastos += gasto.monto;
+      });
+    }
+    
     document.getElementById("totalGastos").textContent = `Total Gastado: $${formatearNumero(totalGastos.toFixed(0))}`;
-  });
-}
-
-// Guardar gastos en chrome.storage.sync al agregar uno nuevo
-function agregarGasto(descripcion, monto) {
-  chrome.storage.sync.get(["gastos"], function(data) {
-    let gastos = data.gastos || {};
-    gastos[descripcion] = parseFloat(monto); // Guardar como objeto clave-valor
-
-    chrome.storage.sync.set({ gastos: gastos }, function() {
-      actualizarTotalGastos(); // Actualiza la suma total
-    });
   });
 }
 
@@ -111,7 +251,7 @@ function openTab(evt, tabName) {
 
 // Cargar datos guardados
 function cargarDatos() {
-  chrome.storage.sync.get(['ingreso', 'gastos'], function(data) {
+  chrome.storage.sync.get(['ingreso', 'gastos', 'gastosPersonalizados'], function(data) {
     if (data.ingreso) {
       document.getElementById('ingreso').value = data.ingreso;
     }
@@ -125,21 +265,28 @@ function cargarDatos() {
       }
     }
     
+    // Cargar y mostrar gastos personalizados
+    if (data.gastosPersonalizados && data.gastosPersonalizados.length > 0) {
+      mostrarGastosPersonalizados();
+    }
+    
     actualizarResumen();
   });
 }
 
 // Actualizar resumen de presupuesto
 function actualizarResumen() {
-  chrome.storage.sync.get(['ingreso', 'gastos'], function(data) {
+  chrome.storage.sync.get(['ingreso', 'gastos', 'gastosPersonalizados'], function(data) {
     const ingreso = data.ingreso || 0;
     const gastos = data.gastos || {};
+    const gastosPersonalizados = data.gastosPersonalizados || [];
     
     // Calcular totales por categoría
     let totalEsencial = 0;
     let totalImportante = 0;
     let totalOpcional = 0;
     
+    // Sumar gastos predefinidos por categoría
     const inputs = document.querySelectorAll('.gasto');
     inputs.forEach(input => {
       const categoria = input.getAttribute('data-categoria');
@@ -151,6 +298,17 @@ function actualizarResumen() {
         totalImportante += valor;
       } else if (categoria === 'opcional') {
         totalOpcional += valor;
+      }
+    });
+    
+    // Sumar gastos personalizados por categoría
+    gastosPersonalizados.forEach(gasto => {
+      if (gasto.categoria === 'esencial') {
+        totalEsencial += gasto.monto;
+      } else if (gasto.categoria === 'importante') {
+        totalImportante += gasto.monto;
+      } else if (gasto.categoria === 'opcional') {
+        totalOpcional += gasto.monto;
       }
     });
     
@@ -173,6 +331,9 @@ function actualizarResumen() {
         disponible: disponible
       }
     });
+    
+    // Actualizar el total mostrado en la pestaña de gastos
+    document.getElementById("totalGastos").textContent = `Total Gastado: $${formatearNumero(totalGastos.toFixed(0))}`;
   });
 }
 
@@ -202,108 +363,104 @@ function formatearNumero(numero) {
   return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+// Función para actualizar el gráfico de gastos
 function actualizarGraficoGastos() {
-  chrome.storage.sync.get(['ingreso', 'gastos'], function (data) {
-      const ingreso = data.ingreso || 1; // Evita dividir por cero
-      const gastos = data.gastos || {};
-
-      // Calcular total de gastos
-      const totalGastos = Object.values(gastos).reduce((a, b) => a + b, 0);
-      const dineroDisponible = ingreso - totalGastos;
-
-      // Convertir datos en arrays
-      const categorias = [...Object.keys(gastos), "Disponible"];
-      const valores = [...Object.values(gastos), dineroDisponible];
-
-      // Calcular porcentajes
-      const porcentajes = valores.map(valor => (valor / ingreso) * 100);
-
-      // Configuración del Canvas
-      const canvas = document.getElementById("graficoGastos");
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar antes de redibujar
-
-      // Configuración del gráfico de pastel
-      const centroX = canvas.width / 2;
-      const centroY = canvas.height / 2;
-      const radio = Math.min(centroX, centroY) - 10;
-      let anguloInicio = 0;
-
-      // Colores aleatorios + un color especial para "Disponible"
-      const colores = [ '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#4CAF50', 
-        '#FF5733', '#C70039', '#900C3F', '#581845', '#1ABC9C', '#2ECC71', '#3498DB', 
-        '#9B59B6', '#34495E', '#16A085', '#27AE60', '#2980B9', '#8E44AD', '#2C3E50', 
-        '#F39C12', '#D35400', '#E74C3C', '#ECF0F1', '#95A5A6', '#7F8C8D', '#BDC3C7', 
-        '#E67E22', '#F1C40F', '#E84393', '#00CEC9', '#636E72', '#B2BEC3', '#FD79A8', 
-        '#A29BFE', '#6C5CE7', '#00B894', '#55EFC4', '#FAB1A0', '#FFEAA7', '#FF7675'];
-
-      porcentajes.forEach((porcentaje, i) => {
-          if (porcentaje <= 0) return; // No dibujar secciones de 0%
-
-          const anguloFin = anguloInicio + (porcentaje / 100) * 2 * Math.PI;
-
-          // Dibujar sector
-          ctx.beginPath();
-          ctx.moveTo(centroX, centroY);
-          ctx.arc(centroX, centroY, radio, anguloInicio, anguloFin);
-          ctx.closePath();
-          ctx.fillStyle = colores[i % colores.length];
-          ctx.fill();
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Posición para texto
-          const anguloMedio = (anguloInicio + anguloFin) / 2;
-          const xTexto = centroX + Math.cos(anguloMedio) * (radio / 1.5);
-          const yTexto = centroY + Math.sin(anguloMedio) * (radio / 1.5);
-          
-          // Dibujar porcentaje en la sección
-          ctx.fillStyle = "#000";
-          ctx.font = "12px Arial";
-          ctx.textAlign = "center";
-          ctx.fillText(`${porcentaje.toFixed(1)}%`, xTexto, yTexto);
-
-          anguloInicio = anguloFin;
-      });
-
-      // Mostrar leyenda con porcentaje y monto
-      const leyenda = document.getElementById("leyenda");
-      leyenda.innerHTML = "";
-      categorias.forEach((categoria, i) => {
-          const color = colores[i % colores.length];
-          const montoFormateado = valores[i].toLocaleString();
-          const porcentajeTexto = porcentajes[i].toFixed(1);
-
-          leyenda.innerHTML += `<div style="display: flex; align-items: center; margin-bottom: 4px;">
-                                  <span style="display: inline-block; width: 15px; height: 15px; background-color: ${color}; margin-right: 5px;"></span> 
-                                  ${categoria} (${montoFormateado}$ - ${porcentajeTexto}%)
-                                </div>`;
-      });
+  chrome.storage.sync.get(['ingreso', 'gastos', 'gastosPersonalizados'], function(data) {
+    const ingreso = data.ingreso || 1; // Evita dividir por cero
+    const gastos = data.gastos || {};
+    const gastosPersonalizados = data.gastosPersonalizados || [];
+    
+    // Crear objeto para agrupar todos los gastos por nombre
+    let todosLosGastos = {};
+    
+    // Agregar gastos predefinidos
+    for (const [nombre, valor] of Object.entries(gastos)) {
+      todosLosGastos[nombre] = valor;
+    }
+    
+    // Agregar gastos personalizados
+    gastosPersonalizados.forEach(gasto => {
+      todosLosGastos[gasto.nombre] = gasto.monto;
+    });
+    
+    // Calcular total de gastos
+    const totalGastos = Object.values(todosLosGastos).reduce((a, b) => a + b, 0);
+    const dineroDisponible = ingreso - totalGastos;
+    
+    // Convertir datos en arrays
+    let categorias = [...Object.keys(todosLosGastos)];
+    let valores = [...Object.values(todosLosGastos)];
+    
+    // Agregar el dinero disponible
+    categorias.push("Disponible");
+    valores.push(dineroDisponible > 0 ? dineroDisponible : 0); // No mostrar disponible negativo en gráfico
+    
+    // Calcular porcentajes
+    const porcentajes = valores.map(valor => (valor / ingreso) * 100);
+    
+    // Configuración del Canvas
+    const canvas = document.getElementById("graficoGastos");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar antes de redibujar
+    
+    // Configuración del gráfico de pastel
+    const centroX = canvas.width / 2;
+    const centroY = canvas.height / 2;
+    const radio = Math.min(centroX, centroY) - 10;
+    let anguloInicio = 0;
+    
+    // Colores aleatorios + un color especial para "Disponible"
+    const colores = [ '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#4CAF50', 
+      '#FF5733', '#C70039', '#900C3F', '#581845', '#1ABC9C', '#2ECC71', '#3498DB', 
+      '#9B59B6', '#34495E', '#16A085', '#27AE60', '#2980B9', '#8E44AD', '#2C3E50', 
+      '#F39C12', '#D35400', '#E74C3C', '#ECF0F1', '#95A5A6', '#7F8C8D', '#BDC3C7', 
+      '#E67E22', '#F1C40F', '#E84393', '#00CEC9', '#636E72', '#B2BEC3', '#FD79A8', 
+      '#A29BFE', '#6C5CE7', '#00B894', '#55EFC4', '#FAB1A0', '#FFEAA7', '#FF7675'];
+    
+    porcentajes.forEach((porcentaje, i) => {
+      if (porcentaje <= 0) return; // No dibujar secciones de 0%
+      
+      const anguloFin = anguloInicio + (porcentaje / 100) * 2 * Math.PI;
+      
+      // Dibujar sector
+      ctx.beginPath();
+      ctx.moveTo(centroX, centroY);
+      ctx.arc(centroX, centroY, radio, anguloInicio, anguloFin);
+      ctx.closePath();
+      ctx.fillStyle = colores[i % colores.length];
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Posición para texto
+      const anguloMedio = (anguloInicio + anguloFin) / 2;
+      const xTexto = centroX + Math.cos(anguloMedio) * (radio / 1.5);
+      const yTexto = centroY + Math.sin(anguloMedio) * (radio / 1.5);
+      
+      // Dibujar porcentaje en la sección
+      ctx.fillStyle = "#000";
+      ctx.font = "12px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`${porcentaje.toFixed(1)}%`, xTexto, yTexto);
+      
+      anguloInicio = anguloFin;
+    });
+    
+    // Mostrar leyenda con porcentaje y monto
+    const leyenda = document.getElementById("leyenda");
+    leyenda.innerHTML = "";
+    categorias.forEach((categoria, i) => {
+      if (valores[i] <= 0) return; // No mostrar elementos con valor cero
+      
+      const color = colores[i % colores.length];
+      const montoFormateado = formatearNumero(valores[i].toFixed(0));
+      const porcentajeTexto = porcentajes[i].toFixed(1);
+      
+      leyenda.innerHTML += `<div style="display: flex; align-items: center; margin-bottom: 4px;">
+                              <span style="display: inline-block; width: 15px; height: 15px; background-color: ${color}; margin-right: 5px;"></span> 
+                              ${categoria} (${montoFormateado}$ - ${porcentajeTexto}%)
+                            </div>`;
+    });
   });
 }
-
-
-// //funcion para la suma de todo lo ingresado por el usuario 
-// function actualizarTotalGastos() {
-//   chrome.storage.sync.get(["gastos"], function(data) {
-//       if (data.gastos) {
-//           let totalGastos = data.gastos.reduce((total, gasto) => total + gasto.monto, 0);
-//           document.getElementById("totalGastos").textContent = `Total Gastado: $${totalGastos.toFixed(2)}`;
-//       } else {
-//           document.getElementById("totalGastos").textContent = "Total Gastado: $0.00";
-//       }
-//   });
-// }
-
-// // Guardar gastos en chrome.storage.sync al agregar uno nuevos
-// function agregarGasto(descripcion, monto) {
-//   chrome.storage.sync.get(["gastos"], function(data) {
-//       let gastos = data.gastos || [];
-//       gastos.push({ descripcion: descripcion, monto: parseFloat(monto) });
-
-//       chrome.storage.sync.set({ gastos: gastos }, function() {
-//           actualizarTotalGastos(); // Actualiza la suma total
-//       });
-//   });
-// }

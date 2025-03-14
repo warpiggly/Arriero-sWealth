@@ -95,6 +95,34 @@
       </div>
     </div>
 
+    <!-- Nueva sección para gastos personalizados -->
+    <div class="categoria-gastos">
+      <h4>Mis Gastos Personalizados</h4>
+      <div id="gastos-personalizados-container">
+        <!-- Aquí se mostrarán los gastos personalizados agregados -->
+      </div>
+      
+      <div class="gasto-personalizado-form">
+        <div class="gasto-item">
+          <label for="nuevo-gasto-nombre">Nombre:</label>
+          <input type="text" id="nuevo-gasto-nombre" placeholder="Ej: Gimnasio">
+        </div>
+        <div class="gasto-item">
+          <label for="nuevo-gasto-monto">Monto:</label>
+          <input type="number" id="nuevo-gasto-monto" min="0">
+        </div>
+        <div class="gasto-item">
+          <label for="nuevo-gasto-categoria">Categoría:</label>
+          <select id="nuevo-gasto-categoria">
+            <option value="esencial">Esencial</option>
+            <option value="importante">Importante</option>
+            <option value="opcional">Opcional</option>
+          </select>
+        </div>
+        <button id="agregar-gasto-personalizado">Agregar Gasto</button>
+      </div>
+    </div>
+
     <p id="totalGastos">Total Gastado: $0.00</p>
     
     <button id="guardarGastos">Guardar Gastos</button>
