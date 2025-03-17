@@ -106,6 +106,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  //Descargar Graficas
+  document.getElementById("descargarGrafico").addEventListener("click", function() {
+    const canvas = document.getElementById("graficoGastos");
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "grafico_gastos.png";
+    link.click();
+});
+
+//Descargar informacion de gastos
+document.getElementById("descargarTXT").addEventListener("click", function() {
+  let textContent = "Color - Categoría - Monto ($) - Porcentaje (%)\n"; // Encabezados
+
+  const elementosLeyenda = document.querySelectorAll("#leyenda div");
+
+  elementosLeyenda.forEach((elemento) => {
+      const texto = elemento.innerText;
+      textContent += texto + "\n"; // Agrega cada línea de la leyenda
+  });
+
+  // Crear y descargar el archivo TXT
+  const blob = new Blob([textContent], { type: "text/plain" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "leyenda_gastos.txt";
+  link.click();
+});
+
+
   // Mostrar gastos personalizados guardados
   mostrarGastosPersonalizados();
   
@@ -464,3 +493,5 @@ function actualizarGraficoGastos() {
     });
   });
 }
+
+
