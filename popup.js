@@ -370,6 +370,7 @@ function actualizarResumen() {
 function mostrarAnalisisCompra(datos) {
   const resultadoDiv = document.getElementById('resultado-compra');
   const mensajeP = document.getElementById('mensaje-compra');
+  const tiempoP = document.createElement('p'); // Nuevo elemento para mostrar el tiempo
   
   const precioFormateado = formatearNumero(datos.precio);
   const restanteFormateado = formatearNumero(Math.abs(datos.restante));
@@ -380,10 +381,74 @@ function mostrarAnalisisCompra(datos) {
     mensajeP.innerHTML = `¡Puedes comprar este producto de $${precioFormateado}!<br>
                           Te quedarán $${restanteFormateado} de tu presupuesto disponible.`;
     mensajeP.className = 'verde';
+    
+    // Eliminar el elemento de tiempo si existía de un análisis anterior
+    const tiempoExistente = document.getElementById('tiempo-estimado');
+    if (tiempoExistente) {
+      tiempoExistente.remove();
+    }
   } else {
     mensajeP.innerHTML = `No tienes presupuesto suficiente para comprar este producto de $${precioFormateado}.<br>
                           Te faltan $${restanteFormateado}.`;
     mensajeP.className = 'rojo';
+    
+    // Obtener datos del resumen para calcular el tiempo
+    chrome.storage.sync.get(['resumen'], function(data) {
+      if (data.resumen) {
+        const ingreso = data.resumen.ingreso || 0;
+        const totalGastos = data.resumen.totalGastos || 0;
+        
+        // Calcular ahorro mensual (si es positivo)
+        const ahorroMensual = ingreso - totalGastos;
+        
+        if (ahorroMensual > 0) {
+          // Calcular tiempo necesario
+          const mesesNecesarios = Math.abs(datos.restante) / ahorroMensual;
+          
+          // Convertir a años, meses, semanas y días
+          const anos = Math.floor(mesesNecesarios / 12);
+          const mesesRestantes = Math.floor(mesesNecesarios % 12);
+          const diasTotales = Math.ceil((mesesNecesarios % 1) * 30); // Aproximadamente 30 días por mes
+          const semanas = Math.floor(diasTotales / 7);
+          const dias = diasTotales % 7;
+          
+          // Preparar el mensaje
+          let mensajeTiempo = 'Con tu ahorro mensual actual podrías comprar este producto en: ';
+          
+          if (anos > 0) {
+            mensajeTiempo += `${anos} año${anos !== 1 ? 's' : ''}`;
+            if (mesesRestantes > 0 || semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          
+          if (mesesRestantes > 0) {
+            mensajeTiempo += `${mesesRestantes} mes${mesesRestantes !== 1 ? 'es' : ''}`;
+            if (semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          
+          if (semanas > 0) {
+            mensajeTiempo += `${semanas} semana${semanas !== 1 ? 's' : ''}`;
+            if (dias > 0) mensajeTiempo += ' y ';
+          }
+          
+          if (dias > 0) {
+            mensajeTiempo += `${dias} día${dias !== 1 ? 's' : ''}`;
+          }
+          
+          // Mostrar el mensaje
+          tiempoP.innerHTML = mensajeTiempo;
+          tiempoP.className = 'tiempo-estimado';
+          tiempoP.id = 'tiempo-estimado';
+          resultadoDiv.appendChild(tiempoP);
+        } else {
+          // Si no hay ahorro mensual
+          tiempoP.innerHTML = 'Con tu presupuesto actual no estás ahorrando dinero cada mes. ' +
+                              'Necesitarías reducir gastos para poder comprar este producto.';
+          tiempoP.className = 'tiempo-estimado alerta';
+          tiempoP.id = 'tiempo-estimado';
+          resultadoDiv.appendChild(tiempoP);
+        }
+      }
+    });
   }
 }
 
