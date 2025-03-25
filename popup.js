@@ -450,6 +450,8 @@ function mostrarAnalisisCompra(datos) {
       }
     });
   }
+  // Llamar a la función de análisis avanzado
+  mostrarAnalisisCompraAvanzado(datos);
 }
 
 // Formatear número con separadores de miles
@@ -559,4 +561,97 @@ function actualizarGraficoGastos() {
   });
 }
 
+
+function mostrarAnalisisCompraAvanzado(datos) {
+  // Obtener datos de resumen
+  chrome.storage.sync.get(['resumen'], function(data) {
+    if (data.resumen) {
+      const ingreso = data.resumen.ingreso || 0;
+      const totalGastos = data.resumen.totalGastos || 0;
+      
+      // Calcular ahorro mensual
+      const ahorroMensual = ingreso - totalGastos;
+      
+      // Limpiar contenido previo
+      const opcionesDiv = document.getElementById('opciones-compra');
+      opcionesDiv.innerHTML = '';
+      
+      // 1. Estrategias de Compra
+      const estrategiasCompra = document.createElement('div');
+      estrategiasCompra.innerHTML = `
+        <h3>🔍 Estrategias de Compra</h3>
+        <ul>
+          <li>💳 Cuotas: ${calcularCuotasMensuales(datos.precio, ahorroMensual)}</li>
+          <li>💰 Financiamiento: ${sugerirFinanciamiento(datos.precio, ahorroMensual)}</li>
+        </ul>
+      `;
+      opcionesDiv.appendChild(estrategiasCompra);
+      
+      // 2. Impacto Financiero
+      const impactoFinanciero = document.createElement('div');
+      impactoFinanciero.innerHTML = `
+        <h3>📊 Impacto Financiero</h3>
+        <ul>
+          <li>📈 % de Ingreso: ${calcularPorcentajeIngreso(datos.precio, ingreso)}%</li>
+          <li>✂️ Posibles Recortes: ${identificarCategoriasReduccion(ahorroMensual)}</li>
+        </ul>
+      `;
+      opcionesDiv.appendChild(impactoFinanciero);
+      
+      // 3. Proyección de Inversión
+      const proyeccionInversion = document.createElement('div');
+      proyeccionInversion.innerHTML = `
+        <h3>📈 Alternativa de Inversión</h3>
+        <p>Si guardas $${formatearNumero(datos.precio)} en lugar de comprarlo:</p>
+        <ul>
+          <li>🌱 Rendimiento Potencial: ${calcularRendimientoInversion(datos.precio)}</li>
+        </ul>
+      `;
+      opcionesDiv.appendChild(proyeccionInversion);
+    }
+  });
+}
+
+// Funciones auxiliares
+function calcularCuotasMensuales(precio, ahorroMensual) {
+  if (ahorroMensual <= 0) return 'No es posible financiar';
+  const meses = Math.ceil(precio / ahorroMensual);
+  return `${meses} cuotas de $${formatearNumero((precio / meses).toFixed(0))}`;
+}
+
+function sugerirFinanciamiento(precio, ahorroMensual) {
+  const tasasInteres = [
+    { nombre: 'Bajo', tasa: 0.1 },
+    { nombre: 'Medio', tasa: 0.15 },
+    { nombre: 'Alto', tasa: 0.20 }
+  ];
+  
+  return tasasInteres.map(interes => {
+    const pagoMensual = precio * (1 + interes.tasa) / (precio / ahorroMensual);
+    return `${interes.nombre}: $${formatearNumero(pagoMensual.toFixed(0))} mensual`;
+  }).join(' | ');
+}
+
+function calcularPorcentajeIngreso(precio, ingreso) {
+  return ((precio / ingreso) * 100).toFixed(1);
+}
+
+function identificarCategoriasReduccion(ahorroMensual) {
+  if (ahorroMensual <= 0) return 'Necesitas aumentar tus ingresos o reducir gastos';
+  if (ahorroMensual < 50000) return 'Revisar gastos de entretenimiento y suscripciones';
+  if (ahorroMensual < 100000) return 'Optimizar gastos en alimentación y servicios';
+  return 'Buen manejo financiero, considera inversiones';
+}
+
+function calcularRendimientoInversion(monto) {
+  const tasasInversion = [
+    { nombre: 'Conservador', tasa: 0.05 },
+    { nombre: 'Moderado', tasa: 0.08 },
+    { nombre: 'Agresivo', tasa: 0.12 }
+  ];
+  
+  return tasasInversion.map(inv => 
+    `${inv.nombre}: $${formatearNumero((monto * inv.tasa).toFixed(0))}`
+  ).join(' | ');
+}
 
