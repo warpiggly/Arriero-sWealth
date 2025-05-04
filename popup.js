@@ -136,7 +136,7 @@ document.getElementById("descargarTXT").addEventListener("click", function() {
 
 
   // Mostrar gastos personalizados guardados
-  mostrarGastosPersonalizados();
+  // mostrarGastosPersonalizados();
   
   // Actualizar gráfico
   actualizarGraficoGastos();
@@ -163,7 +163,7 @@ function mostrarGastosPersonalizados() {
       gastoElement.innerHTML = `
         <label>${gasto.nombre}:</label>
         <input type="number" value="${gasto.monto}" class="gasto-personalizado" data-id="${gasto.id}" data-categoria="${gasto.categoria}" min="0">
-        <button class="eliminar-gasto" data-id="${gasto.id}">X</button>
+        <button class="eliminar-gasto" data-id="${gasto.id}">Delete</button>
       `;
       
       container.appendChild(gastoElement);
