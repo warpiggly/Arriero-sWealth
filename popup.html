@@ -17,10 +17,24 @@
   
   <!-- Pestaña de ingresos -->
   <div id="ingresos" class="tabcontent active">
-    <h3>Mis Ingresos</h3>
-    <label for="ingreso">Ingreso mensual:</label>
-    <input type="number" id="ingreso" min="0">
+    <h3>My Income</h3>
+    <div class="form__group field">
+    <input type="number" id="ingreso" min="0" placeholder=" " class="form__field">
+    <label for="ingreso" class="form__label" >Monthly Income</label>
     <button id="guardarIngreso">Guardar</button>
+    </div>
+
+    <div class="divisa-container">
+      <label for="divisa">Divisa:</label>
+      <select id="divisa">
+        <option value="local">Pesos (COP)</option>
+        <option value="usd">Dólar (USD)</option>
+      </select>
+      <label for="tasaCambio">Tasa de cambio (1 USD =):</label>
+      <input type="text" id="tasaCambio" placeholder="4176">
+      <span>COP</span>
+      <button id="guardarDivisa">Guardar</button>
+    </div>
   </div>
   
   <!-- Pestaña de gastos -->
