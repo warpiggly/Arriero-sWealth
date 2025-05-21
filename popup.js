@@ -524,10 +524,10 @@ function mostrarAnalisisCompra(datos) {
     let precio = datos.precio;
     let restante = datos.restante;
 
-    if (divisa === 'usd') {
-      precio = precio / tasaCambio;
-      restante = restante / tasaCambio;
-    }
+    // if (divisa === 'usd') {
+    //   precio = precio / tasaCambio;
+    //   restante = restante / tasaCambio;
+    // }
 
     const precioFormateado = formatearNumero(precio.toFixed(divisa === 'usd' ? 2 : 0));
     const restanteFormateado = formatearNumero(Math.abs(restante).toFixed(divisa === 'usd' ? 2 : 0));
@@ -627,12 +627,12 @@ function mostrarAnalisisCompra(datos) {
       });
     }
 
-    // Llamar a la función avanzada con los datos ya convertidos
-    // const datosConvertidos = { ...datos };
-    // if (divisa === 'usd') {
-    //   datosConvertidos.precio = precio;
-    //   datosConvertidos.restante = restante;
-    // }
+    //Llamar a la función avanzada con los datos ya convertidos
+    const datosConvertidos = { ...datos };
+    if (divisa === 'usd') {
+      datosConvertidos.precio = precio;
+      datosConvertidos.restante = restante;
+    }
 
     mostrarAnalisisCompraAvanzado(datosConvertidos);
   });
