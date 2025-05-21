@@ -339,24 +339,25 @@ function guardarConfiguracionDivisa() {
     if (divisaAnterior !== nuevaDivisa) {
       if (nuevaDivisa === 'usd') {
         // Convertir de pesos a dólares
-        nuevoIngreso = nuevoIngreso / tasaCambio;
+        nuevoIngreso = (nuevoIngreso / tasaCambio).toFixed(2);
+        nuevoIngreso = parseFloat(nuevoIngreso); // Para que no se guarde como string
         for (let key in nuevosGastos) {
-          nuevosGastos[key] = nuevosGastos[key] / tasaCambio;
+          nuevosGastos[key] = parseFloat((nuevosGastos[key] / tasaCambio).toFixed(2));
         }
         nuevosGastosPersonalizados = nuevosGastosPersonalizados.map(gasto => ({
           ...gasto,
-          monto: gasto.monto / tasaCambio
+          monto: parseFloat((gasto.monto / tasaCambio).toFixed(2))
         }));
       } else if (nuevaDivisa === 'local') {
         // Convertir de dólares a pesos
-        nuevoIngreso = nuevoIngreso * tasaCambio;
-        for (let key in nuevosGastos) {
-          nuevosGastos[key] = nuevosGastos[key] * tasaCambio;
-        }
-        nuevosGastosPersonalizados = nuevosGastosPersonalizados.map(gasto => ({
-          ...gasto,
-          monto: gasto.monto * tasaCambio
-        }));
+        nuevoIngreso = Math.round(nuevoIngreso * tasaCambio);
+          for (let key in nuevosGastos) {
+            nuevosGastos[key] = Math.round(nuevosGastos[key] * tasaCambio);
+          }
+          nuevosGastosPersonalizados = nuevosGastosPersonalizados.map(gasto => ({
+            ...gasto,
+            monto: Math.round(gasto.monto * tasaCambio)
+          }));
       }
     }
 
@@ -627,11 +628,11 @@ function mostrarAnalisisCompra(datos) {
     }
 
     // Llamar a la función avanzada con los datos ya convertidos
-    const datosConvertidos = { ...datos };
-    if (divisa === 'usd') {
-      datosConvertidos.precio = precio;
-      datosConvertidos.restante = restante;
-    }
+    // const datosConvertidos = { ...datos };
+    // if (divisa === 'usd') {
+    //   datosConvertidos.precio = precio;
+    //   datosConvertidos.restante = restante;
+    // }
 
     mostrarAnalisisCompraAvanzado(datosConvertidos);
   });
@@ -639,8 +640,14 @@ function mostrarAnalisisCompra(datos) {
 
 
 // Formatear número con separadores de miles
-function formatearNumero(numero) {
-  return numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+function formatearNumero(numero, divisa = 'COP') {
+  const esUSD = divisa.toUpperCase() === 'USD';
+  return new Intl.NumberFormat(esUSD ? 'en-US' : 'es-CO', {
+    style: 'currency',
+    currency: divisa.toUpperCase(),
+    minimumFractionDigits: esUSD ? 2 : 0,
+    maximumFractionDigits: esUSD ? 2 : 0
+  }).format(numero);
 }
 
 // Función para actualizar el gráfico de gastos
