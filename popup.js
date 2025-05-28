@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() { 
   // Cargar datos guardados
   cargarDatos();
   
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Guardar ingreso
   document.getElementById('guardarIngreso').addEventListener('click', function() {
     let ingresoTexto = document.getElementById('ingreso').value;
-    ingresoTexto = ingresoTexto.replace(/\./g, ''); // Eliminar puntos
+    ingresoTexto = ingresoTexto.replace(',', '.'); // Eliminar puntos
     const ingreso = parseFloat(ingresoTexto) || 0;
     
     chrome.storage.sync.set({ingreso: ingreso}, function() {
@@ -97,14 +97,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Verificar si hay un análisis pendiente
   chrome.storage.local.get(['analisis'], function(data) {
-    if (data.analisis) {
-      mostrarAnalisisCompra(data.analisis);
-      // Abrir pestaña de análisis
-      openTab(null, 'analisis');
-      // Limpiar después de mostrar
-      chrome.storage.local.remove(['analisis']);
+  if (data.analisis) {
+    // Corregimos el precio si es string con formato incorrecto
+    if (typeof data.analisis.precio === 'string') {
+      data.analisis.precio = limpiarPrecio(data.analisis.precio);
     }
-  });
+    mostrarAnalisisCompra(data.analisis);
+    openTab(null, 'analisis');
+    chrome.storage.local.remove(['analisis']);
+  }
+});
+
 
   //Descargar Graficas
   document.getElementById("descargarGrafico").addEventListener("click", function() {
@@ -291,8 +294,12 @@ function openTab(evt, tabName) {
 function cargarDatos() {
   chrome.storage.sync.get(['ingreso', 'gastos', 'gastosPersonalizados', 'divisa', 'tasaCambio'], function(data) {
     if (data.ingreso) {
-      document.getElementById('ingreso').value = data.ingreso;
-    }
+    let ingreso = data.ingreso;
+  if (data.divisa === 'usd') {
+    ingreso = ingreso.toString().replace('.', '');
+  }
+  document.getElementById('ingreso').value = ingreso;
+}
     
     if (data.gastos) {
       for (const [categoria, valor] of Object.entries(data.gastos)) {
@@ -507,148 +514,426 @@ function actualizarResumen() {
   });
 }
 
-
-
-// Mostrar análisis de compra
+// =================================================================
+// FUNCIÓN PRINCIPAL QUE DECIDE QUÉ ANÁLISIS USAR
+// =================================================================
 function mostrarAnalisisCompra(datos) {
-  chrome.storage.sync.get(['divisa', 'tasaCambio'], function(config) {
+  chrome.storage.sync.get(['divisa'], function(config) {
     const divisa = config.divisa || 'local';
-    const tasaCambio = config.tasaCambio || 1;
-
-    const resultadoDiv = document.getElementById('resultado-compra');
-    const mensajeP = document.getElementById('mensaje-compra');
-    const tiempoP = document.createElement('p');
-    const ahorroP = document.createElement('p');
-
-    // Convertir precio si es necesario
-    let precio = datos.precio;
-    let restante = datos.restante;
-
-    // if (divisa === 'usd') {
-    //   precio = precio / tasaCambio;
-    //   restante = restante / tasaCambio;
-    // }
-
-    const precioFormateado = formatearNumero(precio.toFixed(divisa === 'usd' ? 2 : 0));
-    const restanteFormateado = formatearNumero(Math.abs(restante).toFixed(divisa === 'usd' ? 2 : 0));
-    const simboloDivisa = divisa === 'usd' ? 'USD' : '';
-
-    resultadoDiv.classList.remove('oculto');
-
-    if (datos.puedeComprar) {
-      mensajeP.innerHTML = `¡Puedes comprar este producto de $${precioFormateado} ${simboloDivisa}!<br>
-                            Te quedarán $${restanteFormateado} ${simboloDivisa} de tu presupuesto disponible.`;
-      mensajeP.className = 'verde';
-
-      const tiempoExistente = document.getElementById('tiempo-estimado');
-      if (tiempoExistente) tiempoExistente.remove();
-
-      const ahorroExistente = document.getElementById('ahorro-estimado');
-      if (ahorroExistente) ahorroExistente.remove();
-    } else {
-      mensajeP.innerHTML = `No tienes presupuesto suficiente para comprar este producto de $${precioFormateado} ${simboloDivisa}.<br>
-                            Te faltan $${restanteFormateado} ${simboloDivisa}.`;
-      mensajeP.className = 'rojo';
-
-      chrome.storage.sync.get(['resumen'], function(data) {
-        if (data.resumen) {
-          const ingreso = data.resumen.ingreso || 0;
-          const totalGastos = data.resumen.totalGastos || 0;
-
-          const ahorroMensual = ingreso - totalGastos;
-          const ahorro3Meses = Math.ceil(precio / 3);
-          const ahorro6Meses = Math.ceil(precio / 6);
-          const ahorro12Meses = Math.ceil(precio / 12);
-
-          const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
-          const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
-          const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
-
-          ahorroP.innerHTML = '<strong>Opciones para ahorrar para este producto:</strong><br>';
-          ahorroP.innerHTML += `• En 3 meses: $${formatearNumero(ahorro3Meses)} mensuales (${porcentaje3Meses}% de tus ingresos)<br>`;
-          ahorroP.innerHTML += `• En 6 meses: $${formatearNumero(ahorro6Meses)} mensuales (${porcentaje6Meses}% de tus ingresos)<br>`;
-          ahorroP.innerHTML += `• En 12 meses: $${formatearNumero(ahorro12Meses)} mensuales (${porcentaje12Meses}% de tus ingresos)`;
-
-          let recomendacion = '';
-          if (porcentaje12Meses > 20) {
-            recomendacion = '<br><span class="alerta">⚠️ Este producto requiere un ahorro significativo. Considera revisar si es una compra prioritaria.</span>';
-          } else if (porcentaje6Meses <= 10) {
-            recomendacion = '<br><span class="verde">✓ En 6 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
-          } else if (porcentaje12Meses <= 10) {
-            recomendacion = '<br><span class="verde">✓ En 12 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
-          }
-          ahorroP.innerHTML += recomendacion;
-
-          ahorroP.className = 'ahorro-estimado';
-          ahorroP.id = 'ahorro-estimado';
-
-          if (ahorroMensual > 0) {
-            const mesesNecesarios = Math.abs(restante) / ahorroMensual;
-            const anos = Math.floor(mesesNecesarios / 12);
-            const mesesRestantes = Math.floor(mesesNecesarios % 12);
-            const diasTotales = Math.ceil((mesesNecesarios % 1) * 30);
-            const semanas = Math.floor(diasTotales / 7);
-            const dias = diasTotales % 7;
-
-            let mensajeTiempo = '<strong>Con tu ahorro mensual actual podrías comprar este producto en:</strong><br>';
-
-            if (anos > 0) {
-              mensajeTiempo += `${anos} año${anos !== 1 ? 's' : ''}`;
-              if (mesesRestantes > 0 || semanas > 0 || dias > 0) mensajeTiempo += ', ';
-            }
-
-            if (mesesRestantes > 0) {
-              mensajeTiempo += `${mesesRestantes} mes${mesesRestantes !== 1 ? 'es' : ''}`;
-              if (semanas > 0 || dias > 0) mensajeTiempo += ', ';
-            }
-
-            if (semanas > 0) {
-              mensajeTiempo += `${semanas} semana${semanas !== 1 ? 's' : ''}`;
-              if (dias > 0) mensajeTiempo += ' y ';
-            }
-
-            if (dias > 0) {
-              mensajeTiempo += `${dias} día${dias !== 1 ? 's' : ''}`;
-            }
-
-            tiempoP.innerHTML = mensajeTiempo;
-            tiempoP.className = 'tiempo-estimado';
-            tiempoP.id = 'tiempo-estimado';
-            resultadoDiv.appendChild(tiempoP);
-          } else {
-            tiempoP.innerHTML = 'Con tu presupuesto actual no estás ahorrando dinero cada mes. Necesitarías reducir gastos para poder comprar este producto.';
-            tiempoP.className = 'tiempo-estimado alerta';
-            tiempoP.id = 'tiempo-estimado';
-            resultadoDiv.appendChild(tiempoP);
-          }
-
-          resultadoDiv.appendChild(ahorroP);
-        }
-      });
-    }
-
-    //Llamar a la función avanzada con los datos ya convertidos
-    const datosConvertidos = { ...datos };
+    
     if (divisa === 'usd') {
-      datosConvertidos.precio = precio;
-      datosConvertidos.restante = restante;
+      mostrarAnalisisCompraUSD(datos);
+    } else {
+      mostrarAnalisisCompraLocal(datos);
     }
-
-    mostrarAnalisisCompraAvanzado(datosConvertidos);
   });
 }
 
+// =================================================================
+// ANÁLISIS PARA DIVISA LOCAL (PESOS COLOMBIANOS)
+// =================================================================
+function mostrarAnalisisCompraLocal(datos) {
+  const resultadoDiv = document.getElementById('resultado-compra');
+  const mensajeP = document.getElementById('mensaje-compra');
+  
+  // Limpiar elementos previos
+  const tiempoExistente = document.getElementById('tiempo-estimado');
+  if (tiempoExistente) tiempoExistente.remove();
+  const ahorroExistente = document.getElementById('ahorro-estimado');
+  if (ahorroExistente) ahorroExistente.remove();
 
-// Formatear número con separadores de miles
-function formatearNumero(numero, divisa = 'COP') {
-  const esUSD = divisa.toUpperCase() === 'USD';
-  return new Intl.NumberFormat(esUSD ? 'en-US' : 'es-CO', {
-    style: 'currency',
-    currency: divisa.toUpperCase(),
-    minimumFractionDigits: esUSD ? 2 : 0,
-    maximumFractionDigits: esUSD ? 2 : 0
-  }).format(numero);
+  const precio = typeof datos.precio === 'string' ? limpiarPrecio(datos.precio) : datos.precio;
+  const restante = datos.restante;
+  
+  const precioFormateado = formatearNumeroLocal(precio);
+  const restanteFormateado = formatearNumeroLocal(Math.abs(restante));
+
+  resultadoDiv.classList.remove('oculto');
+
+  if (datos.puedeComprar) {
+    mensajeP.innerHTML = `¡Puedes comprar este producto de $${precioFormateado}!<br>
+                          Te quedarán $${restanteFormateado} de tu presupuesto disponible.`;
+    mensajeP.className = 'verde';
+  } else {
+    mensajeP.innerHTML = `No tienes presupuesto suficiente para comprar este producto de $${precioFormateado}.<br>
+                          Te faltan $${restanteFormateado}.`;
+    mensajeP.className = 'rojo';
+
+    // Crear opciones de ahorro para moneda local
+    chrome.storage.sync.get(['resumen'], function(data) {
+      if (data.resumen) {
+        const ingreso = data.resumen.ingreso || 0;
+        const totalGastos = data.resumen.totalGastos || 0;
+        const ahorroMensual = ingreso - totalGastos;
+
+        // Crear elemento para tiempo estimado
+        const tiempoP = document.createElement('p');
+        tiempoP.id = 'tiempo-estimado';
+
+        // Crear elemento para opciones de ahorro
+        const ahorroP = document.createElement('p');
+        ahorroP.id = 'ahorro-estimado';
+
+        // Calcular opciones de ahorro
+        const ahorro3Meses = Math.ceil(precio / 3);
+        const ahorro6Meses = Math.ceil(precio / 6);
+        const ahorro12Meses = Math.ceil(precio / 12);
+
+        const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
+        const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
+        const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
+
+        ahorroP.innerHTML = '<strong>Opciones para ahorrar para este producto:</strong><br>';
+        ahorroP.innerHTML += `• En 3 meses: $${formatearNumeroLocal(ahorro3Meses)} mensuales (${porcentaje3Meses}% de tus ingresos)<br>`;
+        ahorroP.innerHTML += `• En 6 meses: $${formatearNumeroLocal(ahorro6Meses)} mensuales (${porcentaje6Meses}% de tus ingresos)<br>`;
+        ahorroP.innerHTML += `• En 12 meses: $${formatearNumeroLocal(ahorro12Meses)} mensuales (${porcentaje12Meses}% de tus ingresos)`;
+
+        // Recomendaciones
+        let recomendacion = '';
+        if (porcentaje12Meses > 20) {
+          recomendacion = '<br><span class="alerta">⚠️ Este producto requiere un ahorro significativo. Considera revisar si es una compra prioritaria.</span>';
+        } else if (porcentaje6Meses <= 10) {
+          recomendacion = '<br><span class="verde">✓ En 6 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
+        } else if (porcentaje12Meses <= 10) {
+          recomendacion = '<br><span class="verde">✓ En 12 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
+        }
+        ahorroP.innerHTML += recomendacion;
+        ahorroP.className = 'ahorro-estimado';
+
+        // Calcular tiempo necesario
+        if (ahorroMensual > 0) {
+          const mesesNecesarios = Math.abs(restante) / ahorroMensual;
+          const anos = Math.floor(mesesNecesarios / 12);
+          const mesesRestantes = Math.floor(mesesNecesarios % 12);
+          const diasTotales = Math.ceil((mesesNecesarios % 1) * 30);
+          const semanas = Math.floor(diasTotales / 7);
+          const dias = diasTotales % 7;
+
+          let mensajeTiempo = '<strong>Con tu ahorro mensual actual podrías comprar este producto en:</strong><br>';
+
+          if (anos > 0) {
+            mensajeTiempo += `${anos} año${anos !== 1 ? 's' : ''}`;
+            if (mesesRestantes > 0 || semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          if (mesesRestantes > 0) {
+            mensajeTiempo += `${mesesRestantes} mes${mesesRestantes !== 1 ? 'es' : ''}`;
+            if (semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          if (semanas > 0) {
+            mensajeTiempo += `${semanas} semana${semanas !== 1 ? 's' : ''}`;
+            if (dias > 0) mensajeTiempo += ' y ';
+          }
+          if (dias > 0) {
+            mensajeTiempo += `${dias} día${dias !== 1 ? 's' : ''}`;
+          }
+
+          tiempoP.innerHTML = mensajeTiempo;
+          tiempoP.className = 'tiempo-estimado';
+        } else {
+          tiempoP.innerHTML = 'Con tu presupuesto actual no estás ahorrando dinero cada mes. Necesitarías reducir gastos para poder comprar este producto.';
+          tiempoP.className = 'tiempo-estimado alerta';
+        }
+
+        resultadoDiv.appendChild(tiempoP);
+        resultadoDiv.appendChild(ahorroP);
+      }
+    });
+  }
+
+  // Llamar análisis avanzado para moneda local
+  mostrarAnalisisCompraAvanzadoLocal(datos);
 }
+
+// =================================================================
+// ANÁLISIS PARA DIVISA USD (DÓLARES)
+// =================================================================
+function mostrarAnalisisCompraUSD(datos) {
+  const resultadoDiv = document.getElementById('resultado-compra');
+  const mensajeP = document.getElementById('mensaje-compra');
+  
+  // Limpiar elementos previos
+  const tiempoExistente = document.getElementById('tiempo-estimado');
+  if (tiempoExistente) tiempoExistente.remove();
+  const ahorroExistente = document.getElementById('ahorro-estimado');
+  if (ahorroExistente) ahorroExistente.remove();
+
+  const precio = typeof datos.precio === 'string' ? limpiarPrecio(datos.precio) : parseFloat(datos.precio);
+  const restante = typeof datos.restante === 'string' ? limpiarPrecio(datos.restante) : parseFloat(datos.restante);
+
+  
+  // Usar el formateo corregido
+  const precioFormateado = formatearNumeroUSD(precio);
+  const restanteFormateado = formatearNumeroUSD(Math.abs(restante));
+
+  resultadoDiv.classList.remove('oculto');
+
+  if (datos.puedeComprar) {
+    mensajeP.innerHTML = `¡Puedes comprar este producto de $${precioFormateado} USD!<br>
+                          Te quedarán $${restanteFormateado} USD de tu presupuesto disponible.`;
+    mensajeP.className = 'verde';
+  } else {
+    mensajeP.innerHTML = `No tienes presupuesto suficiente para comprar este producto de $${precioFormateado} USD.<br>
+                          Te faltan $${restanteFormateado} USD.`;
+    mensajeP.className = 'rojo';
+
+    // Crear opciones de ahorro para USD
+    chrome.storage.sync.get(['resumen'], function(data) {
+      if (data.resumen) {
+        const ingreso = parseFloat(data.resumen.ingreso) || 0;
+        const totalGastos = parseFloat(data.resumen.totalGastos) || 0;
+        const ahorroMensual = ingreso - totalGastos;
+
+        // Crear elemento para tiempo estimado
+        const tiempoP = document.createElement('p');
+        tiempoP.id = 'tiempo-estimado';
+
+        // Crear elemento para opciones de ahorro
+        const ahorroP = document.createElement('p');
+        ahorroP.id = 'ahorro-estimado';
+
+        // Calcular opciones de ahorro (sin redondear, mantener decimales)
+        const ahorro3Meses = precio / 3;
+        const ahorro6Meses = precio / 6;
+        const ahorro12Meses = precio / 12;
+
+        const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
+        const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
+        const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
+
+        ahorroP.innerHTML = '<strong>Opciones para ahorrar para este producto:</strong><br>';
+        ahorroP.innerHTML += `• En 3 meses: $${formatearNumeroUSD(ahorro3Meses)} USD mensuales (${porcentaje3Meses}% de tus ingresos)<br>`;
+        ahorroP.innerHTML += `• En 6 meses: $${formatearNumeroUSD(ahorro6Meses)} USD mensuales (${porcentaje6Meses}% de tus ingresos)<br>`;
+        ahorroP.innerHTML += `• En 12 meses: $${formatearNumeroUSD(ahorro12Meses)} USD mensuales (${porcentaje12Meses}% de tus ingresos)`;
+
+        // Recomendaciones
+        let recomendacion = '';
+        if (parseFloat(porcentaje12Meses) > 20) {
+          recomendacion = '<br><span class="alerta">⚠️ Este producto requiere un ahorro significativo. Considera revisar si es una compra prioritaria.</span>';
+        } else if (parseFloat(porcentaje6Meses) <= 10) {
+          recomendacion = '<br><span class="verde">✓ En 6 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
+        } else if (parseFloat(porcentaje12Meses) <= 10) {
+          recomendacion = '<br><span class="verde">✓ En 12 meses podrías comprarlo sin afectar significativamente tu presupuesto.</span>';
+        }
+        ahorroP.innerHTML += recomendacion;
+        ahorroP.className = 'ahorro-estimado';
+
+        // Calcular tiempo necesario
+        if (ahorroMensual > 0) {
+          const mesesNecesarios = Math.abs(restante) / ahorroMensual;
+          const anos = Math.floor(mesesNecesarios / 12);
+          const mesesRestantes = Math.floor(mesesNecesarios % 12);
+          const diasTotales = Math.ceil((mesesNecesarios % 1) * 30);
+          const semanas = Math.floor(diasTotales / 7);
+          const dias = diasTotales % 7;
+
+          let mensajeTiempo = '<strong>Con tu ahorro mensual actual podrías comprar este producto en:</strong><br>';
+
+          if (anos > 0) {
+            mensajeTiempo += `${anos} año${anos !== 1 ? 's' : ''}`;
+            if (mesesRestantes > 0 || semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          if (mesesRestantes > 0) {
+            mensajeTiempo += `${mesesRestantes} mes${mesesRestantes !== 1 ? 'es' : ''}`;
+            if (semanas > 0 || dias > 0) mensajeTiempo += ', ';
+          }
+          if (semanas > 0) {
+            mensajeTiempo += `${semanas} semana${semanas !== 1 ? 's' : ''}`;
+            if (dias > 0) mensajeTiempo += ' y ';
+          }
+          if (dias > 0) {
+            mensajeTiempo += `${dias} día${dias !== 1 ? 's' : ''}`;
+          }
+
+          tiempoP.innerHTML = mensajeTiempo;
+          tiempoP.className = 'tiempo-estimado';
+        } else {
+          tiempoP.innerHTML = 'Con tu presupuesto actual no estás ahorrando dinero cada mes. Necesitarías reducir gastos para poder comprar este producto.';
+          tiempoP.className = 'tiempo-estimado alerta';
+        }
+
+        resultadoDiv.appendChild(tiempoP);
+        resultadoDiv.appendChild(ahorroP);
+      }
+    });
+  }
+
+  // Llamar análisis avanzado para USD
+  mostrarAnalisisCompraAvanzadoUSD(datos);
+}
+
+// =================================================================
+// FUNCIONES DE FORMATEO CORREGIDAS
+// =================================================================
+
+// Función mejorada para formatear números en USD
+function formatearNumeroUSD(numero) {
+  let num = parseFloat(numero);
+  if (isNaN(num)) return "0.00";
+  
+  // Convertir de centavos a dólares
+  // Si el número es mayor a 100 y no tiene decimales significativos, probablemente está en centavos
+  if (num >= 100 && (num % 1 === 0 || num.toString().split('.')[1]?.length <= 1)) {
+    num = num / 100;
+  }
+  
+  if (Math.abs(num) < 1000) {
+    return num.toFixed(2);
+  }
+  
+  return num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// Función mejorada para formatear números locales
+function formatearNumeroLocal(numero) {
+  const num = parseFloat(numero);
+  if (isNaN(num)) return "0";
+  
+  return Math.round(num).toLocaleString('es-CO');
+}
+
+// Función general para formatear números (la que ya usas en otras partes)
+function formatearNumero(numero) {
+  const num = parseFloat(numero);
+  if (isNaN(num)) return "0";
+  
+  return Math.round(num).toLocaleString('es-CO');
+}
+
+
+// =================================================================
+// ANÁLISIS AVANZADO PARA MONEDA LOCAL
+// =================================================================
+function mostrarAnalisisCompraAvanzadoLocal(datos) {
+  chrome.storage.sync.get(['resumen'], function(data) {
+    if (data.resumen) {
+      const ingreso = data.resumen.ingreso || 0;
+      const totalGastos = data.resumen.totalGastos || 0;
+      const ahorroMensual = ingreso - totalGastos;
+      
+      const opcionesDiv = document.getElementById('opciones-compra');
+      opcionesDiv.innerHTML = '';
+      
+      const accordionContainer = document.createElement('div');
+      accordionContainer.className = 'accordion-container';
+      
+      // Opciones de ahorro
+      const opcionesAhorroBtn = document.createElement('button');
+      opcionesAhorroBtn.className = 'collapsible';
+      opcionesAhorroBtn.innerHTML = '<span><span class="icon-text">💰</span> Opciones para ahorrar</span>';
+      
+      const opcionesAhorroContent = document.createElement('div');
+      opcionesAhorroContent.className = 'collapsible-content';
+      
+      const ahorro3Meses = Math.ceil(datos.precio / 3);
+      const ahorro6Meses = Math.ceil(datos.precio / 6);
+      const ahorro12Meses = Math.ceil(datos.precio / 12);
+      
+      const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
+      const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
+      const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
+      
+      opcionesAhorroContent.innerHTML = `
+        <div class="option-card">
+          <h4>🕒 En 3 meses</h4>
+          <p>$${formatearNumeroLocal(ahorro3Meses)} mensuales <span class="option-badge">${porcentaje3Meses}%</span></p>
+        </div>
+        <div class="option-card">
+          <h4>🕓 En 6 meses</h4>
+          <p>$${formatearNumeroLocal(ahorro6Meses)} mensuales <span class="option-badge">${porcentaje6Meses}%</span></p>
+        </div>
+        <div class="option-card">
+          <h4>🕔 En 12 meses</h4>
+          <p>$${formatearNumeroLocal(ahorro12Meses)} mensuales <span class="option-badge">${porcentaje12Meses}%</span></p>
+        </div>
+      `;
+      
+      accordionContainer.appendChild(opcionesAhorroBtn);
+      accordionContainer.appendChild(opcionesAhorroContent);
+      opcionesDiv.appendChild(accordionContainer);
+      
+      // Agregar funcionalidad al acordeón
+      opcionesAhorroBtn.addEventListener("click", function() {
+        this.classList.toggle("active-collapsible");
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+  });
+}
+
+// =================================================================
+// ANÁLISIS AVANZADO PARA USD
+// =================================================================
+function mostrarAnalisisCompraAvanzadoUSD(datos) {
+  chrome.storage.sync.get(['resumen'], function(data) {
+    if (data.resumen) {
+      const ingreso = parseFloat(data.resumen.ingreso) || 0;
+      const totalGastos = parseFloat(data.resumen.totalGastos) || 0;
+      const ahorroMensual = ingreso - totalGastos;
+      const precio = parseFloat(datos.precio);
+      
+      const opcionesDiv = document.getElementById('opciones-compra');
+      opcionesDiv.innerHTML = '';
+      
+      const accordionContainer = document.createElement('div');
+      accordionContainer.className = 'accordion-container';
+      
+      // Opciones de ahorro
+      const opcionesAhorroBtn = document.createElement('button');
+      opcionesAhorroBtn.className = 'collapsible';
+      opcionesAhorroBtn.innerHTML = '<span><span class="icon-text">💰</span> Opciones para ahorrar</span>';
+      
+      const opcionesAhorroContent = document.createElement('div');
+      opcionesAhorroContent.className = 'collapsible-content';
+      
+      const ahorro3Meses = precio / 3;
+      const ahorro6Meses = precio / 6;
+      const ahorro12Meses = precio / 12;
+      
+      const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
+      const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
+      const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
+      
+      opcionesAhorroContent.innerHTML = `
+        <div class="option-card">
+          <h4>🕒 En 3 meses</h4>
+          <p>$${formatearNumeroUSD(ahorro3Meses)} USD mensuales <span class="option-badge">${porcentaje3Meses}%</span></p>
+        </div>
+        <div class="option-card">
+          <h4>🕓 En 6 meses</h4>
+          <p>$${formatearNumeroUSD(ahorro6Meses)} USD mensuales <span class="option-badge">${porcentaje6Meses}%</span></p>
+        </div>
+        <div class="option-card">
+          <h4>🕔 En 12 meses</h4>
+          <p>$${formatearNumeroUSD(ahorro12Meses)} USD mensuales <span class="option-badge">${porcentaje12Meses}%</span></p>
+        </div>
+      `;
+      
+      accordionContainer.appendChild(opcionesAhorroBtn);
+      accordionContainer.appendChild(opcionesAhorroContent);
+      opcionesDiv.appendChild(accordionContainer);
+      
+      // Agregar funcionalidad al acordeón
+      opcionesAhorroBtn.addEventListener("click", function() {
+        this.classList.toggle("active-collapsible");
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    }
+  });
+}
+
 
 // Función para actualizar el gráfico de gastos
 function actualizarGraficoGastos() {
@@ -753,190 +1038,6 @@ function actualizarGraficoGastos() {
 }
 ////////////////////////////////////////////////Analisis De compras /////////////////////////////////////////////////// 
 
-function mostrarAnalisisCompraAvanzado(datos) {
-  // Obtener datos de resumen
-  chrome.storage.sync.get(['resumen'], function(data) {
-    if (data.resumen) {
-      const ingreso = data.resumen.ingreso || 0;
-      const totalGastos = data.resumen.totalGastos || 0;
-      
-      // Calcular ahorro mensual
-      const ahorroMensual = ingreso - totalGastos;
-      
-      // Limpiar contenido previo
-      const opcionesDiv = document.getElementById('opciones-compra');
-      opcionesDiv.innerHTML = '';
-      
-      // Contenedor de acordeones
-      const accordionContainer = document.createElement('div');
-      accordionContainer.className = 'accordion-container';
-      
-      // 1. Opciones para ahorrar
-      const opcionesAhorroBtn = document.createElement('button');
-      opcionesAhorroBtn.className = 'collapsible';
-      opcionesAhorroBtn.innerHTML = '<span><span class="icon-text">💰</span> Opciones para ahorrar para este producto</span>';
-      
-      const opcionesAhorroContent = document.createElement('div');
-      opcionesAhorroContent.className = 'collapsible-content';
-      
-      // Calcular opciones de ahorro mensual para diferentes plazos
-      const ahorro3Meses = Math.ceil(datos.precio / 3);
-      const ahorro6Meses = Math.ceil(datos.precio / 6);
-      const ahorro12Meses = Math.ceil(datos.precio / 12);
-      
-      // Calcular porcentajes respecto al ingreso mensual
-      const porcentaje3Meses = ((ahorro3Meses / ingreso) * 100).toFixed(1);
-      const porcentaje6Meses = ((ahorro6Meses / ingreso) * 100).toFixed(1);
-      const porcentaje12Meses = ((ahorro12Meses / ingreso) * 100).toFixed(1);
-      
-      opcionesAhorroContent.innerHTML = `
-        <div class="option-card">
-          <h4>🕒 En 3 meses</h4>
-          <p>$${formatearNumero(ahorro3Meses)} mensuales <span class="option-badge">${porcentaje3Meses}% de tus ingresos</span></p>
-        </div>
-        <div class="option-card">
-          <h4>🕓 En 6 meses</h4>
-          <p>$${formatearNumero(ahorro6Meses)} mensuales <span class="option-badge">${porcentaje6Meses}% de tus ingresos</span></p>
-        </div>
-        <div class="option-card">
-          <h4>🕔 En 12 meses</h4>
-          <p>$${formatearNumero(ahorro12Meses)} mensuales <span class="option-badge">${porcentaje12Meses}% de tus ingresos</span></p>
-        </div>
-      `;
-      
-      // 2. Tiempo para comprar
-      const tiempoCompraBtn = document.createElement('button');
-      tiempoCompraBtn.className = 'collapsible';
-      tiempoCompraBtn.innerHTML = '<span><span class="icon-text">⏱️</span> Con tu ahorro mensual actual podrías comprar este producto en</span>';
-      
-      const tiempoCompraContent = document.createElement('div');
-      tiempoCompraContent.className = 'collapsible-content';
-      
-      if (ahorroMensual > 0) {
-        // Calcular tiempo necesario
-        const mesesNecesarios = Math.abs(datos.restante) / ahorroMensual;
-        
-        // Convertir a años, meses, semanas y días
-        const anos = Math.floor(mesesNecesarios / 12);
-        const mesesRestantes = Math.floor(mesesNecesarios % 12);
-        const diasTotales = Math.ceil((mesesNecesarios % 1) * 30);
-        const semanas = Math.floor(diasTotales / 7);
-        const dias = diasTotales % 7;
-        
-        // Preparar el mensaje
-        let mensajeTiempo = '<div class="option-card"><h4>⏳ Tiempo estimado</h4><p>';
-        
-        if (anos > 0) {
-          mensajeTiempo += `${anos} año${anos !== 1 ? 's' : ''}`;
-          if (mesesRestantes > 0 || semanas > 0 || dias > 0) mensajeTiempo += ', ';
-        }
-        
-        if (mesesRestantes > 0) {
-          mensajeTiempo += `${mesesRestantes} mes${mesesRestantes !== 1 ? 'es' : ''}`;
-          if (semanas > 0 || dias > 0) mensajeTiempo += ', ';
-        }
-        
-        if (semanas > 0) {
-          mensajeTiempo += `${semanas} semana${semanas !== 1 ? 's' : ''}`;
-          if (dias > 0) mensajeTiempo += ' y ';
-        }
-        
-        if (dias > 0) {
-          mensajeTiempo += `${dias} día${dias !== 1 ? 's' : ''}`;
-        }
-        
-        mensajeTiempo += '</p></div>';
-        tiempoCompraContent.innerHTML = mensajeTiempo;
-      } else {
-        tiempoCompraContent.innerHTML = `
-          <div class="option-card">
-            <h4>⚠️ Atención</h4>
-            <p>Con tu presupuesto actual no estás ahorrando dinero cada mes. Necesitarías reducir gastos para poder comprar este producto.</p>
-          </div>
-        `;
-      }
-      
-      // 3. Estrategias de Compra
-      const estrategiasBtn = document.createElement('button');
-      estrategiasBtn.className = 'collapsible';
-      estrategiasBtn.innerHTML = '<span><span class="icon-text">🔍</span> Estrategias de Compra</span>';
-      
-      const estrategiasContent = document.createElement('div');
-      estrategiasContent.className = 'collapsible-content';
-      estrategiasContent.innerHTML = `
-        <div class="option-card">
-          <h4>💳 Cuotas</h4>
-          <p>${calcularCuotasMensuales(datos.precio, ahorroMensual)}</p>
-        </div>
-        <div class="option-card">
-          <h4>💰 Financiamiento</h4>
-          <p>${sugerirFinanciamiento(datos.precio, ahorroMensual)}</p>
-        </div>
-      `;
-      
-      // 4. Impacto Financiero
-      const impactoBtn = document.createElement('button');
-      impactoBtn.className = 'collapsible';
-      impactoBtn.innerHTML = '<span><span class="icon-text">📊</span> Impacto Financiero</span>';
-      
-      const impactoContent = document.createElement('div');
-      impactoContent.className = 'collapsible-content';
-      impactoContent.innerHTML = `
-        <div class="option-card">
-          <h4>📈 % de Ingreso</h4>
-          <p>${calcularPorcentajeIngreso(datos.precio, ingreso)}% de tu ingreso mensual</p>
-        </div>
-        <div class="option-card">
-          <h4>✂️ Posibles Recortes</h4>
-          <p>${identificarCategoriasReduccion(ahorroMensual)}</p>
-        </div>
-      `;
-      
-      // 5. Alternativa de Inversión
-      const inversionBtn = document.createElement('button');
-      inversionBtn.className = 'collapsible';
-      inversionBtn.innerHTML = '<span><span class="icon-text">📈</span> Alternativa de Inversión</span>';
-      
-      const inversionContent = document.createElement('div');
-      inversionContent.className = 'collapsible-content';
-      inversionContent.innerHTML = `
-        <div class="option-card">
-          <h4>🌱 Rendimiento Potencial</h4>
-          <p>Si guardas $${formatearNumero(datos.precio)} en lugar de comprarlo:</p>
-          <p>${calcularRendimientoInversion(datos.precio)}</p>
-        </div>
-      `;
-      
-      // Agregar todos los elementos al contenedor
-      accordionContainer.appendChild(opcionesAhorroBtn);
-      accordionContainer.appendChild(opcionesAhorroContent);
-      accordionContainer.appendChild(tiempoCompraBtn);
-      accordionContainer.appendChild(tiempoCompraContent);
-      accordionContainer.appendChild(estrategiasBtn);
-      accordionContainer.appendChild(estrategiasContent);
-      accordionContainer.appendChild(impactoBtn);
-      accordionContainer.appendChild(impactoContent);
-      accordionContainer.appendChild(inversionBtn);
-      accordionContainer.appendChild(inversionContent);
-      
-      opcionesDiv.appendChild(accordionContainer);
-      
-      // Añadir funcionalidad a los botones desplegables
-      const coll = document.getElementsByClassName("collapsible");
-      for (let i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active-collapsible");
-          const content = this.nextElementSibling;
-          if (content.style.maxHeight) {
-            content.style.maxHeight = null;
-          } else {
-            content.style.maxHeight = content.scrollHeight + "px";
-          }
-        });
-      }
-    }
-  });
-}
 
 // Funciones auxiliares
 function calcularCuotasMensuales(precio, ahorroMensual) {
@@ -981,3 +1082,11 @@ function calcularRendimientoInversion(monto) {
   ).join(' | ');
 }
 
+function limpiarPrecio(precioTexto) {
+  // Si el texto contiene una coma y no un punto, asumimos que es formato europeo (1.234,56)
+  if (precioTexto.includes(',') && !precioTexto.includes('.')) {
+    return parseFloat(precioTexto.replace(/\./g, '').replace(',', '.')) || 0;
+  }
+  // Si es en formato anglosajón (como 79.95 o 1,584.00), eliminamos comas, pero no tocamos el punto decimal
+  return parseFloat(precioTexto.replace(/,/g, '')) || 0;
+}
