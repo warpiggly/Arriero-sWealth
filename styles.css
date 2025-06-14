@@ -94,6 +94,17 @@ button {
   background-color: #ff0000;
 }
 
+.categoria-deuda {
+  font-family:LEMONMILK-Regular;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.categoria-deuda:nth-child(1){
+   background-color: #ffe6e6;
+}
+
 .categoria-gastos {
   font-family:LEMONMILK-Regular;
   margin-bottom: 15px;
@@ -150,6 +161,22 @@ button {
 
 .tab button.active {
   background-color: #ccc;
+}
+
+
+.descripcion-deuda-box {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-left: 4px solid #11998e;
+  border-radius: 5px;
+  font-style: italic;
+  font-size: 14px;
+  color: #333;
+}
+
+.descripcion-deuda-box.oculto {
+  display: none;
 }
 
 .tabcontent {

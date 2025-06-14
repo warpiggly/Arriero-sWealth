@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabLinks = document.querySelectorAll('.tablinks');
   tabLinks.forEach(tab => {
     tab.addEventListener('click', function(e) {
-      openTab(e, this.textContent.toLowerCase());
+      const tabName = this.getAttribute('data-tab');
+      openTab(e, tabName);
     });
   });
   
@@ -1040,47 +1041,47 @@ function actualizarGraficoGastos() {
 
 
 // Funciones auxiliares
-function calcularCuotasMensuales(precio, ahorroMensual) {
-  if (ahorroMensual <= 0) return 'No es posible financiar';
-  const meses = Math.ceil(precio / ahorroMensual);
-  return `${meses} cuotas de $${formatearNumero((precio / meses).toFixed(0))}`;
-}
+// function calcularCuotasMensuales(precio, ahorroMensual) {
+//   if (ahorroMensual <= 0) return 'No es posible financiar';
+//   const meses = Math.ceil(precio / ahorroMensual);
+//   return `${meses} cuotas de $${formatearNumero((precio / meses).toFixed(0))}`;
+// }
 
-function sugerirFinanciamiento(precio, ahorroMensual) {
-  const tasasInteres = [
-    { nombre: 'Bajo', tasa: 0.1 },
-    { nombre: 'Medio', tasa: 0.15 },
-    { nombre: 'Alto', tasa: 0.20 }
-  ];
+// function sugerirFinanciamiento(precio, ahorroMensual) {
+//   const tasasInteres = [
+//     { nombre: 'Bajo', tasa: 0.1 },
+//     { nombre: 'Medio', tasa: 0.15 },
+//     { nombre: 'Alto', tasa: 0.20 }
+//   ];
   
-  return tasasInteres.map(interes => {
-    const pagoMensual = precio * (1 + interes.tasa) / (precio / ahorroMensual);
-    return `${interes.nombre}: $${formatearNumero(pagoMensual.toFixed(0))} mensual`;
-  }).join(' | ');
-}
+//   return tasasInteres.map(interes => {
+//     const pagoMensual = precio * (1 + interes.tasa) / (precio / ahorroMensual);
+//     return `${interes.nombre}: $${formatearNumero(pagoMensual.toFixed(0))} mensual`;
+//   }).join(' | ');
+// }
 
-function calcularPorcentajeIngreso(precio, ingreso) {
-  return ((precio / ingreso) * 100).toFixed(1);
-}
+// function calcularPorcentajeIngreso(precio, ingreso) {
+//   return ((precio / ingreso) * 100).toFixed(1);
+// }
 
-function identificarCategoriasReduccion(ahorroMensual) {
-  if (ahorroMensual <= 0) return 'Necesitas aumentar tus ingresos o reducir gastos';
-  if (ahorroMensual < 50000) return 'Revisar gastos de entretenimiento y suscripciones';
-  if (ahorroMensual < 100000) return 'Optimizar gastos en alimentación y servicios';
-  return 'Buen manejo financiero, considera inversiones';
-}
+// function identificarCategoriasReduccion(ahorroMensual) {
+//   if (ahorroMensual <= 0) return 'Necesitas aumentar tus ingresos o reducir gastos';
+//   if (ahorroMensual < 50000) return 'Revisar gastos de entretenimiento y suscripciones';
+//   if (ahorroMensual < 100000) return 'Optimizar gastos en alimentación y servicios';
+//   return 'Buen manejo financiero, considera inversiones';
+// }
 
-function calcularRendimientoInversion(monto) {
-  const tasasInversion = [
-    { nombre: 'Conservador', tasa: 0.05 },
-    { nombre: 'Moderado', tasa: 0.08 },
-    { nombre: 'Agresivo', tasa: 0.12 }
-  ];
+// function calcularRendimientoInversion(monto) {
+//   const tasasInversion = [
+//     { nombre: 'Conservador', tasa: 0.05 },
+//     { nombre: 'Moderado', tasa: 0.08 },
+//     { nombre: 'Agresivo', tasa: 0.12 }
+//   ];
   
-  return tasasInversion.map(inv => 
-    `${inv.nombre}: $${formatearNumero((monto * inv.tasa).toFixed(0))}`
-  ).join(' | ');
-}
+//   return tasasInversion.map(inv => 
+//     `${inv.nombre}: $${formatearNumero((monto * inv.tasa).toFixed(0))}`
+//   ).join(' | ');
+// }
 
 function limpiarPrecio(precioTexto) {
   // Si el texto contiene una coma y no un punto, asumimos que es formato europeo (1.234,56)

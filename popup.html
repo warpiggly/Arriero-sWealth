@@ -10,10 +10,12 @@
   <h2>ARRIERO'S WEALTH <span style="color: #cccccc;">- Of Mules and Coins</span></h2>
   
   <div class="tab">
-    <button class="tablinks active" onclick="openTab(event, 'ingresos')">Ingresos</button>
-    <button class="tablinks" onclick="openTab(event, 'gastos')">Gastos</button>
-    <button class="tablinks" onclick="openTab(event, 'analisis')">Análisis</button>
+    <button class="tablinks active" data-tab="ingresos">Ingresos</button>
+    <button class="tablinks" data-tab="gastos">Gastos</button>
+    <button class="tablinks" data-tab="deuda">Deuda</button>
+    <button class="tablinks" data-tab="analisis">Análisis</button>
   </div>
+
   
   <!-- Pestaña de ingresos -->
   <div id="ingresos" class="tabcontent active">
@@ -148,6 +150,36 @@
     <button id="descargarTXT">Descargar TXT</button>
 
   </div>
+
+  <div id="deuda" class="tabcontent">
+    <h3>Deuda</h3>
+      <div class="categoria-deuda">
+        <h4>Cuanto Es Mi Deuda</h4>
+        <div>
+          <label for="nuevo-deuda-categoria">Categoría:</label>
+          <select id="nuevo-deuda-categoria">
+            <option value="">Selecciona una categoría</option>
+            <option value="garantizada">Deuda garantizada</option>
+            <option value="no-garantizada">Deuda no garantizada</option>
+            <option value="consumo">Créditos de consumo</option>
+            <option value="hipoteca">Hipotecas</option>
+            <option value="subsistencia">Deuda de subsistencia</option>
+            <option value="estudiantil">Préstamos estudiantiles</option>
+            <option value="apalancamiento">Deuda de apalancamiento</option>
+          </select>
+          <button id="mostrarDescripcionBtn">Mostrar Descripción</button>
+        </div>
+
+        <!-- Aquí se mostrará la info -->
+        <div id="descripcion-deuda" class="descripcion-deuda-box oculto"></div> 
+
+      </div>
+
+      
+   
+
+
+  </div>
   
   <!-- Pestaña de análisis -->
   <div id="analisis" class="tabcontent">
@@ -170,6 +202,7 @@
   </div>
   
   <script src="popup.js"></script>
+  <script src="debt.js" ></script>
 
 </body>
 </html>
