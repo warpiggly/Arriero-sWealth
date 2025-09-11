@@ -10,17 +10,33 @@
   <h2>ARRIERO'S WEALTH <span style="color: #cccccc;">- Of Mules and Coins</span></h2>
   
   <div class="tab">
-    <button class="tablinks active" onclick="openTab(event, 'ingresos')">Ingresos</button>
-    <button class="tablinks" onclick="openTab(event, 'gastos')">Gastos</button>
-    <button class="tablinks" onclick="openTab(event, 'analisis')">Análisis</button>
+    <button class="tablinks active" data-tab="ingresos">Ingresos</button>
+    <button class="tablinks" data-tab="gastos">Gastos</button>
+    <button class="tablinks" data-tab="deuda">Deuda</button>
+    <button class="tablinks" data-tab="analisis">Análisis</button>
   </div>
+
   
   <!-- Pestaña de ingresos -->
   <div id="ingresos" class="tabcontent active">
-    <h3>Mis Ingresos</h3>
-    <label for="ingreso">Ingreso mensual:</label>
-    <input type="number" id="ingreso" min="0">
+    <h3>My Income</h3>
+    <div class="form__group field">
+    <input type="number" id="ingreso" min="0" placeholder=" " class="form__field">
+    <label for="ingreso" class="form__label" >Monthly Income</label>
     <button id="guardarIngreso">Guardar</button>
+    </div>
+
+    <div class="divisa-container">
+      <label for="divisa">Divisa:</label>
+      <select id="divisa">
+        <option value="local">Pesos (COP)</option>
+        <option value="usd">Dólar (USD)</option>
+      </select>
+      <label for="tasaCambio">Tasa de cambio (1 USD =):</label>
+      <input type="text" id="tasaCambio" placeholder="4176">
+      <span>COP</span>
+      <button id="guardarDivisa">Guardar</button>
+    </div>
   </div>
   
   <!-- Pestaña de gastos -->
@@ -134,6 +150,36 @@
     <button id="descargarTXT">Descargar TXT</button>
 
   </div>
+
+  <div id="deuda" class="tabcontent">
+    <h3>Deuda</h3>
+      <div class="categoria-deuda">
+        <h4>Cuanto Es Mi Deuda</h4>
+        <div>
+          <label for="nuevo-deuda-categoria">Categoría:</label>
+          <select id="nuevo-deuda-categoria">
+            <option value="">Selecciona una categoría</option>
+            <option value="garantizada">Deuda garantizada</option>
+            <option value="no-garantizada">Deuda no garantizada</option>
+            <option value="consumo">Créditos de consumo</option>
+            <option value="hipoteca">Hipotecas</option>
+            <option value="subsistencia">Deuda de subsistencia</option>
+            <option value="estudiantil">Préstamos estudiantiles</option>
+            <option value="apalancamiento">Deuda de apalancamiento</option>
+          </select>
+          <button id="mostrarDescripcionBtn">Mostrar Descripción</button>
+        </div>
+
+        <!-- Aquí se mostrará la info -->
+        <div id="descripcion-deuda" class="descripcion-deuda-box oculto"></div> 
+
+      </div>
+
+      
+   
+
+
+  </div>
   
   <!-- Pestaña de análisis -->
   <div id="analisis" class="tabcontent">
@@ -148,13 +194,15 @@
       <p><strong>Dinero disponible:</strong> <span id="dinero-disponible">$0</span></p>
     </div>
     
-    <div id="resultado-compra" class="oculto">
-      <h3>Análisis de compra</h3>
+    <div id="resultado-compra">
+      <h3>Análisis de Compra</h3>
       <p id="mensaje-compra"></p>
+      <div id="opciones-compra"></div>
     </div>
   </div>
   
   <script src="popup.js"></script>
+  <script src="debt.js" ></script>
 
 </body>
 </html>
