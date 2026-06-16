@@ -1,366 +1,317 @@
+/* ===========================================================
+   ARRIERO'S WEALTH — Interfaz tipo tarjeta costumbrista
+   Fondo: paisaje paisa ampliado. Fuente display: ScothBrace.
+   =========================================================== */
+
+@font-face {
+  font-family: 'ScothBrace';
+  src: url('fonts/ScothBrace-Regular.ttf') format('truetype');
+}
 @font-face {
   font-family: 'LEMONMILK-Light';
   src: url('fonts/LEMONMILK-Light.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+}
+@font-face {
+  font-family: 'LEMONMILK-Medium';
+  src: url('fonts/LEMONMILK-Medium.otf') format('truetype');
 }
 
-@font-face {
-  font-family: 'LEMONMILK-Regular';
-  src: url('fonts/LEMONMILK-Regular.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Pixeled';
-  src: url('fonts/Pixeled.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'LEMONMILK-Bold';
-  src: url('fonts/LEMONMILK-Bold.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
+:root {
+  --crema:        #FBF5E2;
+  --crema-trans:  rgba(251, 245, 226, 0.92);
+  --verde-oscuro: #14532D;
+  --verde:        #2E7D40;
+  --naranja:      #E8742C;
+  --naranja-osc:  #C85E1E;
+  --dorado:       #F2B233;
+  --dorado-osc:   #E0991C;
+  --marron:       #7A4A22;
+  --terracota:    #C0392B;
+  --texto:        #2B2118;
+  --sombra:       0 2px 8px rgba(43, 33, 24, 0.25);
 }
 
 body {
-  width: 350px;
-  padding: 10px;
-  font-family: LEMONMILK-Light;
+  position: relative;
+  width: 480px;
+  margin: 0;
+  padding: 0 0 18px;
+  color: var(--texto);
+  font-family: 'LEMONMILK-Light', sans-serif;
+  background: var(--crema);
+
+  /* Borde de la app (recto, sin esquinas redondas) */
+  border: 6px solid var(--naranja);
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
-h2 {
-font-family: LEMONMILK-Bold;
+/* Paisaje de fondo, desenfocado (capa detrás del contenido) */
+body::before {
+  content: '';
+  position: fixed;
+  top: -16px;
+  left: -16px;
+  width: 512px;            /* tamaño fijo: la imagen no se reescala al expandir */
+  height: 632px;           /* alto fijo (mayor que la ventana) -> imagen estática */
+  z-index: -2;
+  background-image: url('Image/ChatGPT Image Sep 20, 2025, 08_48_10 AM.png');
+  background-size: cover;
+  background-position: left 8%;
+  background-repeat: no-repeat;
+  filter: blur(2px);
 }
 
-h3, h4 {
-  margin-top: 10px;
-  margin-bottom: 5px;
+/* Capa semitransparente para mejorar la legibilidad */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(155, 155, 155, 0.066);
 }
 
-input, button, select {
-  margin: 5px 0;
-  padding: 5px;
+/* ---------- Navegación: estrellas ---------- */
+.estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 88px;
+  padding: 14px 0 6px;
 }
-
-button {
+.estrella {
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
+  line-height: 0;
+  opacity: 0.55;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.estrella img { width: 28px; height: 28px; display: block; object-fit: contain; }
+.estrella:hover { opacity: 0.85; transform: scale(1.1); }
+.estrella.activa { opacity: 1; transform: scale(1.25); }
+
+/* ---------- Encabezado / logo ---------- */
+.app-header { text-align: center; padding: 0 16px; }
+.app-logo { display: block; width: 82%; max-width: 1030px; margin: 0 auto 6px; }
+
+/* ---------- Caja del resultado (¿cuánto cobrar?) ---------- */
+.jornal-box {
+  margin: 10px 18px 16px;
+  padding: 12px 18px;
+  background: var(--dorado);
+  border-radius: 30px;
+  box-shadow: var(--sombra);
+  text-align: center;
+
+}
+.jornal-label {
+  display: block;
+  font-family: 'ScothBrace', serif;
+  font-size: 1rem;
+  color: var(--texto);
+  letter-spacing: 1px;
+}
+.jornal-num {
+  display: block;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.5rem;
+  color: var(--texto);
+  line-height: 1.1;
 }
 
-.oculto {
-  display: none;
+/* ---------- Botón maestro (abre/cierra todo el cálculo) ---------- */
+.master-toggle-wrap { text-align: center; margin: 2px 0 14px; }
+.master-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  background: var(--dorado);
+  color: var(--texto);
+  box-shadow: var(--sombra);
+}
+.master-btn:hover { background: var(--dorado-osc); }
+
+.master-contenido.cerrado { display: none; }
+
+/* ---------- Vistas (estrellas cambian entre ellas) ---------- */
+.vista { display: none; padding: 0 12px; }
+.vista.activa { display: block; }
+
+.vista-placeholder {
+  text-align: center;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.3rem;
+  color: var(--crema);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  padding: 60px 20px;
 }
 
-.verde {
-  color: green;
+h3 {
+  font-family: 'ScothBrace', serif;
+  color: var(--crema);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  text-align: center;
+  font-size: 1.4rem;
+  margin: 6px 0 12px;
+}
+h4 {
+  font-family: 'ScothBrace', serif;
+  color: var(--texto);
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+  border-bottom: 2px solid var(--dorado);
+  padding-bottom: 4px;
 }
 
-.rojo {
-  color: red;
+/* ---------- Tarjetas de sección ---------- */
+.categoria-gastos {
+  background: var(--crema-trans);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--sombra);
+  backdrop-filter: blur(1px);
 }
+
+/* Secciones expandibles/contraíbles */
+.colapsable h4 {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  margin-bottom: 0;
+}
+.colapsable h4::after {
+  content: '\2212';            /* − */
+  color: var(--naranja);
+  font-size: 1.2rem;
+  margin-left: 8px;
+}
+.colapsable.cerrada h4::after { content: '\002B'; }  /* + */
+.colapsable.cerrada h4 { border-bottom: none; padding-bottom: 0; }
+.colapsable > *:not(h4) { margin-top: 8px; }
+.colapsable.cerrada > *:not(h4) { display: none; }
 
 .gasto-item {
   display: flex;
   justify-content: space-between;
-  margin: 5px 0;
   align-items: center;
+  margin: 6px 0;
+  font-size: 0.82rem;
 }
+.gasto-item label { flex: 1; padding-right: 8px; }
 
-.gasto-item label {
-  flex: 1;
+input, select {
+  font-family: 'LEMONMILK-Light', sans-serif;
+  border: 1px solid var(--marron);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #fff;
+  color: var(--texto);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-
-.gasto-item input {
-  width: 100px;
+input:focus, select:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 2px rgba(232, 116, 44, 0.25);
 }
+.gasto-item input, .gasto-item select { width: 110px; }
 
-.gasto-item select {
-  width: 100px;
-}
-
-.gasto-item button {
-  margin-left: 5px;
-  padding: 2px 6px;
-  background-color: #ff5252;
-  color: white;
+/* ---------- Botones ---------- */
+button {
+  font-family: 'ScothBrace', serif;
+  cursor: pointer;
   border: none;
-  border-radius: 3px;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  background: var(--naranja);
+  color: #fff;
+  transition: background 0.2s, transform 0.05s;
 }
+button:hover { background: var(--naranja-osc); }
+button:active { transform: translateY(1px); }
 
-.gasto-item button:hover {
-  background-color: #ff0000;
+.btn-principal {
+  display: block;
+  width: 100%;
+  background: var(--verde);
+  margin: 10px 0;
 }
+.btn-principal:hover { background: var(--verde-oscuro); }
 
-.categoria-gastos {
-  font-family:LEMONMILK-Regular;
-  margin-bottom: 15px;
-  padding: 10px;
-  border-radius: 5px;
+.btn-secundario { background: var(--dorado); color: var(--texto); }
+.btn-secundario:hover { background: var(--dorado-osc); }
+
+.gasto-item button, .btn-eliminar {
+  margin-left: 6px;
+  padding: 3px 9px;
+  font-size: 0.8rem;
+  background: var(--terracota);
 }
+.gasto-item button:hover, .btn-eliminar:hover { background: #9c2c20; }
 
-.categoria-gastos:nth-child(1) {
-  background-color: #ffe6e6;
-}
-
-.categoria-gastos:nth-child(2) {
-  background-color: #e6f2ff;
-}
-
-.categoria-gastos:nth-child(3) {
-  background-color: #e6ffe6;
-}
-
-.categoria-gastos:nth-child(4) {
-  background-color: #fff5e6;
-}
-
+/* ---------- Formulario para agregar ítems ---------- */
 .gasto-personalizado-form {
   margin-top: 10px;
   padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  border: 1px dashed #ccc;
+  background: rgba(242, 178, 51, 0.35);
+  border: 1px dashed var(--marron);
+  border-radius: 10px;
 }
 
-/* Estilos para las pestañas */
-.tab {
-  font-family: LEMONMILK-Regular;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
-  border-radius: 5px 5px 0 0;
-}
-
-.tab button {
-  background-color: inherit;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 10px 16px;
-  transition: 0.3s;
-}
-
-.tab button:hover {
-  background-color: #ddd;
-}
-
-.tab button.active {
-  background-color: #ccc;
-}
-
-.tabcontent {
-  display: none;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 5px 5px;
-}
-
-.tabcontent.active {
-  display: block;
-}
-
-#gastos-personalizados-container {
-  max-height: 150px;
+/* ---------- Listas ---------- */
+#materiales-container, #herramientas-container, #presupuestos-container {
+  max-height: 170px;
   overflow-y: auto;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+#subtotalMateriales, #subtotalHerramientas {
+  font-size: 0.82rem;
+  text-align: right;
+  margin: 6px 0 0;
+  color: var(--texto);
 }
 
-#leyenda {
-  margin-top: 15px;
-  font-size: 12px;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-#resultado-compra {
-  background-color: #f4f4f4;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 15px;
-}
-
-#resultado-compra h3 {
-  margin-top: 0;
-  color: #333;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
-}
-
-#mensaje-compra {
-  margin-bottom: 15px;
-}
-
-#opciones-compra {
+/* Tarjeta de presupuesto guardado */
+.presupuesto-item {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-#opciones-compra h3 {
-  margin: 0;
-  color: #555;
-  font-size: 1em;
-  border-bottom: none;
-}
-
-#opciones-compra ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.verde {
-  color: green;
-}
-
-.rojo {
-  color: red;
-}
-
-.collapsible {
-  background-color: #f1f1f1;
-  color: #444;
-  cursor: pointer;
-  padding: 12px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-  border-radius: 5px;
-  margin: 5px 0;
-  transition: 0.3s;
-  display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--verde);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 0.82rem;
 }
+.presupuesto-item .info { flex: 1; }
+.presupuesto-item .nombre { font-family: 'ScothBrace', serif; color: var(--texto); font-size: 1rem; }
+.presupuesto-item .detalle { color: var(--marron); font-size: 0.74rem; }
+.presupuesto-item button { padding: 4px 8px; font-size: 0.8rem; }
+.presupuesto-item .btn-cargar { background: var(--verde); }
+.presupuesto-item .btn-cargar:hover { background: var(--verde-oscuro); }
 
-.active-collapsible, .collapsible:hover {
-  background-color: #e0e0e0;
-}
-
-.collapsible:after {
-  content: '\002B';
-  color: #777;
-  font-weight: bold;
-  float: right;
-  margin-left: 5px;
-}
-
-.active-collapsible:after {
-  content: "\2212";
-}
-
-.collapsible-content {
-  padding: 0 18px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-  background-color: white;
-  border-radius: 0 0 5px 5px;
-}
-
-.icon-text {
-  margin-right: 8px;
-}
-
-.option-card {
-  border-left: 4px solid #4CAF50;
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.option-card h4 {
-  margin-top: 0;
-  color: #333;
-}
-
-.option-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  background-color: #4CAF50;
-  color: white;
+/* ---------- Desglose de costos ---------- */
+#resultado-cotizacion {
+  background: var(--crema-trans);
   border-radius: 12px;
-  font-size: 12px;
-  margin-left: 5px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--sombra);
 }
+#resultado-cotizacion p { margin: 5px 0; font-size: 0.85rem; }
+#resultado-cotizacion hr { border: none; border-top: 1px solid var(--dorado); margin: 8px 0; }
 
-/* ////////////////////////////////// */
-
-:root {
-  --primary: #11998e;
-  --secondary: #38ef7d;
-  --white: #000000;
-  --gray: #9b9b9b;
-}
-
-.form__group {
-  position: relative;
-  padding: 10px 0 0;
-  margin-top: 5px;
-  width: 70%;
-}
-
-.form__field {
-  font-family: inherit;
-  width: 100%;
-  border: 0;
-  border-bottom: 2px solid var(--gray);
-  outline: 0;
-  font-size: 1.3rem;
-  color: var(--white);
-  padding: 7px 0;
-  background: transparent;
-  transition: border-color 0.2s;
-}
-
-.form__field::placeholder {
-  color: transparent;
-}
-
-.form__field:placeholder-shown ~ .form__label {
-  font-size: 1.3rem;
-  cursor: text;
-  top: 10px;
-}
-
-.form__label {
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 1rem;
-  color: var(--gray);
-}
-
-.form__field:focus {
-  padding-bottom: 6px;
-  font-weight: 700;
-  border-width: 3px;
-  border-image: linear-gradient(to right, var(--primary), var(--secondary));
-  border-image-slice: 1;
-}
-
-.form__field:focus ~ .form__label {
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 1rem;
-  color: var(--primary);
-  font-weight: 700;
-}
-
-/* reset input */
-.form__field:required,
-.form__field:invalid {
-  box-shadow: none;
+.frase-arriero {
+  font-family: 'ScothBrace', serif;
+  text-align: center;
+  color: var(--marron);
+  font-size: 0.85rem;
+  margin: 6px 0 0;
 }

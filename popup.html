@@ -7,169 +7,167 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h2>ARRIERO'S WEALTH <span style="color: #cccccc;">- Of Mules and Coins</span></h2>
-  
-  <div class="tab">
-    <button class="tablinks active" onclick="openTab(event, 'ingresos')">Ingresos</button>
-    <button class="tablinks" onclick="openTab(event, 'gastos')">Gastos</button>
-    <button class="tablinks" onclick="openTab(event, 'analisis')">Análisis</button>
+  <!-- Navegación: estrellas para cambiar de vista -->
+  <nav class="estrellas">
+    <button class="estrella activa" data-view="cotizar" title="Cotizar">
+      <img src="Image/Estrellas-cambiopagina.png" alt="estrella">
+    </button>
+    <button class="estrella" data-view="vista2" title="Próximamente">
+      <img src="Image/Estrellas-cambiopagina.png" alt="estrella">
+    </button>
+    <button class="estrella" data-view="vista3" title="Próximamente">
+      <img src="Image/Estrellas-cambiopagina.png" alt="estrella">
+    </button>
+  </nav>
+
+  <!-- Logo -->
+  <header class="app-header">
+    <img src="Image/Logo Negro  PNG.png" alt="ARRIERO'S WEALTH - Of Mules and Coins" class="app-logo">
+  </header>
+
+  <!-- Resultado destacado: cuánto cobrar por todo -->
+  <div class="jornal-box">
+    <span class="jornal-label">Deberías cobrar:</span>
+    <span class="jornal-num" id="cotiz-precio-venta">$0</span>
   </div>
-  
-  <!-- Pestaña de ingresos -->
-  <div id="ingresos" class="tabcontent active">
-    <h3>My Income</h3>
-    <div class="form__group field">
-    <input type="number" id="ingreso" min="0" placeholder=" " class="form__field">
-    <label for="ingreso" class="form__label" >Monthly Income</label>
-    <button id="guardarIngreso">Guardar</button>
+
+  <!-- ===================== VISTA 1: COTIZAR ===================== -->
+  <div id="cotizar" class="vista activa">
+
+    <!-- Botón maestro: abre/cierra todo el cálculo -->
+    <div class="master-toggle-wrap">
+      <button id="toggleCalculo" class="master-btn" title="Ver cálculo">+</button>
     </div>
 
-    <div class="divisa-container">
-      <label for="divisa">Divisa:</label>
-      <select id="divisa">
-        <option value="local">Pesos (COP)</option>
-        <option value="usd">Dólar (USD)</option>
-      </select>
-      <label for="tasaCambio">Tasa de cambio (1 USD =):</label>
-      <input type="text" id="tasaCambio" placeholder="4176">
-      <span>COP</span>
-      <button id="guardarDivisa">Guardar</button>
-    </div>
-  </div>
-  
-  <!-- Pestaña de gastos -->
-  <div id="gastos" class="tabcontent">
-    <h3>Mis Gastos Mensuales</h3>
-    
-    <div class="categoria-gastos">
-      <h4>Esenciales para la vida</h4>
+    <!-- Contenedor maestro: todas las secciones expandibles -->
+    <div id="panel-calculo" class="master-contenido cerrado">
+
+    <!-- Tarifa por hora -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Tu tarifa por hora</h4>
       <div class="gasto-item">
-        <label for="vivienda">Vivienda:</label>
-        <input type="number" id="vivienda" min="0" class="gasto" data-categoria="esencial">
+        <label for="ingresoDeseado">Ingreso que quieres al mes:</label>
+        <input type="number" id="ingresoDeseado" min="0" placeholder="3000000">
       </div>
       <div class="gasto-item">
-        <label for="alimentacion">Alimentación:</label>
-        <input type="number" id="alimentacion" min="0" class="gasto" data-categoria="esencial">
+        <label for="horasFacturables">Horas facturables al mes:</label>
+        <input type="number" id="horasFacturables" min="0" placeholder="120">
       </div>
-      <div class="gasto-item">
-        <label for="servicios">Servicios:</label>
-        <input type="number" id="servicios" min="0" class="gasto" data-categoria="esencial">
-      </div>
-      <div class="gasto-item">
-        <label for="transporte">Transporte:</label>
-        <input type="number" id="transporte" min="0" class="gasto" data-categoria="esencial">
-      </div>
-      <div class="gasto-item">
-        <label for="salud">Salud:</label>
-        <input type="number" id="salud" min="0" class="gasto" data-categoria="esencial">
-      </div>
-    </div>
-    
-    <div class="categoria-gastos">
-      <h4>Importantes</h4>
-      <div class="gasto-item">
-        <label for="deudas">Deudas:</label>
-        <input type="number" id="deudas" min="0" class="gasto" data-categoria="importante">
-      </div>
-      <div class="gasto-item">
-        <label for="ahorro">Ahorro:</label>
-        <input type="number" id="ahorro" min="0" class="gasto" data-categoria="importante">
-      </div>
-      <div class="gasto-item">
-        <label for="estudio">Estudio:</label>
-        <input type="number" id="estudio" min="0" class="gasto" data-categoria="importante">
-      </div>
-      <div class="gasto-item">
-        <label for="mantenimiento">Mantenimiento del hogar:</label>
-        <input type="number" id="mantenimiento" min="0" class="gasto" data-categoria="importante">
-      </div>
-    </div>
-    
-    <div class="categoria-gastos">
-      <h4>Opcionales</h4>
-      <div class="gasto-item">
-        <label for="entretenimiento">Entretenimiento:</label>
-        <input type="number" id="entretenimiento" min="0" class="gasto" data-categoria="opcional">
-      </div>
-      <div class="gasto-item">
-        <label for="salidas">Salidas a comer:</label>
-        <input type="number" id="salidas" min="0" class="gasto" data-categoria="opcional">
-      </div>
-      <div class="gasto-item">
-        <label for="compras">Compras no esenciales:</label>
-        <input type="number" id="compras" min="0" class="gasto" data-categoria="opcional">
-      </div>
-      <div class="gasto-item">
-        <label for="viajes">Viajes:</label>
-        <input type="number" id="viajes" min="0" class="gasto" data-categoria="opcional">
-      </div>
-      <div class="gasto-item">
-        <label for="suscripciones">Suscripciones/membresías:</label>
-        <input type="number" id="suscripciones" min="0" class="gasto" data-categoria="opcional">
-      </div>
+      <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
     </div>
 
-    <!-- Nueva sección para gastos personalizados -->
-    <div class="categoria-gastos">
-      <h4>Mis Gastos Personalizados</h4>
-      <div id="gastos-personalizados-container">
-        <!-- Aquí se mostrarán los gastos personalizados agregados -->
+    <!-- Mano de obra -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Mano de obra (tu tiempo)</h4>
+      <div class="gasto-item">
+        <label for="horasTrabajo">Horas de este trabajo:</label>
+        <input type="number" id="horasTrabajo" min="0" placeholder="0">
       </div>
-      
+      <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
+    </div>
+
+    <!-- Materiales -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Materiales / insumos</h4>
+      <div id="materiales-container"></div>
       <div class="gasto-personalizado-form">
         <div class="gasto-item">
-          <label for="nuevo-gasto-nombre">Nombre:</label>
-          <input type="text" id="nuevo-gasto-nombre" placeholder="Ej: Gimnasio">
+          <label for="material-nombre">Nombre:</label>
+          <input type="text" id="material-nombre" placeholder="Ej: Pintura">
         </div>
         <div class="gasto-item">
-          <label for="nuevo-gasto-monto">Monto:</label>
-          <input type="number" id="nuevo-gasto-monto" min="0">
+          <label for="material-costo">Costo unitario:</label>
+          <input type="number" id="material-costo" min="0">
         </div>
         <div class="gasto-item">
-          <label for="nuevo-gasto-categoria">Categoría:</label>
-          <select id="nuevo-gasto-categoria">
-            <option value="esencial">Esencial</option>
-            <option value="importante">Importante</option>
-            <option value="opcional">Opcional</option>
-          </select>
+          <label for="material-cantidad">Cantidad:</label>
+          <input type="number" id="material-cantidad" min="1" value="1">
         </div>
-        <button id="agregar-gasto-personalizado">Agregar Gasto</button>
+        <button id="agregar-material">Agregar material</button>
+      </div>
+      <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
+    </div>
+
+    <!-- Herramientas -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Herramientas / equipos</h4>
+      <div id="herramientas-container"></div>
+      <div class="gasto-personalizado-form">
+        <div class="gasto-item">
+          <label for="herramienta-nombre">Nombre:</label>
+          <input type="text" id="herramienta-nombre" placeholder="Ej: Taladro">
+        </div>
+        <div class="gasto-item">
+          <label for="herramienta-costo">Costo:</label>
+          <input type="number" id="herramienta-costo" min="0">
+        </div>
+        <button id="agregar-herramienta">Agregar herramienta</button>
+      </div>
+      <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
+    </div>
+
+    <!-- Otros costos -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Otros costos</h4>
+      <div class="gasto-item">
+        <label for="costoTransporte">Transporte:</label>
+        <input type="number" id="costoTransporte" min="0">
+      </div>
+      <div class="gasto-item">
+        <label for="otrosGastos">Otros gastos:</label>
+        <input type="number" id="otrosGastos" min="0">
       </div>
     </div>
 
-    <p id="totalGastos">Total Gastado: $0.00</p>
-    
-    <button id="guardarGastos">Guardar Gastos</button>
-
-    <canvas id="graficoGastos" width="300" height="300"></canvas>
-    <div id="leyenda"></div>
-
-    <button id="descargarGrafico">Descargar Gráfico</button>
-    <button id="descargarTXT">Descargar TXT</button>
-
-  </div>
-  
-  <!-- Pestaña de análisis -->
-  <div id="analisis" class="tabcontent">
-    <h3>Análisis de Presupuesto</h3>
-    <div id="resumen-presupuesto">
-      <p><strong>Ingreso total:</strong> <span id="total-ingreso">$0</span></p>
-      <p><strong>Gastos esenciales:</strong> <span id="total-esencial">$0</span></p>
-      <p><strong>Gastos importantes:</strong> <span id="total-importante">$0</span></p>
-      <p><strong>Gastos opcionales:</strong> <span id="total-opcional">$0</span></p>
-      <p><strong>Total gastos:</strong> <span id="total-gastos">$0</span></p>
-      <hr>
-      <p><strong>Dinero disponible:</strong> <span id="dinero-disponible">$0</span></p>
+    <!-- Margen -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Margen de ganancia</h4>
+      <div class="gasto-item">
+        <label for="margenGanancia">Margen (%):</label>
+        <input type="number" id="margenGanancia" min="0" value="30">
+      </div>
     </div>
-    
-    <div id="resultado-compra">
-      <h3>Análisis de Compra</h3>
-      <p id="mensaje-compra"></p>
-      <div id="opciones-compra"></div>
+
+    <!-- Desglose de costos -->
+    <div id="resultado-cotizacion" class="colapsable cerrada">
+      <h4>Desglose de costos</h4>
+      <p><strong>Costo total:</strong> <span id="cotiz-costo-total">$0</span></p>
+      <p><strong>Ganancia (<span id="cotiz-margen-pct">30</span>%):</strong> <span id="cotiz-ganancia">$0</span></p>
     </div>
+
+    <!-- Guardar este presupuesto con nombre -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Guardar este presupuesto</h4>
+      <div class="gasto-item">
+        <label for="nombrePresupuesto">Nombre:</label>
+        <input type="text" id="nombrePresupuesto" placeholder="Ej: DJ set 4 horas">
+      </div>
+      <p id="estado-edicion" class="frase-arriero"></p>
+      <button id="guardarPresupuesto" class="btn-principal">Guardar presupuesto</button>
+      <button id="nuevoPresupuesto" class="btn-secundario">Empezar uno nuevo</button>
+    </div>
+
+    <!-- Presupuestos guardados -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Mis presupuestos</h4>
+      <div id="presupuestos-container"></div>
+      <p id="sin-presupuestos" class="frase-arriero">Todavía no ha guardado ninguno, mijo.</p>
+    </div>
+
+    </div><!-- /#panel-calculo -->
   </div>
-  
-  <script src="popup.js"></script>
+
+  <!-- ===================== VISTA 2 (placeholder) ===================== -->
+  <div id="vista2" class="vista">
+    <p class="vista-placeholder">Próximamente, mijo 🐴</p>
+  </div>
+
+  <!-- ===================== VISTA 3 (placeholder) ===================== -->
+  <div id="vista3" class="vista">
+    <p class="vista-placeholder">Próximamente, mijo 🐴</p>
+  </div>
+
+  <script src="logic_quotation.js"></script>
 
 </body>
 </html>
