@@ -1,0 +1,119 @@
+/* ===========================================================
+   ARRIERO'S WEALTH — Capa de magia (estilo Encanto / Macondo)
+   Mariposas amarillas volando + chispas doradas.
+   Todo es decorativo: pointer-events:none para no estorbar.
+   Se puede quitar borrando magic.css y magic.js del popup.html
+   =========================================================== */
+
+/* Lienzo donde viven las mariposas y las chispas.
+   z-index: -1 -> detrás de todo el contenido, pero por encima
+   del fondo (la imagen está en body::before con z-index: -2). */
+#capa-magica {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;   /* nunca bloquea clics ni inputs */
+}
+
+/* ---------- Mariposas ---------- */
+.mariposa {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 18px;
+  opacity: 0.55;          /* discretas: se insinúan, no distraen */
+  will-change: transform;
+}
+.mariposa svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  /* Plano (sin sombra 3D): solo un difuminado suave para el aire mágico */
+  filter: blur(1.1px);
+}
+
+/* Aleteo: las alas se "cierran" hacia el centro del cuerpo */
+.mariposa .alas {
+  transform-box: view-box;
+  transform-origin: 60px 50px;
+  animation: aleteo 0.28s ease-in-out infinite alternate;
+}
+@keyframes aleteo {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0.25); }
+}
+
+/* Balanceo del cuerpo: se mece suave (vida propia, no rígida) */
+.mariposa .cuerpo {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 58%;
+  animation: balanceo 1.6s ease-in-out infinite;
+}
+@keyframes balanceo {
+  0%, 100% { transform: rotate(-7deg) translateY(0); }
+  50%      { transform: rotate(7deg)  translateY(-2px); }
+}
+
+/* ---------- Chispas: brasas/luciérnagas con brillo de fuego ---------- */
+.chispa {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  /* núcleo blanco-cálido que se funde en naranja fuego */
+  background: radial-gradient(circle,
+              #FFFBEA 0%,
+              #FFD25A 35%,
+              #F2960F 65%,
+              rgba(232, 116, 44, 0) 80%);
+  /* resplandor sutil que palpita en @keyframes */
+  box-shadow:
+    0 0 4px 1px rgba(242, 178, 51, 0.6),
+    0 0 8px 3px rgba(232, 116, 44, 0.3);
+  opacity: 0;
+  will-change: transform, opacity, box-shadow;
+  animation: brasa 2.6s ease-in-out forwards;
+}
+/* Sube flotando, titila y el halo late como ascua viva (discreto) */
+@keyframes brasa {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) translateY(0);
+    box-shadow: 0 0 3px 1px rgba(242, 178, 51, 0.4),
+                0 0 6px 2px rgba(232, 116, 44, 0.2);
+  }
+  20% {
+    opacity: 0.7;
+    transform: scale(1.05) translateY(-6px);
+    box-shadow: 0 0 6px 2px rgba(255, 210, 90, 0.7),
+                0 0 12px 4px rgba(232, 116, 44, 0.35);
+  }
+  45% {
+    opacity: 0.55;
+    transform: scale(0.8) translateY(-14px);
+    box-shadow: 0 0 4px 1px rgba(242, 178, 51, 0.5),
+                0 0 8px 3px rgba(232, 116, 44, 0.25);
+  }
+  70% {
+    opacity: 0.65;
+    transform: scale(0.95) translateY(-22px);
+    box-shadow: 0 0 5px 2px rgba(255, 210, 90, 0.6),
+                0 0 11px 4px rgba(232, 116, 44, 0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(-32px);
+    box-shadow: 0 0 2px 1px rgba(242, 178, 51, 0.25),
+                0 0 4px 2px rgba(232, 116, 44, 0.12);
+  }
+}
+
+/* Respeta a quien prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .mariposa .alas { animation: none; }
+  .chispa { animation-duration: 3.5s; }
+}

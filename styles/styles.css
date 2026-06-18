@@ -1,0 +1,336 @@
+/* ===========================================================
+   ARRIERO'S WEALTH — Interfaz tipo tarjeta costumbrista
+   Fondo: paisaje paisa ampliado. Fuente display: ScothBrace.
+   =========================================================== */
+
+@font-face {
+  font-family: 'ScothBrace';
+  src: url('../assets/fonts/ScothBrace-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'LEMONMILK-Light';
+  src: url('../assets/fonts/LEMONMILK-Light.otf') format('truetype');
+}
+@font-face {
+  font-family: 'LEMONMILK-Medium';
+  src: url('../assets/fonts/LEMONMILK-Medium.otf') format('truetype');
+}
+
+:root {
+  --crema:        #FBF5E2;
+  --crema-trans:  rgba(251, 245, 226, 0.92);
+  --verde-oscuro: #14532D;
+  --verde:        #2E7D40;
+  --naranja:      #E8742C;
+  --naranja-osc:  #C85E1E;
+  --dorado:       #F2B233;
+  --dorado-osc:   #E0991C;
+  --marron:       #7A4A22;
+  --terracota:    #C0392B;
+  --texto:        #2B2118;
+  --sombra:       0 2px 8px rgba(43, 33, 24, 0.25);
+}
+
+body {
+  position: relative;
+  width: 480px;
+  margin: 0;
+  padding: 0 0 18px;
+  color: var(--texto);
+  font-family: 'LEMONMILK-Light', sans-serif;
+  background: var(--crema);
+
+  /* Borde de la app (recto, sin esquinas redondas) */
+  border: 6px solid var(--naranja);
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+/* Paisaje de fondo, desenfocado (capa detrás del contenido) */
+body::before {
+  content: '';
+  position: fixed;
+  top: -16px;
+  left: -16px;
+  width: 512px;            /* tamaño fijo: la imagen no se reescala al expandir */
+  height: 632px;           /* alto fijo (mayor que la ventana) -> imagen estática */
+  z-index: -2;
+  background-image: url('../assets/images/ChatGPT Image Sep 20, 2025, 08_48_10 AM.png');
+  background-size: cover;
+  background-position: left 8%;
+  background-repeat: no-repeat;
+  filter: blur(2px);
+}
+
+/* Capa semitransparente para mejorar la legibilidad */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(155, 155, 155, 0.066);
+}
+
+/* ---------- Navegación: estrellas ---------- */
+.estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 88px;
+  padding: 14px 0 6px;
+}
+.estrella {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+  opacity: 0.55;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.estrella img { width: 28px; height: 28px; display: block; object-fit: contain; }
+.estrella:hover { opacity: 0.85; transform: scale(1.1); }
+.estrella.activa { opacity: 1; transform: scale(1.25); }
+
+/* ---------- Encabezado / logo ---------- */
+.app-header { text-align: center; padding: 0 16px; }
+.app-logo { display: block; width: 82%; max-width: 1030px; margin: 0 auto 6px; }
+
+/* ---------- Caja del resultado (¿cuánto cobrar?) ---------- */
+.jornal-box {
+  margin: 10px 18px 16px;
+  padding: 12px 18px;
+  background: var(--dorado);
+  border-radius: 30px;
+  box-shadow: var(--sombra);
+  text-align: center;
+
+}
+.jornal-label {
+  display: block;
+  font-family: 'ScothBrace', serif;
+  font-size: 1rem;
+  color: var(--texto);
+  letter-spacing: 1px;
+}
+.jornal-num {
+  display: block;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.5rem;
+  color: var(--texto);
+  line-height: 1.1;
+}
+
+/* ---------- Selector de moneda (pastilla compacta, arriba del precio) ---------- */
+.selector-moneda-wrap {
+  display: flex;
+  justify-content: flex-end;   /* discreto, pegado a la derecha */
+  margin: 0 18px 6px;
+}
+.selector-moneda-wrap select {
+  padding: 2px 6px;
+  border: 1.5px solid var(--naranja);
+  border-radius: 12px;
+  background: var(--crema);
+  color: var(--texto);
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.selector-moneda-wrap select:hover { border-color: var(--naranja-osc); }
+
+/* ---------- Botón maestro (abre/cierra todo el cálculo) ---------- */
+.master-toggle-wrap { text-align: center; margin: 2px 0 14px; }
+.master-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.8rem;
+  line-height: 1;
+  background: var(--dorado);
+  color: var(--texto);
+  box-shadow: var(--sombra);
+}
+.master-btn:hover { background: var(--dorado-osc); }
+
+.master-contenido.cerrado { display: none; }
+
+/* ---------- Vistas (estrellas cambian entre ellas) ---------- */
+.vista { display: none; padding: 0 12px; }
+.vista.activa { display: block; }
+
+.vista-placeholder {
+  text-align: center;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.3rem;
+  color: var(--crema);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  padding: 60px 20px;
+}
+
+h3 {
+  font-family: 'ScothBrace', serif;
+  color: var(--crema);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  text-align: center;
+  font-size: 1.4rem;
+  margin: 6px 0 12px;
+}
+h4 {
+  font-family: 'ScothBrace', serif;
+  color: var(--texto);
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+  border-bottom: 2px solid var(--dorado);
+  padding-bottom: 4px;
+}
+
+/* ---------- Tarjetas de sección ---------- */
+.categoria-gastos {
+  background: var(--crema-trans);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--sombra);
+  backdrop-filter: blur(1px);
+}
+
+/* Secciones expandibles/contraíbles */
+.colapsable h4 {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  margin-bottom: 0;
+}
+.colapsable h4::after {
+  content: '\2212';            /* − */
+  color: var(--naranja);
+  font-size: 1.2rem;
+  margin-left: 8px;
+}
+.colapsable.cerrada h4::after { content: '\002B'; }  /* + */
+.colapsable.cerrada h4 { border-bottom: none; padding-bottom: 0; }
+.colapsable > *:not(h4) { margin-top: 8px; }
+.colapsable.cerrada > *:not(h4) { display: none; }
+
+.gasto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+  font-size: 0.82rem;
+}
+.gasto-item label { flex: 1; padding-right: 8px; }
+
+input, select {
+  font-family: 'LEMONMILK-Light', sans-serif;
+  border: 1px solid var(--marron);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #fff;
+  color: var(--texto);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 2px rgba(232, 116, 44, 0.25);
+}
+.gasto-item input, .gasto-item select { width: 110px; }
+
+/* ---------- Botones ---------- */
+button {
+  font-family: 'ScothBrace', serif;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  background: var(--naranja);
+  color: #fff;
+  transition: background 0.2s, transform 0.05s;
+}
+button:hover { background: var(--naranja-osc); }
+button:active { transform: translateY(1px); }
+
+.btn-principal {
+  display: block;
+  width: 100%;
+  background: var(--verde);
+  margin: 10px 0;
+}
+.btn-principal:hover { background: var(--verde-oscuro); }
+
+.btn-secundario { background: var(--dorado); color: var(--texto); }
+.btn-secundario:hover { background: var(--dorado-osc); }
+
+.gasto-item button, .btn-eliminar {
+  margin-left: 6px;
+  padding: 3px 9px;
+  font-size: 0.8rem;
+  background: var(--terracota);
+}
+.gasto-item button:hover, .btn-eliminar:hover { background: #9c2c20; }
+
+/* ---------- Formulario para agregar ítems ---------- */
+.gasto-personalizado-form {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(242, 178, 51, 0.35);
+  border: 1px dashed var(--marron);
+  border-radius: 10px;
+}
+
+/* ---------- Listas ---------- */
+#materiales-container, #herramientas-container, #presupuestos-container {
+  max-height: 170px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+#subtotalMateriales, #subtotalHerramientas {
+  font-size: 0.82rem;
+  text-align: right;
+  margin: 6px 0 0;
+  color: var(--texto);
+}
+
+/* Tarjeta de presupuesto guardado */
+.presupuesto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--verde);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-size: 0.82rem;
+}
+.presupuesto-item .info { flex: 1; }
+.presupuesto-item .nombre { font-family: 'ScothBrace', serif; color: var(--texto); font-size: 1rem; }
+.presupuesto-item .detalle { color: var(--marron); font-size: 0.74rem; }
+.presupuesto-item button { padding: 4px 8px; font-size: 0.8rem; }
+.presupuesto-item .btn-cargar { background: var(--verde); }
+.presupuesto-item .btn-cargar:hover { background: var(--verde-oscuro); }
+
+/* ---------- Desglose de costos ---------- */
+#resultado-cotizacion {
+  background: var(--crema-trans);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--sombra);
+}
+#resultado-cotizacion p { margin: 5px 0; font-size: 0.85rem; }
+#resultado-cotizacion hr { border: none; border-top: 1px solid var(--dorado); margin: 8px 0; }
+
+.frase-arriero {
+  font-family: 'ScothBrace', serif;
+  text-align: center;
+  color: var(--marron);
+  font-size: 0.85rem;
+  margin: 6px 0 0;
+}

@@ -1,0 +1,21 @@
+# Archivos comprimidos (no van al repo)
+*.zip
+*.rar
+*.7z
+
+# Basura del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Carpetas de editores / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Dependencias (por si en el futuro se usa npm)
+node_modules/
+
+# Logs y temporales
+*.log
+*.tmp
