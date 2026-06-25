@@ -38,6 +38,13 @@
     <span class="jornal-num" id="cotiz-precio-venta">$0</span>
   </div>
 
+  <!-- Refrán paisa: sabiduría del arriero. Cambia al tocarlo.
+       El texto lo carga refranes.js desde data/refranes.json -->
+  <div id="refran-arriero" class="refran-arriero" title="Toca para otra frase" role="button" tabindex="0">
+    <span class="refran-icono">🐴</span>
+    <span class="refran-texto"></span>
+  </div>
+
   <!-- ===================== VISTA 1: COTIZAR ===================== -->
   <div id="cotizar" class="vista activa">
 
@@ -54,11 +61,11 @@
       <h4>Tu tarifa por hora</h4>
       <div class="gasto-item">
         <label for="ingresoDeseado">Ingreso que quieres al mes:</label>
-        <input type="number" id="ingresoDeseado" min="0" placeholder="3000000">
+        <input type="text" inputmode="numeric" class="input-num input-money" id="ingresoDeseado" placeholder="3.000.000">
       </div>
       <div class="gasto-item">
         <label for="horasFacturables">Horas facturables al mes:</label>
-        <input type="number" id="horasFacturables" min="0" placeholder="120">
+        <input type="number" inputmode="numeric" class="input-num" id="horasFacturables" min="0" placeholder="120">
       </div>
       <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
     </div>
@@ -68,7 +75,7 @@
       <h4>Mano de obra (tu tiempo)</h4>
       <div class="gasto-item">
         <label for="horasTrabajo">Horas de este trabajo:</label>
-        <input type="number" id="horasTrabajo" min="0" placeholder="0">
+        <input type="number" inputmode="numeric" class="input-num" id="horasTrabajo" min="0" placeholder="0">
       </div>
       <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
     </div>
@@ -84,13 +91,14 @@
         </div>
         <div class="gasto-item">
           <label for="material-costo">Costo unitario:</label>
-          <input type="number" id="material-costo" min="0">
+          <input type="text" inputmode="numeric" class="input-num input-money" id="material-costo">
         </div>
         <div class="gasto-item">
           <label for="material-cantidad">Cantidad:</label>
-          <input type="number" id="material-cantidad" min="1" value="1">
+          <input type="number" inputmode="numeric" class="input-num" id="material-cantidad" min="1" value="1">
         </div>
         <button id="agregar-material">Agregar material</button>
+        <p class="hint">Presiona Enter para agregar</p>
       </div>
       <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
     </div>
@@ -106,11 +114,11 @@
         </div>
         <div class="gasto-item">
           <label for="herramienta-costo">Valor inicial:</label>
-          <input type="number" id="herramienta-costo" min="0">
+          <input type="text" inputmode="numeric" class="input-num input-money" id="herramienta-costo">
         </div>
         <div class="gasto-item">
           <label for="herramienta-anios">Años de vida:</label>
-          <input type="number" id="herramienta-anios" min="0.5" step="0.5" placeholder="Ej: 5">
+          <input type="number" inputmode="numeric" class="input-num" id="herramienta-anios" min="0.5" step="0.5" placeholder="Ej: 5">
         </div>
         <div class="gasto-item">
           <label for="herramienta-uso">Nivel de uso:</label>
@@ -121,6 +129,7 @@
           </select>
         </div>
         <button id="agregar-herramienta">Agregar herramienta</button>
+        <p class="hint">Presiona Enter para agregar</p>
       </div>
       <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
     </div>
@@ -130,11 +139,11 @@
       <h4>Otros costos</h4>
       <div class="gasto-item">
         <label for="costoTransporte">Transporte:</label>
-        <input type="number" id="costoTransporte" min="0">
+        <input type="text" inputmode="numeric" class="input-num input-money" id="costoTransporte">
       </div>
       <div class="gasto-item">
         <label for="otrosGastos">Otros gastos:</label>
-        <input type="number" id="otrosGastos" min="0">
+        <input type="text" inputmode="numeric" class="input-num input-money" id="otrosGastos">
       </div>
     </div>
 
@@ -143,7 +152,13 @@
       <h4>Margen de ganancia</h4>
       <div class="gasto-item">
         <label for="margenGanancia">Margen (%):</label>
-        <input type="number" id="margenGanancia" min="0" value="30">
+        <input type="number" inputmode="numeric" class="input-num" id="margenGanancia" min="0" value="30">
+      </div>
+      <div class="margen-chips" id="margen-chips">
+        <button type="button" class="chip-margen" data-margen="20">20%</button>
+        <button type="button" class="chip-margen" data-margen="30">30%</button>
+        <button type="button" class="chip-margen" data-margen="40">40%</button>
+        <button type="button" class="chip-margen" data-margen="50">50%</button>
       </div>
     </div>
 
@@ -187,6 +202,7 @@
   </div>
 
   <script src="src/logic_quotation.js"></script>
+  <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
 
 </body>

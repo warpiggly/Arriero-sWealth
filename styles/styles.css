@@ -120,6 +120,49 @@ body::after {
   line-height: 1.1;
 }
 
+/* ---------- Refrán paisa (bajo el precio, cambia al tocarlo) ---------- */
+.refran-arriero {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 18px 16px;
+  padding: 10px 15px;
+  background: rgba(251, 245, 226, 0.86);
+  border: 1px solid rgba(242, 178, 51, 0.55);
+  border-radius: 14px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s ease, transform 0.05s, border-color 0.2s;
+}
+.refran-arriero:hover { border-color: var(--dorado-osc); }
+.refran-arriero:active { transform: translateY(1px); }
+.refran-arriero:focus-visible { box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.4); }
+.refran-icono { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+.refran-texto {
+  font-family: 'ScothBrace', serif;
+  font-size: 0.9rem;
+  line-height: 1.34;
+  color: var(--texto);
+  font-style: italic;
+}
+
+/* Cursor de tecleo (estilo ChatGPT): solo visible mientras escribe */
+.refran-arriero.escribiendo .refran-texto::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--naranja);
+  animation: refran-cursor 0.7s step-end infinite;
+}
+@keyframes refran-cursor {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
 /* ---------- Selector de moneda (pastilla compacta, arriba del precio) ---------- */
 .selector-moneda-wrap {
   display: flex;
@@ -179,21 +222,30 @@ h3 {
 }
 h4 {
   font-family: 'ScothBrace', serif;
-  color: var(--texto);
-  font-size: 1.1rem;
+  color: var(--verde-oscuro);
+  font-size: 1.06rem;
+  letter-spacing: 0.3px;
   margin: 0 0 8px;
-  border-bottom: 2px solid var(--dorado);
-  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(122, 74, 34, 0.14);
+  padding-bottom: 6px;
 }
+
+/* ===========================================================
+   PANEL DE DATOS — estilo empresarial, limpio y rápido
+   (Solo afecta lo que está dentro de #panel-calculo. El fondo,
+    logo, estrellas, precio y mariposas quedan intactos.)
+   =========================================================== */
 
 /* ---------- Tarjetas de sección ---------- */
 .categoria-gastos {
-  background: var(--crema-trans);
+  background: #FCFAF2;                 /* blanco cálido, sólido y nítido */
+  border: 1px solid rgba(122, 74, 34, 0.12);
+  border-left: 3px solid var(--dorado); /* acento cálido discreto */
   border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 14px;
-  box-shadow: var(--sombra);
-  backdrop-filter: blur(1px);
+  padding: 13px 15px;
+  margin-bottom: 11px;
+  box-shadow: 0 1px 2px rgba(43, 33, 24, 0.06),
+              0 6px 16px rgba(43, 33, 24, 0.07);
 }
 
 /* Secciones expandibles/contraíbles */
@@ -220,10 +272,15 @@ h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 6px 0;
+  margin: 9px 0;
   font-size: 0.82rem;
 }
-.gasto-item label { flex: 1; padding-right: 8px; }
+.gasto-item label {
+  flex: 1;
+  padding-right: 10px;
+  color: #5a4a36;
+  font-family: 'LEMONMILK-Medium', sans-serif;
+}
 
 input, select {
   font-family: 'LEMONMILK-Light', sans-serif;
@@ -240,6 +297,26 @@ input:focus, select:focus {
   box-shadow: 0 0 0 2px rgba(232, 116, 44, 0.25);
 }
 .gasto-item input, .gasto-item select { width: 110px; }
+
+/* ---------- Inputs dentro del panel (más legibles y consistentes) ---------- */
+#panel-calculo input,
+#panel-calculo select {
+  border: 1px solid #d9cdb0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.84rem;
+  background: #fff;
+}
+#panel-calculo input:focus,
+#panel-calculo select:focus {
+  border-color: var(--dorado-osc);
+  box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.28);
+}
+#panel-calculo .gasto-item input,
+#panel-calculo .gasto-item select { width: 132px; }
+
+/* Cifras alineadas a la derecha = se leen como en una factura */
+.input-num { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ---------- Botones ---------- */
 button {
@@ -278,10 +355,48 @@ button:active { transform: translateY(1px); }
 /* ---------- Formulario para agregar ítems ---------- */
 .gasto-personalizado-form {
   margin-top: 10px;
-  padding: 10px;
-  background: rgba(242, 178, 51, 0.35);
-  border: 1px dashed var(--marron);
+  padding: 12px;
+  background: rgba(46, 125, 64, 0.06);
+  border: 1px solid rgba(46, 125, 64, 0.18);
   border-radius: 10px;
+}
+/* Botón "Agregar..." = acción principal del mini-formulario: ancho completo */
+.gasto-personalizado-form > button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: var(--verde);
+}
+.gasto-personalizado-form > button:hover { background: var(--verde-oscuro); }
+.gasto-personalizado-form .hint {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: var(--marron);
+  text-align: center;
+  opacity: 0.85;
+}
+
+/* ---------- Atajos de margen (chips rápidos) ---------- */
+.margen-chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip-margen {
+  flex: 1;
+  padding: 7px 0;
+  font-family: 'LEMONMILK-Light', sans-serif;
+  font-size: 0.82rem;
+  background: #fff;
+  color: var(--texto);
+  border: 1px solid var(--dorado);
+  border-radius: 999px;
+}
+.chip-margen:hover { background: rgba(242, 178, 51, 0.35); }
+.chip-margen.activo {
+  background: var(--dorado);
+  border-color: var(--dorado-osc);
+  font-family: 'LEMONMILK-Medium', sans-serif;
 }
 
 /* ---------- Listas ---------- */
@@ -303,11 +418,13 @@ button:active { transform: translateY(1px); }
   justify-content: space-between;
   align-items: center;
   background: #fff;
-  border: 1px solid var(--verde);
+  border: 1px solid rgba(122, 74, 34, 0.14);
+  border-left: 3px solid var(--verde);
   border-radius: 10px;
-  padding: 8px 10px;
-  margin: 6px 0;
+  padding: 9px 11px;
+  margin: 7px 0;
   font-size: 0.82rem;
+  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
 }
 .presupuesto-item .info { flex: 1; }
 .presupuesto-item .nombre { font-family: 'ScothBrace', serif; color: var(--texto); font-size: 1rem; }
@@ -318,13 +435,23 @@ button:active { transform: translateY(1px); }
 
 /* ---------- Desglose de costos ---------- */
 #resultado-cotizacion {
-  background: var(--crema-trans);
+  background: #FCFAF2;
+  border: 1px solid rgba(122, 74, 34, 0.12);
+  border-left: 3px solid var(--verde);
   border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--sombra);
+  padding: 13px 16px;
+  margin-bottom: 11px;
+  box-shadow: 0 1px 2px rgba(43, 33, 24, 0.06),
+              0 6px 16px rgba(43, 33, 24, 0.07);
 }
-#resultado-cotizacion p { margin: 5px 0; font-size: 0.85rem; }
+#resultado-cotizacion p {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 7px 0;
+  font-size: 0.85rem;
+}
+#resultado-cotizacion p span:last-child { font-variant-numeric: tabular-nums; }
 #resultado-cotizacion hr { border: none; border-top: 1px solid var(--dorado); margin: 8px 0; }
 
 .frase-arriero {

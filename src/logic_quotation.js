@@ -61,7 +61,74 @@ document.addEventListener('DOMContentLoaded', function() {
       btnMaestro.textContent = cerrado ? '+' : '−'; // + / −
     });
   }
+
+  // ----- Captura rápida -----
+
+  // Campos de dinero: mostrar separadores de miles (3.000.000) para leerlos
+  // como en una factura. Al enfocar se muestran solo los dígitos (editar fácil);
+  // al salir se vuelven a formatear. valorNumerico() ya quita los puntos al calcular.
+  document.querySelectorAll('.input-money').forEach(el => {
+    el.addEventListener('focus', () => { el.value = soloDigitos(el.value); });
+    el.addEventListener('blur', () => { formatearInputMoneda(el); });
+    formatearInputMoneda(el); // formatear el valor inicial (si viene precargado)
+  });
+
+  // Enter dentro de un mini-formulario = "Agregar" (sin tocar el mouse)
+  enterParaAgregar(['material-nombre', 'material-costo', 'material-cantidad'],
+                   agregarMaterialCotizacion);
+  enterParaAgregar(['herramienta-nombre', 'herramienta-costo', 'herramienta-anios'],
+                   agregarHerramientaCotizacion);
+
+  // Chips de margen: fijar 20/30/40/50% de un toque
+  document.querySelectorAll('.chip-margen').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const campo = document.getElementById('margenGanancia');
+      if (campo) campo.value = chip.dataset.margen;
+      recalcularCotizacion();
+      marcarChipMargen();
+    });
+  });
+  const campoMargen = document.getElementById('margenGanancia');
+  if (campoMargen) campoMargen.addEventListener('input', marcarChipMargen);
+  marcarChipMargen();
 });
+
+// Deja solo los dígitos de un texto ("3.000.000" -> "3000000")
+function soloDigitos(texto) {
+  return String(texto).replace(/[^\d]/g, '');
+}
+
+// Formatea el contenido de un input de dinero con separadores de miles (es-CO).
+// Se usan puntos como separador, que es justo lo que valorNumerico() sabe quitar.
+function formatearInputMoneda(el) {
+  const digitos = soloDigitos(el.value);
+  el.value = digitos ? parseInt(digitos, 10).toLocaleString('es-CO') : '';
+}
+
+// Reformatea todos los campos de dinero (tras cargar datos en el formulario)
+function formatearTodosLosMontos() {
+  document.querySelectorAll('.input-money').forEach(formatearInputMoneda);
+}
+
+// Conecta el Enter de varios campos a una acción de "agregar"
+function enterParaAgregar(ids, accion) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); accion(); }
+    });
+  });
+}
+
+// Resalta el chip que coincide con el margen escrito (o ninguno si es otro valor)
+function marcarChipMargen() {
+  const campo = document.getElementById('margenGanancia');
+  const actual = campo ? String(parseInt(campo.value, 10)) : '';
+  document.querySelectorAll('.chip-margen').forEach(chip => {
+    chip.classList.toggle('activo', chip.dataset.margen === actual);
+  });
+}
 
 // Muestra la vista indicada y marca la estrella activa
 function cambiarVista(idVista, estrella) {
@@ -199,6 +266,8 @@ function aplicarDatosEnFormulario(c) {
 
   renderMateriales();
   renderHerramientas();
+  formatearTodosLosMontos();   // mostrar 3.000.000 en los campos de dinero
+  marcarChipMargen();          // resaltar el chip de margen si coincide
   recalcularCotizacion();
 }
 
