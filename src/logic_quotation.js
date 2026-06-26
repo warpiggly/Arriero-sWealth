@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Recalcular automáticamente al escribir en cualquier campo numérico
   ['ingresoDeseado', 'horasFacturables', 'horasTrabajo', 'costoTransporte',
-   'otrosGastos', 'margenGanancia'].forEach(id => {
+   'otrosGastos', 'margenGanancia', 'descuentoPorcentaje'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', recalcularCotizacion);
   });
@@ -138,6 +138,10 @@ function cambiarVista(idVista, estrella) {
 
   document.querySelectorAll('.estrella').forEach(e => e.classList.remove('activa'));
   if (estrella) estrella.classList.add('activa');
+
+  // En "Mi Despensa" la cabecera se compacta (barra: logo · precio · refrán).
+  // La animación y el nuevo layout los hace el CSS al ver esta clase en <body>.
+  document.body.classList.toggle('modo-despensa', idVista === 'vista2');
 }
 
 // ----------------------------------------------------------------
@@ -263,6 +267,7 @@ function aplicarDatosEnFormulario(c) {
   setVal('costoTransporte', c.costoTransporte);
   setVal('otrosGastos', c.otrosGastos);
   setVal('margenGanancia', c.margenGanancia !== undefined ? c.margenGanancia : 30);
+  setVal('descuentoPorcentaje', c.descuentoPorcentaje !== undefined ? c.descuentoPorcentaje : 0);
 
   renderMateriales();
   renderHerramientas();
@@ -286,6 +291,7 @@ function obtenerCotizacionActual() {
     costoTransporte: valorNumerico('costoTransporte'),
     otrosGastos: valorNumerico('otrosGastos'),
     margenGanancia: valorNumerico('margenGanancia'),
+    descuentoPorcentaje: valorNumerico('descuentoPorcentaje'),
     materiales: materialesCotizacion,
     herramientas: herramientasCotizacion
   };
@@ -318,7 +324,9 @@ function precioVentaDe(c) {
   const mat = (c.materiales || []).reduce((s, m) => s + m.costo * m.cantidad, 0);
   const her = (c.herramientas || []).reduce((s, h) => s + costoDesgasteHerramienta(h, c.horasTrabajo || 0), 0);
   const costoTotal = manoObra + mat + her + (c.costoTransporte || 0) + (c.otrosGastos || 0);
-  return costoTotal * (1 + (c.margenGanancia || 0) / 100);
+  const precioConMargen = costoTotal * (1 + (c.margenGanancia || 0) / 100);
+  // El descuento se aplica al final, sobre el precio ya con margen.
+  return precioConMargen * (1 - (c.descuentoPorcentaje || 0) / 100);
 }
 
 function renderPresupuestos() {
@@ -419,16 +427,72 @@ function renderMateriales() {
   if (!cont) return;
   cont.innerHTML = '';
   materialesCotizacion.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'gasto-item';
     const total = m.costo * m.cantidad;
-    div.innerHTML = `<span>${m.nombre} — ${formatearDinero(m.costo)} x ${m.cantidad} = ${formatearDinero(total)}</span>`;
-    const btn = document.createElement('button');
-    btn.textContent = 'X';
-    btn.addEventListener('click', () => eliminarMaterial(m.id));
-    div.appendChild(btn);
+    const bloqueado = !!m.bloqueado;
+
+    const div = document.createElement('div');
+    div.className = 'item-cotiz' + (bloqueado ? ' bloqueado' : '');
+
+    div.innerHTML =
+      `<div class="item-nombre">${m.nombre}</div>` +
+      `<div class="item-campos">` +
+        `<label>Costo <input type="text" inputmode="numeric" class="input-num item-costo"></label>` +
+        `<label>Cant. <input type="number" min="1" class="input-num item-cantidad"></label>` +
+      `</div>` +
+      `<div class="item-total">= ${formatearDinero(total)}</div>` +
+      `<div class="item-acciones"></div>`;
+
+    // Valores actuales en los campos (el costo con separadores de miles)
+    const inCosto = div.querySelector('.item-costo');
+    const inCant = div.querySelector('.item-cantidad');
+    inCosto.value = m.costo ? Math.round(m.costo).toLocaleString('es-CO') : '';
+    inCant.value = m.cantidad;
+
+    // Editar solo este presupuesto (no toca lo guardado en la despensa)
+    inCosto.addEventListener('input', () => {
+      m.costo = parseInt(soloDigitos(inCosto.value), 10) || 0;
+      div.querySelector('.item-total').textContent = '= ' + formatearDinero(m.costo * m.cantidad);
+      recalcularCotizacion();
+    });
+    inCosto.addEventListener('focus', () => { inCosto.value = soloDigitos(inCosto.value); });
+    inCosto.addEventListener('blur', () => formatearInputMoneda(inCosto));
+    inCant.addEventListener('input', () => {
+      m.cantidad = parseInt(inCant.value, 10) || 1;
+      div.querySelector('.item-total').textContent = '= ' + formatearDinero(m.costo * m.cantidad);
+      recalcularCotizacion();
+    });
+
+    // Candado: al bloquear no se puede editar ni eliminar
+    inCosto.disabled = bloqueado;
+    inCant.disabled = bloqueado;
+
+    const acciones = div.querySelector('.item-acciones');
+    const btnLock = document.createElement('button');
+    btnLock.className = 'btn-lock' + (bloqueado ? ' activo' : '');
+    btnLock.textContent = bloqueado ? '🔒' : '🔓';
+    btnLock.title = bloqueado ? 'Desbloquear' : 'Bloquear (no se podrá editar ni eliminar)';
+    btnLock.addEventListener('click', () => toggleBloqueoMaterial(m.id));
+    acciones.appendChild(btnLock);
+
+    if (!bloqueado) {
+      const btnX = document.createElement('button');
+      btnX.className = 'btn-eliminar';
+      btnX.textContent = 'X';
+      btnX.addEventListener('click', () => eliminarMaterial(m.id));
+      acciones.appendChild(btnX);
+    }
+
     cont.appendChild(div);
   });
+}
+
+// Bloquea/desbloquea un material del presupuesto (candado)
+function toggleBloqueoMaterial(id) {
+  const m = materialesCotizacion.find(x => x.id === id);
+  if (!m) return;
+  m.bloqueado = !m.bloqueado;
+  renderMateriales();
+  recalcularCotizacion();
 }
 
 function agregarMaterialCotizacion() {
@@ -472,19 +536,79 @@ function renderHerramientas() {
   if (!cont) return;
   cont.innerHTML = '';
   herramientasCotizacion.forEach(h => {
+    const bloqueado = !!h.bloqueado;
+
     const div = document.createElement('div');
-    div.className = 'gasto-item';
-    const anios = h.anios ? ` · ${h.anios} años` : '';
-    const detalle = (h.vidaUtil > 0)
-      ? `${h.nombre} — valor ${formatearDinero(h.costo)}${anios} · desgaste ${formatearDinero(desgastePorHora(h))}/h`
-      : `${h.nombre} — ${formatearDinero(h.costo)}`;
-    div.innerHTML = `<span>${detalle}</span>`;
-    const btn = document.createElement('button');
-    btn.textContent = 'X';
-    btn.addEventListener('click', () => eliminarHerramienta(h.id));
-    div.appendChild(btn);
+    div.className = 'item-cotiz' + (bloqueado ? ' bloqueado' : '');
+
+    div.innerHTML =
+      `<div class="item-nombre">${h.nombre}</div>` +
+      `<div class="item-campos">` +
+        `<label>Valor <input type="text" inputmode="numeric" class="input-num item-costo"></label>` +
+        `<label>Años <input type="number" min="0.5" step="0.5" class="input-num item-anios"></label>` +
+      `</div>` +
+      `<div class="item-total"></div>` +
+      `<div class="item-acciones"></div>`;
+
+    const inCosto = div.querySelector('.item-costo');
+    const inAnios = div.querySelector('.item-anios');
+    const elTotal = div.querySelector('.item-total');
+    inCosto.value = h.costo ? Math.round(h.costo).toLocaleString('es-CO') : '';
+    inAnios.value = h.anios || '';
+
+    // Muestra el desgaste por hora (lo que de verdad se cobra por trabajo)
+    const pintarDetalle = () => {
+      elTotal.textContent = (h.vidaUtil > 0)
+        ? `desgaste ${formatearDinero(desgastePorHora(h))}/h`
+        : `valor fijo`;
+    };
+    pintarDetalle();
+
+    // Editar solo este presupuesto (no toca lo guardado en la despensa)
+    inCosto.addEventListener('input', () => {
+      h.costo = parseInt(soloDigitos(inCosto.value), 10) || 0;
+      pintarDetalle();
+      recalcularCotizacion();
+    });
+    inCosto.addEventListener('focus', () => { inCosto.value = soloDigitos(inCosto.value); });
+    inCosto.addEventListener('blur', () => formatearInputMoneda(inCosto));
+    inAnios.addEventListener('input', () => {
+      h.anios = parseFloat(inAnios.value) || 0;
+      h.vidaUtil = h.anios * (h.horasPorAnio || 1200);
+      pintarDetalle();
+      recalcularCotizacion();
+    });
+
+    inCosto.disabled = bloqueado;
+    inAnios.disabled = bloqueado;
+
+    const acciones = div.querySelector('.item-acciones');
+    const btnLock = document.createElement('button');
+    btnLock.className = 'btn-lock' + (bloqueado ? ' activo' : '');
+    btnLock.textContent = bloqueado ? '🔒' : '🔓';
+    btnLock.title = bloqueado ? 'Desbloquear' : 'Bloquear (no se podrá editar ni eliminar)';
+    btnLock.addEventListener('click', () => toggleBloqueoHerramienta(h.id));
+    acciones.appendChild(btnLock);
+
+    if (!bloqueado) {
+      const btnX = document.createElement('button');
+      btnX.className = 'btn-eliminar';
+      btnX.textContent = 'X';
+      btnX.addEventListener('click', () => eliminarHerramienta(h.id));
+      acciones.appendChild(btnX);
+    }
+
     cont.appendChild(div);
   });
+}
+
+// Bloquea/desbloquea una herramienta del presupuesto (candado)
+function toggleBloqueoHerramienta(id) {
+  const h = herramientasCotizacion.find(x => x.id === id);
+  if (!h) return;
+  h.bloqueado = !h.bloqueado;
+  renderHerramientas();
+  recalcularCotizacion();
 }
 
 function agregarHerramientaCotizacion() {
@@ -538,10 +662,15 @@ function recalcularCotizacion() {
   // Costo total
   const costoTotal = costoManoObra + subtotalMateriales + subtotalHerramientas + transporte + otros;
 
-  // Margen y precio de venta
+  // Margen y precio con margen
   const margen = valorNumerico('margenGanancia');
   const ganancia = costoTotal * (margen / 100);
-  const precioVenta = costoTotal * (1 + margen / 100);
+  const precioConMargen = costoTotal * (1 + margen / 100);
+
+  // Descuento: se aplica al final, sobre el precio ya con margen.
+  const descuento = valorNumerico('descuentoPorcentaje');
+  const valorDescuento = precioConMargen * (descuento / 100);
+  const precioVenta = precioConMargen - valorDescuento;
 
   document.getElementById('tarifaHora').innerHTML = `<strong>Tu hora vale:</strong> ${formatearDinero(tarifaHora)}`;
   document.getElementById('costoManoObra').innerHTML = `<strong>Costo de tu tiempo:</strong> ${formatearDinero(costoManoObra)}`;
@@ -550,6 +679,8 @@ function recalcularCotizacion() {
   document.getElementById('cotiz-costo-total').textContent = formatearDinero(costoTotal);
   document.getElementById('cotiz-margen-pct').textContent = margen;
   document.getElementById('cotiz-ganancia').textContent = formatearDinero(ganancia);
+  document.getElementById('cotiz-descuento-pct').textContent = descuento;
+  document.getElementById('cotiz-descuento').textContent = '-' + formatearDinero(valorDescuento);
   document.getElementById('cotiz-precio-venta').textContent = formatearDinero(precioVenta);
 
   // Persistir el estado actual en cada recálculo (autoguardado)

@@ -21,29 +21,36 @@
     </button>
   </nav>
 
-  <!-- Logo -->
-  <header class="app-header">
-    <img src="assets/images/Logo Negro  PNG.png" alt="ARRIERO'S WEALTH - Of Mules and Coins" class="app-logo">
-  </header>
+  <!-- Cabecera compartida. En la vista "Mi Despensa" se compacta en una barra
+       (logo a la izquierda, precio en el centro, refrán a la derecha) con una
+       animación suave. La clase .modo-despensa en <body> dispara ese modo. -->
+  <div class="top-chrome">
+    <!-- Logo -->
+    <header class="app-header">
+      <img src="assets/images/Logo Negro  PNG.png" alt="ARRIERO'S WEALTH - Of Mules and Coins" class="app-logo">
+    </header>
 
-  <!-- Selector de moneda: compacto, arriba del precio. El usuario la cambia
-       cuando quiera. Las opciones las llena logic_quotation.js (lista MONEDAS). -->
-  <div class="selector-moneda-wrap">
-    <select id="selector-moneda" title="Cambiar moneda"></select>
+    <!-- Selector de moneda: compacto, arriba del precio. El usuario la cambia
+         cuando quiera. Las opciones las llena logic_quotation.js (lista MONEDAS). -->
+    <div class="selector-moneda-wrap">
+      <select id="selector-moneda" title="Cambiar moneda"></select>
+    </div>
+
+    <!-- Resultado destacado: cuánto cobrar por todo. La etiqueta se ve en el
+         inicio y se oculta solo en la vista "Mi Despensa" (barra compacta). -->
+    <div class="jornal-box">
+      <span class="jornal-label">Deberías cobrar:</span>
+      <span class="jornal-num" id="cotiz-precio-venta">$0</span>
+    </div>
+
+    <!-- Refrán paisa: sabiduría del arriero. Cambia al tocarlo.
+         El texto lo carga refranes.js desde data/refranes.json -->
+    <div id="refran-arriero" class="refran-arriero" title="Toca para otra frase" role="button" tabindex="0">
+      <span class="refran-icono"><img src="assets/images/Cirrel Arriero.png" alt="Carriel"></span>
+      <span class="refran-texto"></span>
+    </div>
   </div>
 
-  <!-- Resultado destacado: cuánto cobrar por todo -->
-  <div class="jornal-box">
-    <span class="jornal-label">Deberías cobrar:</span>
-    <span class="jornal-num" id="cotiz-precio-venta">$0</span>
-  </div>
-
-  <!-- Refrán paisa: sabiduría del arriero. Cambia al tocarlo.
-       El texto lo carga refranes.js desde data/refranes.json -->
-  <div id="refran-arriero" class="refran-arriero" title="Toca para otra frase" role="button" tabindex="0">
-    <span class="refran-icono">🐴</span>
-    <span class="refran-texto"></span>
-  </div>
 
   <!-- ===================== VISTA 1: COTIZAR ===================== -->
   <div id="cotizar" class="vista activa">
@@ -68,6 +75,10 @@
         <input type="number" inputmode="numeric" class="input-num" id="horasFacturables" min="0" placeholder="120">
       </div>
       <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
+      <div class="guardar-despensa">
+        <input type="text" class="nombre-despensa" id="save-tarifa-nombre" placeholder="Nombre (ej: Tarifa premium)">
+        <button type="button" class="btn-guardar-despensa" data-guardar="tarifa">💾 Guardar en despensa</button>
+      </div>
     </div>
 
     <!-- Mano de obra -->
@@ -78,6 +89,10 @@
         <input type="number" inputmode="numeric" class="input-num" id="horasTrabajo" min="0" placeholder="0">
       </div>
       <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
+      <div class="guardar-despensa">
+        <input type="text" class="nombre-despensa" id="save-tiempo-nombre" placeholder="Nombre (ej: Jornada completa)">
+        <button type="button" class="btn-guardar-despensa" data-guardar="tiempo">💾 Guardar en despensa</button>
+      </div>
     </div>
 
     <!-- Materiales -->
@@ -98,7 +113,8 @@
           <input type="number" inputmode="numeric" class="input-num" id="material-cantidad" min="1" value="1">
         </div>
         <button id="agregar-material">Agregar material</button>
-        <p class="hint">Presiona Enter para agregar</p>
+        <button type="button" class="btn-guardar-despensa" data-guardar="material">💾 Guardar en despensa</button>
+        <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
       </div>
       <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
     </div>
@@ -129,7 +145,8 @@
           </select>
         </div>
         <button id="agregar-herramienta">Agregar herramienta</button>
-        <p class="hint">Presiona Enter para agregar</p>
+        <button type="button" class="btn-guardar-despensa" data-guardar="herramienta">💾 Guardar en despensa</button>
+        <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
       </div>
       <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
     </div>
@@ -162,11 +179,25 @@
       </div>
     </div>
 
+    <!-- Descuento -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Descuento</h4>
+      <div class="gasto-item">
+        <label for="descuentoPorcentaje">Descuento (%):</label>
+        <input type="number" inputmode="numeric" class="input-num" id="descuentoPorcentaje" min="0" value="0">
+      </div>
+      <div class="guardar-despensa">
+        <input type="text" class="nombre-despensa" id="save-descuento-nombre" placeholder="Nombre (ej: Cliente frecuente)">
+        <button type="button" class="btn-guardar-despensa" data-guardar="descuento">💾 Guardar en despensa</button>
+      </div>
+    </div>
+
     <!-- Desglose de costos -->
     <div id="resultado-cotizacion" class="colapsable cerrada">
       <h4>Desglose de costos</h4>
       <p><strong>Costo total:</strong> <span id="cotiz-costo-total">$0</span></p>
       <p><strong>Ganancia (<span id="cotiz-margen-pct">30</span>%):</strong> <span id="cotiz-ganancia">$0</span></p>
+      <p><strong>Descuento (<span id="cotiz-descuento-pct">0</span>%):</strong> <span id="cotiz-descuento">$0</span></p>
     </div>
 
     <!-- Guardar este presupuesto con nombre -->
@@ -191,9 +222,42 @@
     </div><!-- /#panel-calculo -->
   </div>
 
-  <!-- ===================== VISTA 2 (placeholder) ===================== -->
+  <!-- ===================== VISTA 2: MI DESPENSA ===================== -->
   <div id="vista2" class="vista">
-    <p class="vista-placeholder">Próximamente, mijo 🐴</p>
+    <h3>Mi Despensa</h3>
+    <p class="despensa-intro">Toque cualquier pieza guardada para sumarla a su presupuesto. Mire arriba cómo cambia lo que debería cobrar, mijo. (Para guardar nuevas, llene los datos en la vista de Cotizar.)</p>
+
+    <!-- Cada gaveta es una tabla: clic en la fila la aplica al presupuesto;
+         la X la borra de la despensa. Las llena biblioteca.js. -->
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Tarifas</h4>
+      <div id="lib-tarifas-container" class="lib-tabla"></div>
+      <p id="lib-tarifas-vacio" class="frase-arriero">Todavía no ha guardado tarifas.</p>
+    </div>
+
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Tiempos (mano de obra)</h4>
+      <div id="lib-tiempos-container" class="lib-tabla"></div>
+      <p id="lib-tiempos-vacio" class="frase-arriero">Todavía no ha guardado tiempos.</p>
+    </div>
+
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Materiales / insumos</h4>
+      <div id="lib-materiales-container" class="lib-tabla"></div>
+      <p id="lib-materiales-vacio" class="frase-arriero">Todavía no ha guardado materiales.</p>
+    </div>
+
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Herramientas / equipos</h4>
+      <div id="lib-herramientas-container" class="lib-tabla"></div>
+      <p id="lib-herramientas-vacio" class="frase-arriero">Todavía no ha guardado herramientas.</p>
+    </div>
+
+    <div class="categoria-gastos colapsable cerrada">
+      <h4>Descuentos</h4>
+      <div id="lib-descuentos-container" class="lib-tabla"></div>
+      <p id="lib-descuentos-vacio" class="frase-arriero">Todavía no ha guardado descuentos.</p>
+    </div>
   </div>
 
   <!-- ===================== VISTA 3 (placeholder) ===================== -->
@@ -202,6 +266,7 @@
   </div>
 
   <script src="src/logic_quotation.js"></script>
+  <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
 

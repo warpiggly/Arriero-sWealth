@@ -138,11 +138,17 @@ body::after {
 .refran-arriero:hover { border-color: var(--dorado-osc); }
 .refran-arriero:active { transform: translateY(1px); }
 .refran-arriero:focus-visible { box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.4); }
-.refran-icono { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+.refran-icono { line-height: 0; flex-shrink: 0; display: inline-flex; align-items: center; }
+.refran-icono img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+}
 .refran-texto {
   font-family: 'ScothBrace', serif;
-  font-size: 0.9rem;
-  line-height: 1.34;
+  font-size: 0.76rem;
+  line-height: 1.3;
   color: var(--texto);
   font-style: italic;
 }
@@ -460,4 +466,200 @@ button:active { transform: translateY(1px); }
   color: var(--marron);
   font-size: 0.85rem;
   margin: 6px 0 0;
+}
+
+/* ===========================================================
+   MI DESPENSA + EL BUFET (presets reutilizables)
+   =========================================================== */
+
+/* Intro de la vista despensa: color mostaza (el mismo del precio) */
+.despensa-intro {
+  margin: 0 6px 14px;
+  line-height: 1.4;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--dorado-osc);
+  font-family: 'ScothBrace', serif;
+}
+
+/* ---------- Tabla de piezas guardadas (clic = sumar al presupuesto) ---------- */
+.lib-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid rgba(122, 74, 34, 0.14);
+  border-left: 3px solid var(--dorado);
+  border-radius: 10px;
+  padding: 9px 11px;
+  margin: 7px 0;
+  font-size: 0.82rem;
+  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s;
+}
+.lib-item:hover { background: var(--crema); border-color: var(--dorado-osc); }
+.lib-item:active { transform: translateY(1px); }
+.lib-item .info { flex: 1; min-width: 0; }
+.lib-item .nombre { font-family: 'ScothBrace', serif; color: var(--texto); font-size: 1rem; }
+.lib-item .detalle { color: var(--marron); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
+
+/* ---------- "💾 Guardar en despensa" (en la vista de cotizar) ---------- */
+.guardar-despensa {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.guardar-despensa .nombre-despensa { flex: 1; min-width: 0; }
+.btn-guardar-despensa {
+  background: var(--dorado);
+  color: var(--texto);
+  font-size: 0.82rem;
+  padding: 7px 12px;
+  white-space: nowrap;
+}
+.btn-guardar-despensa:hover { background: var(--dorado-osc); }
+.btn-guardar-despensa.ok { background: var(--verde); color: #fff; }
+/* Dentro del mini-formulario de materiales/herramientas, ocupa todo el ancho */
+.gasto-personalizado-form > .btn-guardar-despensa { display: block; width: 100%; margin-top: 8px; }
+
+/* ---------- Ítem editable del presupuesto (material/herramienta) ---------- */
+.item-cotiz {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "nombre acciones"
+    "campos total";
+  gap: 6px 8px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(122, 74, 34, 0.14);
+  border-left: 3px solid var(--naranja);
+  border-radius: 10px;
+  padding: 9px 11px;
+  margin: 7px 0;
+  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
+}
+.item-cotiz .item-nombre {
+  grid-area: nombre;
+  font-family: 'ScothBrace', serif;
+  font-size: 0.96rem;
+  color: var(--texto);
+}
+.item-cotiz .item-campos {
+  grid-area: campos;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.item-cotiz .item-campos label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #5a4a36;
+}
+#panel-calculo .item-cotiz .item-campos input { width: 84px; padding: 5px 7px; }
+.item-cotiz .item-total {
+  grid-area: total;
+  justify-self: end;
+  font-size: 0.78rem;
+  color: var(--marron);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.item-cotiz .item-acciones {
+  grid-area: acciones;
+  justify-self: end;
+  display: flex;
+  gap: 4px;
+}
+.item-cotiz .btn-lock {
+  padding: 3px 8px;
+  font-size: 0.85rem;
+  background: var(--dorado);
+}
+.item-cotiz .btn-lock:hover { background: var(--dorado-osc); }
+.item-cotiz .btn-lock.activo { background: var(--verde); }
+
+/* Estado bloqueado: candado total (no se edita ni se elimina) */
+.item-cotiz.bloqueado {
+  border-left-color: var(--verde);
+  background: #f4f8f3;
+}
+.item-cotiz.bloqueado .item-campos input:disabled {
+  background: #eee9da;
+  color: var(--texto);
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+/* ===========================================================
+   CABECERA COMPACTA EN "MI DESPENSA"
+   Al activarse .modo-despensa en <body>, el logo se achica y va a la
+   izquierda, el precio queda al centro y el refrán a la derecha.
+   El selector de moneda se oculta. Transiciones suaves y simples.
+   =========================================================== */
+
+/* Transiciones que dan la sensación de movimiento al compactar */
+.app-logo { transition: width 0.45s ease; }
+.jornal-box { transition: padding 0.45s ease, margin 0.45s ease, border-radius 0.45s ease; }
+.jornal-label, .jornal-num { transition: font-size 0.45s ease; }
+.selector-moneda-wrap { transition: opacity 0.3s ease; }
+
+body.modo-despensa .top-chrome {
+  display: flex;
+  flex-wrap: wrap;          /* el refrán se va a una segunda fila, debajo */
+  align-items: center;
+  gap: 6px 10px;
+  padding: 4px 14px 8px;
+  animation: barra-entra 0.45s ease;
+}
+
+/* Logo: a la izquierda, un poquito más grande */
+body.modo-despensa .app-header { flex: 0 0 auto; padding: 0; }
+body.modo-despensa .app-logo { width: 122px; margin: 0; }
+
+/* Moneda: se oculta en este modo */
+body.modo-despensa .selector-moneda-wrap { display: none; }
+
+/* Precio: solo el número, más pequeño y junto al logo */
+body.modo-despensa .jornal-box {
+  margin: 0;
+  padding: 15px 20px;
+  border-radius: 10px;
+}
+body.modo-despensa .jornal-label { display: none; }
+body.modo-despensa .jornal-num { font-size: 1.1rem; }
+
+/* Refrán: pasa a una fila completa debajo, como en el menú principal */
+body.modo-despensa .refran-arriero {
+  flex: 0 0 93%;
+  margin: 0 0 4px;
+  padding: 10px 15px;
+  max-width: none;
+}
+body.modo-despensa .refran-texto { font-size: 0.76rem; line-height: 1.3; }
+body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
+
+@keyframes barra-entra {
+  from { opacity: 0.25; transform: translateY(-7px); }
+  to   { opacity: 1;    transform: translateY(0); }
+}
+
+/* Pulso del precio cuando una pieza de la despensa cambia el total */
+.jornal-num.pulso { animation: precio-pulso 0.5s ease; }
+@keyframes precio-pulso {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.14); color: var(--naranja-osc); }
+  100% { transform: scale(1); }
+}
+
+/* Respeto por quien prefiere menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  body.modo-despensa .top-chrome { animation: none; }
+  .jornal-num.pulso { animation: none; }
+  .app-logo, .jornal-box, .jornal-label, .jornal-num { transition: none; }
 }
