@@ -255,7 +255,7 @@ function confirmarBoton(btn) {
 
 // Pulso suave del precio "Deberías cobrar" cuando cambia por una pieza
 function pulsarPrecio() {
-  const el = document.getElementById('cotiz-precio-venta');
+  const el = document.getElementById('jornal-num');
   if (!el) return;
   el.classList.remove('pulso');
   void el.offsetWidth;          // reinicia la animación

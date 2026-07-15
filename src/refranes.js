@@ -13,9 +13,12 @@
   let ultimoIndice = -1;   // para no repetir la misma dos veces seguidas
   let timerEscritura = null; // temporizador de la animación de tecleo en curso
 
-  // ¿El usuario prefiere menos movimiento? Entonces no animamos.
-  const sinAnimacion = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // El tecleo estilo IA es parte de la identidad de la app, así que lo
+  // mostramos SIEMPRE, sin importar el sistema operativo ni el ajuste
+  // "reducir animaciones" de Windows. (Antes esto dependía de
+  // prefers-reduced-motion: en Windows 10 con las animaciones del sistema
+  // apagadas, el refrán salía de golpe en vez de escribirse letra a letra.)
+  const sinAnimacion = false;
 
   const MS_POR_LETRA = 28; // velocidad del tecleo (más bajo = más rápido)
 

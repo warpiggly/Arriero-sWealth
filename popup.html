@@ -8,15 +8,18 @@
   <link rel="stylesheet" href="styles/magic.css">
 </head>
 <body>
-  <!-- Navegación: estrellas para cambiar de vista -->
+  <!-- Navegación: estrellas para cambiar de vista.
+       Estrella 1 = Metas (el corazón: ¿cuándo puedo comprarlo?), es la principal.
+       Estrella 2 = Cotizar (para independientes, secundario).
+       Estrella 3 = Mi Despensa (piezas guardadas del cotizador). -->
   <nav class="estrellas">
-    <button class="estrella activa" data-view="cotizar" title="Cotizar">
+    <button class="estrella activa" data-view="metas" title="¿Cuándo puedo comprarlo?">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
-    <button class="estrella" data-view="vista2" title="Próximamente">
+    <button class="estrella" data-view="cotizar" title="Cobrar por mi trabajo">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
-    <button class="estrella" data-view="vista3" title="Próximamente">
+    <button class="estrella" data-view="vista2" title="Mi Despensa">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
   </nav>
@@ -36,11 +39,13 @@
       <select id="selector-moneda" title="Cambiar moneda"></select>
     </div>
 
-    <!-- Resultado destacado: cuánto cobrar por todo. La etiqueta se ve en el
-         inicio y se oculta solo en la vista "Mi Despensa" (barra compacta). -->
+    <!-- Resultado destacado: número grande que cambia según la vista activa.
+         En Metas muestra "Te falta ahorrar", en Cotizar "Deberías cobrar".
+         Lo actualiza pintarJornal() (logic_quotation.js). Se compacta solo en
+         la vista "Mi Despensa". -->
     <div class="jornal-box">
-      <span class="jornal-label">Deberías cobrar:</span>
-      <span class="jornal-num" id="cotiz-precio-venta">$0</span>
+      <span class="jornal-label" id="jornal-label">Te falta ahorrar:</span>
+      <span class="jornal-num" id="jornal-num">$0</span>
     </div>
 
     <!-- Refrán paisa: sabiduría del arriero. Cambia al tocarlo.
@@ -52,8 +57,55 @@
   </div>
 
 
-  <!-- ===================== VISTA 1: COTIZAR ===================== -->
-  <div id="cotizar" class="vista activa">
+  <!-- ===================== VISTA PRINCIPAL: METAS ===================== -->
+  <!-- El corazón de la app: el usuario dice qué quiere comprar y la app le
+       calcula cuánto le falta, cuánto ahorrar por día y cuándo lo logra. -->
+  <div id="metas" class="vista activa">
+    <h3>¿Cuándo puedo comprarlo?</h3>
+
+    <!-- Mi economía: solo 2 datos, con eso se calcula todo. Colapsable para no
+         estorbar una vez llenos. -->
+    <div class="categoria-gastos colapsable">
+      <h4>Mi economía</h4>
+      <div class="gasto-item">
+        <label for="ahorroMensual">Puedo ahorrar al mes:</label>
+        <input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000">
+      </div>
+      <div class="gasto-item">
+        <label for="ahorrosActuales">Ahorros que ya tengo:</label>
+        <input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0">
+      </div>
+      <p class="hint">Con estos dos datos le hago la cuenta, mijo.</p>
+    </div>
+
+    <!-- Agregar un producto a la lista -->
+    <div class="gasto-personalizado-form meta-form">
+      <div class="gasto-item">
+        <label for="meta-nombre">¿Qué quieres comprar?</label>
+        <input type="text" id="meta-nombre" placeholder="Ej: Bicicleta">
+      </div>
+      <div class="gasto-item">
+        <label for="meta-precio">Precio:</label>
+        <input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0">
+      </div>
+      <div class="gasto-item">
+        <label for="meta-fecha">¿Para cuándo? (opcional)</label>
+        <input type="date" id="meta-fecha">
+      </div>
+      <button id="agregar-meta">Agregar a mi lista</button>
+      <p class="hint">Presiona Enter para agregar · o selecciona un precio en cualquier página con clic derecho</p>
+    </div>
+
+    <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
+    <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
+
+    <!-- La lista tipo carrito. La llena metas.js -->
+    <div id="metas-container"></div>
+    <p id="sin-metas" class="frase-arriero">Todavía no has apuntado nada, mijo. Escribe un producto arriba o selecciona un precio en cualquier página.</p>
+  </div>
+
+  <!-- ===================== VISTA: COTIZAR (para independientes) ===================== -->
+  <div id="cotizar" class="vista">
 
     <!-- Botón maestro: abre/cierra todo el cálculo -->
     <div class="master-toggle-wrap">
@@ -260,12 +312,10 @@
     </div>
   </div>
 
-  <!-- ===================== VISTA 3 (placeholder) ===================== -->
-  <div id="vista3" class="vista">
-    <p class="vista-placeholder">Próximamente, mijo 🐴</p>
-  </div>
-
+  <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
+       cambiarVista, pintarJornal…) que metas.js reutiliza. -->
   <script src="src/logic_quotation.js"></script>
+  <script src="src/metas.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>

@@ -142,6 +142,35 @@ function cambiarVista(idVista, estrella) {
   // En "Mi Despensa" la cabecera se compacta (barra: logo · precio · refrán).
   // La animación y el nuevo layout los hace el CSS al ver esta clase en <body>.
   document.body.classList.toggle('modo-despensa', idVista === 'vista2');
+
+  // El número grande de la cabecera cambia de significado según la vista.
+  actualizarCabecera();
+}
+
+// ¿Qué vista está activa ahora? Devuelve su id (ej: 'metas', 'cotizar').
+function vistaActiva() {
+  const v = document.querySelector('.vista.activa');
+  return v ? v.id : '';
+}
+
+// Escribe la etiqueta y el número grande de la cabecera (la caja dorada).
+// Lo usan tanto el cotizador como las metas, según cuál esté al frente.
+function pintarJornal(etiqueta, valorTexto) {
+  const lbl = document.getElementById('jornal-label');
+  const num = document.getElementById('jornal-num');
+  if (lbl) lbl.textContent = etiqueta;
+  if (num) num.textContent = valorTexto;
+}
+
+// Repinta la cabecera con lo que corresponde a la vista activa. En Metas
+// muestra "Te falta ahorrar"; en Cotizar/Despensa, "Deberías cobrar".
+function actualizarCabecera() {
+  const vista = vistaActiva();
+  if (vista === 'metas' && typeof metasPintarJornal === 'function') {
+    metasPintarJornal();
+  } else {
+    pintarJornal('Deberías cobrar:', formatearDinero(window.__precioVentaActual || 0));
+  }
 }
 
 // ----------------------------------------------------------------
@@ -247,6 +276,8 @@ function refrescarTodo() {
   renderHerramientas();
   renderPresupuestos();
   recalcularCotizacion();
+  // Las metas también muestran dinero: que se repinten con la nueva moneda.
+  if (typeof metasRefrescar === 'function') metasRefrescar();
 }
 
 // ----------------------------------------------------------------
@@ -681,7 +712,16 @@ function recalcularCotizacion() {
   document.getElementById('cotiz-ganancia').textContent = formatearDinero(ganancia);
   document.getElementById('cotiz-descuento-pct').textContent = descuento;
   document.getElementById('cotiz-descuento').textContent = '-' + formatearDinero(valorDescuento);
-  document.getElementById('cotiz-precio-venta').textContent = formatearDinero(precioVenta);
+
+  // Guardamos el precio para que la cabecera pueda repintarlo al volver a esta
+  // vista, pero solo tocamos el número grande si Cotizar está al frente (si no,
+  // pisaríamos el "Te falta ahorrar" de la vista de Metas).
+  window.__precioVentaActual = precioVenta;
+  // Cotizar y Mi Despensa comparten el número "Deberías cobrar". Solo la vista
+  // de Metas usa la cabecera para otra cosa ("Te falta ahorrar").
+  if (vistaActiva() !== 'metas') {
+    pintarJornal('Deberías cobrar:', formatearDinero(precioVenta));
+  }
 
   // Persistir el estado actual en cada recálculo (autoguardado)
   autoguardarCotizacion();

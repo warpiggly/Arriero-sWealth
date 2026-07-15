@@ -6,12 +6,16 @@
    =========================================================== */
 
 /* Lienzo donde viven las mariposas y las chispas.
-   z-index: -1 -> detrás de todo el contenido, pero por encima
-   del fondo (la imagen está en body::before con z-index: -2). */
+   z-index: 0 (positivo) -> siempre se dibuja por encima del fondo
+   (body::before -2, body::after -1) y del propio body. El contenido
+   real va en z-index: 2 (ver styles.css) para quedar por delante.
+   Usamos z-index POSITIVO a propósito: con z-index negativo, en equipos
+   con la aceleración por hardware apagada la capa se pintaba detrás del
+   fondo y las mariposas se volvían invisibles. */
 #capa-magica {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;   /* nunca bloquea clics ni inputs */
 }
@@ -112,8 +116,11 @@
   }
 }
 
-/* Respeta a quien prefiere menos movimiento */
-@media (prefers-reduced-motion: reduce) {
-  .mariposa .alas { animation: none; }
-  .chispa { animation-duration: 3.5s; }
-}
+/* Nota: antes aquí se desactivaba el aleteo y se ralentizaban las chispas
+   cuando el sistema tenía "reducir animaciones" activado. Lo quitamos para
+   que la magia se vea igual en cualquier equipo (Windows 10, 11, etc.).
+   Si algún día quieres volver a respetar ese ajuste del sistema, reactiva:
+   @media (prefers-reduced-motion: reduce) {
+     .mariposa .alas { animation: none; }
+     .chispa { animation-duration: 3.5s; }
+   } */
