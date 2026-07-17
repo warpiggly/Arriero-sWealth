@@ -145,6 +145,9 @@ function cambiarVista(idVista, estrella) {
 
   // El número grande de la cabecera cambia de significado según la vista.
   actualizarCabecera();
+
+  // Ajustar el ancho de la app: solo se ensancha en Metas + hoja de cálculo.
+  if (typeof actualizarAnchoApp === 'function') actualizarAnchoApp();
 }
 
 // ¿Qué vista está activa ahora? Devuelve su id (ej: 'metas', 'cotizar').

@@ -68,6 +68,11 @@ body {
   padding: 0 0 18px;
   color: var(--texto);
   font-family: 'LiberationSans', sans-serif;
+
+  /* Tamaño general de la app: achica TODO proporcionalmente (letras, cajas,
+     imágenes, anchos, la hoja de cálculo). Cambie este número para agrandar o
+     achicar la app entera: 1 = tamaño original · 0.75 = 25% más pequeña. */
+  zoom: 0.75;
   /* Fondo transparente a propósito: el color cremita vive en body::before.
      Si lo dejamos opaco aquí, en equipos con aceleración por hardware
      desactivada (típico en algunos Windows 10) el fondo tapa la capa de
@@ -80,21 +85,26 @@ body {
   box-sizing: border-box;
 }
 
-/* Paisaje de fondo, desenfocado (capa detrás del contenido) */
+/* Paisaje de fondo, desenfocado (capa detrás del contenido).
+   IMPORTANTE: el `zoom: 0.75` del <body> también encoge este fondo. Para que la
+   imagen se vea al MISMO tamaño de antes (sin encoger), dividimos sus medidas
+   entre 0.75 (= /0.75). Así el zoom lo vuelve a su tamaño original en pantalla,
+   pero el resto de la app sí queda pequeño. Si cambia el zoom del body, cambie
+   también ese 0.75 aquí. */
 body::before {
   content: '';
   position: fixed;
-  top: -16px;
-  left: -16px;
-  width: 512px;            /* tamaño fijo: la imagen no se reescala al expandir */
-  height: 632px;           /* alto fijo (mayor que la ventana) -> imagen estática */
+  top: calc(-16px / 0.75);
+  left: calc(-16px / 0.75);
+  width: calc(512px / 0.75);   /* tamaño fijo, compensado para el zoom del body */
+  height: calc(632px / 0.75);  /* alto fijo (mayor que la ventana) -> estático */
   z-index: -2;
   background-color: var(--crema);   /* base cremita (antes vivía en body) */
   background-image: url('../assets/images/ChatGPT Image Sep 20, 2025, 08_48_10 AM.png');
   background-size: cover;
   background-position: left 8%;
   background-repeat: no-repeat;
-  filter: blur(2px);
+  filter: blur(calc(2px / 0.75));
 }
 
 /* Capa semitransparente para mejorar la legibilidad */
@@ -1005,6 +1015,19 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 
 /* Utilidad: esconder sin borrar del DOM */
 .oculto { display: none !important; }
+
+/* ===========================================================
+   MODO HOJA DE CÁLCULO: la app se ENSANCHA para que la hoja quepa cómoda
+   (sin deslizar de lado). Lo activa metas.js poniendo .modo-hoja en <body>
+   solo cuando el interruptor está en "Hoja de cálculo" Y estamos en Metas.
+   =========================================================== */
+body.modo-hoja { width: 700px; }
+/* El paisaje del fondo se ensancha con la app para seguir cubriendo todo
+   (también compensado para el zoom del body: /0.75). */
+body.modo-hoja::before { width: calc(740px / 0.75); }
+/* Con más ancho la hoja ya cabe: no hace falta deslizar de lado */
+body.modo-hoja .hoja-scroll { overflow-x: visible; }
+body.modo-hoja .hoja-grande { min-width: 0; }
 
 /* ===========================================================
    INTERRUPTOR DE VISTA (encendido/apagado horizontal)

@@ -89,6 +89,17 @@ function setVistaHoja(on) {
   if (lblH) lblH.classList.toggle('activa', on);
   if (chrome.storage && chrome.storage.sync) chrome.storage.sync.set({ metasVistaHoja: on });
   if (on) renderHoja();
+  actualizarAnchoApp();
+}
+
+// Ensancha la app (clase .modo-hoja en <body>) SOLO cuando el interruptor está
+// en "Hoja de cálculo" y además la vista de Metas es la que está al frente.
+// Al salir de Metas (o volver a "Sencilla") regresa al ancho normal.
+function actualizarAnchoApp() {
+  const sw = document.getElementById('switchVista');
+  const enHoja = !!(sw && sw.getAttribute('aria-checked') === 'true');
+  const enMetas = (typeof vistaActiva === 'function') ? vistaActiva() === 'metas' : true;
+  document.body.classList.toggle('modo-hoja', enHoja && enMetas);
 }
 
 // ----------------------------------------------------------------
