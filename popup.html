@@ -61,47 +61,136 @@
   <!-- El corazón de la app: el usuario dice qué quiere comprar y la app le
        calcula cuánto le falta, cuánto ahorrar por día y cuándo lo logra. -->
   <div id="metas" class="vista activa">
-    <h3>¿Cuándo puedo comprarlo?</h3>
+ 
 
-    <!-- Mi economía: solo 2 datos, con eso se calcula todo. Colapsable para no
-         estorbar una vez llenos. -->
-    <div class="categoria-gastos colapsable">
-      <h4>Mi economía</h4>
-      <div class="gasto-item">
-        <label for="ahorroMensual">Puedo ahorrar al mes:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000">
-      </div>
-      <div class="gasto-item">
-        <label for="ahorrosActuales">Ahorros que ya tengo:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0">
-      </div>
-      <p class="hint">Con estos dos datos le hago la cuenta, mijo.</p>
+    <!-- Botón maestro con la CABEZA DE CABALLO: abre/cierra toda la cuenta,
+         igual que el botón de "Cotizar". El SVG es de Font Awesome (CC BY 4.0),
+         recoloreado con la paleta de la app (silueta café sobre círculo dorado). -->
+    <div class="master-toggle-wrap">
+      <button id="toggleMetas" class="master-btn master-btn-mula" title="Toque la mula para abrir o cerrar su cuenta">
+        <svg class="ico-mula" viewBox="0 0 640 512" fill="currentColor" aria-hidden="true">
+          <path d="M64 464V316.9c0-108.4 68.3-205.1 170.5-241.3L404.2 15.5C425.6 7.9 448 23.8 448 46.4c0 11-5.5 21.2-14.6 27.3L400 96c48.1 0 91.2 29.8 108.1 74.9l48.6 129.5c11.8 31.4 4.1 66.8-19.6 90.5c-16 16-37.8 25.1-60.5 25.1h-3.4c-26.1 0-50.9-11.6-67.6-31.7l-32.3-38.7c-11.7 4.1-24.2 6.4-37.3 6.4l-.1 0 0 0c-6.3 0-12.5-.5-18.6-1.5c-3.6-.6-7.2-1.4-10.7-2.3l0 0c-28.9-7.8-53.1-26.8-67.8-52.2c-4.4-7.6-14.2-10.3-21.9-5.8s-10.3 14.2-5.8 21.9c24 41.5 68.3 70 119.3 71.9l47.2 70.8c4 6.1 6.2 13.2 6.2 20.4c0 20.3-16.5 36.8-36.8 36.8H112c-26.5 0-48-21.5-48-48zM392 224a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/>
+        </svg>
+      </button>
+      <span class="master-hint-label">Toque la mula para abrir o cerrar su cuenta</span>
     </div>
 
-    <!-- Agregar un producto a la lista -->
-    <div class="gasto-personalizado-form meta-form">
-      <div class="gasto-item">
-        <label for="meta-nombre">¿Qué quieres comprar?</label>
-        <input type="text" id="meta-nombre" placeholder="Ej: Bicicleta">
-      </div>
-      <div class="gasto-item">
-        <label for="meta-precio">Precio:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0">
-      </div>
-      <div class="gasto-item">
-        <label for="meta-fecha">¿Para cuándo? (opcional)</label>
-        <input type="date" id="meta-fecha">
-      </div>
-      <button id="agregar-meta">Agregar a mi lista</button>
-      <p class="hint">Presiona Enter para agregar · o selecciona un precio en cualquier página con clic derecho</p>
-    </div>
+    <!-- Toda la cuenta vive aquí dentro (como el panel de "Cotizar"). -->
+    <div id="panel-metas" class="master-contenido">
 
-    <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
-    <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
+      <!-- Interruptor horizontal (encendido/apagado) para cambiar entre la
+           vista SENCILLA (por pasos) y la HOJA DE CÁLCULO tipo Excel. -->
+      <div class="vista-switch">
+        <span class="vs-label vs-izq activa" id="vs-lbl-sencilla">Sencilla</span>
+        <button id="switchVista" class="switch" role="switch" aria-checked="false" title="Cambiar entre vista sencilla y hoja de cálculo">
+          <span class="switch-perilla"></span>
+        </button>
+        <span class="vs-label vs-der" id="vs-lbl-hoja">Hoja de cálculo</span>
+      </div>
 
-    <!-- La lista tipo carrito. La llena metas.js -->
-    <div id="metas-container"></div>
-    <p id="sin-metas" class="frase-arriero">Todavía no has apuntado nada, mijo. Escribe un producto arriba o selecciona un precio en cualquier página.</p>
+      <!-- ============ VISTA A: SENCILLA (por pasos) ============ -->
+      <div id="metas-sencilla">
+
+           <h3>¿Cuándo puedo comprarlo?</h3>
+
+    <!-- Guía siempre visible, en palabras del campo: el usuario no suma nada. -->
+    <p class="metas-instruccion">
+      Llene los cuadritos y yo le saco la cuenta, mijo.<br>
+      Usted no tiene que sumar ni restar nada.
+    </p>
+
+        <!-- PASO 1: sus ahorros -->
+        <section class="metas-paso">
+          <div class="metas-paso-tit"><span class="paso-num">1</span> Mis ahorros</div>
+          <div class="excel">
+            <div class="excel-fila">
+              <div class="excel-celda etiqueta"><label for="ahorroMensual">Puedo guardar al mes</label></div>
+              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000"></div>
+            </div>
+            <div class="excel-fila">
+              <div class="excel-celda etiqueta"><label for="ahorrosActuales">Lo que ya tengo guardado</label></div>
+              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0"></div>
+            </div>
+          </div>
+          <p class="metas-hint">Con estos dos datitos ya le hago la cuenta.</p>
+        </section>
+
+        <!-- PASO 2: qué quiere comprar -->
+        <section class="metas-paso">
+          <div class="metas-paso-tit"><span class="paso-num">2</span> ¿Qué quiere comprar?</div>
+          <div class="excel">
+            <div class="excel-fila">
+              <div class="excel-celda etiqueta"><label for="meta-nombre">¿Qué quiere?</label></div>
+              <div class="excel-celda"><input type="text" id="meta-nombre" placeholder="Ej: Bicicleta"></div>
+            </div>
+            <div class="excel-fila">
+              <div class="excel-celda etiqueta"><label for="meta-precio">¿Cuánto cuesta?</label></div>
+              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0"></div>
+            </div>
+            <div class="excel-fila">
+              <div class="excel-celda etiqueta"><label for="meta-fecha">¿Para cuándo? (si quiere)</label></div>
+              <div class="excel-celda"><input type="date" id="meta-fecha"></div>
+            </div>
+          </div>
+          <button id="agregar-meta">✚ Apuntar en mi lista</button>
+          <p class="metas-hint">O en cualquier página, señale el precio con el clic derecho.</p>
+        </section>
+
+        <!-- PASO 3: la cuenta hecha -->
+        <div class="metas-paso-tit paso-suelto"><span class="paso-num">3</span> Mi cuenta</div>
+
+        <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
+        <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
+
+        <!-- La lista tipo Excel (celdas). La llena metas.js -->
+        <div id="metas-container"></div>
+        <p id="sin-metas" class="frase-arriero">Todavía no ha apuntado nada, mijo. Escriba un producto arriba, o señale un precio en cualquier página con el clic derecho.</p>
+
+      </div><!-- /#metas-sencilla -->
+
+      <!-- ============ VISTA B: HOJA DE CÁLCULO (tipo Excel) ============ -->
+      <div id="metas-hoja" class="oculto">
+        <div class="hoja-tit">Mi hoja de cuentas</div>
+
+        <!-- Dos datos base, en celdas -->
+        <table class="hoja hoja-datos">
+          <tr>
+            <td class="hoja-rot">Guardo cada mes</td>
+            <td class="hoja-cel"><input type="text" inputmode="numeric" class="input-num celda-input" id="ahorroMensualHoja" placeholder="200.000"></td>
+          </tr>
+          <tr>
+            <td class="hoja-rot">Ya tengo guardado</td>
+            <td class="hoja-cel"><input type="text" inputmode="numeric" class="input-num celda-input" id="ahorrosActualesHoja" placeholder="0"></td>
+          </tr>
+        </table>
+
+        <p class="metas-hint">Escriba en los cuadritos blancos. Yo lleno solito las columnas de la cuenta.</p>
+
+        <!-- La hoja grande, con letras de columna y números de fila como en Excel -->
+        <div class="hoja-scroll">
+          <table class="hoja hoja-grande">
+            <thead>
+              <tr class="hoja-abc">
+                <th class="esq"></th>
+                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th class="esq borrar-col"></th>
+              </tr>
+              <tr class="hoja-encab">
+                <th class="esq">№</th>
+                <th>Lo que quiero</th>
+                <th>Precio</th>
+                <th>Me falta</th>
+                <th>¿Cuándo lo tengo?</th>
+                <th>Si es para una fecha</th>
+                <th class="esq borrar-col"></th>
+              </tr>
+            </thead>
+            <tbody id="hoja-cuerpo"></tbody>
+            <tfoot id="hoja-pie"></tfoot>
+          </table>
+        </div>
+      </div><!-- /#metas-hoja -->
+
+    </div><!-- /#panel-metas -->
   </div>
 
   <!-- ===================== VISTA: COTIZAR (para independientes) ===================== -->

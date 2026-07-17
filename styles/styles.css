@@ -700,12 +700,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   to   { opacity: 1;    transform: translateY(0); }
 }
 
-/* ===========================================================
-   VISTA METAS — "¿Cuándo puedo comprarlo?" (el corazón de la app)
-   Visuales simples: una tarjeta de resumen con barra de progreso y
-   tarjetas de producto que responden en lenguaje claro.
-   =========================================================== */
-
 /* Texto de ayuda genérico (también fuera del mini-formulario verde) */
 .hint {
   font-size: 0.72rem;
@@ -714,30 +708,180 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   margin: 8px 0 0;
 }
 
-/* Formulario de agregar producto: hereda la caja verde de
-   .gasto-personalizado-form. Solo ajustamos el ancho de sus campos. */
-.meta-form .gasto-item input { width: 150px; }
-.meta-form .gasto-item input[type="date"] { width: 150px; }
+/* ===========================================================
+   VISTA METAS — "¿Cuándo puedo comprarlo?" (el corazón de la app)
+   Rediseño "cuaderno de cuadrícula sobre vidrio":
+   - Todo vive dentro de un panel con blur (backdrop-filter) para que el
+     paisaje del fondo no distraiga.
+   - Letras BLANCAS (el fondo tiene zonas claras y oscuras).
+   - Celdas tipo Excel con líneas de cuadrícula, guía en 3 pasos numerados
+     y un botón maestro con la mula que abre/cierra toda la cuenta.
+   =========================================================== */
 
-/* Tarjeta de resumen (total, progreso, cuándo llegas) */
-.meta-resumen {
-  background: #FCFAF2;
-  border: 1px solid rgba(122, 74, 34, 0.12);
-  border-left: 3px solid var(--verde);
+/* Guía siempre visible, en letras blancas y grandes */
+.metas-instruccion {
+  text-align: center;
+  color: #fff;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0 8px 12px;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Botón maestro con la MULA ---------- */
+.master-btn-mula {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  color: var(--marron);                 /* color del trazo del caballo */
+  background: var(--dorado);
+  border: 3px solid var(--crema);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+}
+.master-btn-mula .ico-mula { width: 32px; height: 32px; display: block; }
+.master-btn-mula:hover { background: var(--dorado-osc); color: var(--texto); }
+.master-btn-mula:active { transform: translateY(1px) scale(0.97); }
+
+.master-hint-label {
+  display: block;
+  text-align: center;
+  margin-top: 7px;
+  color: #fff;
+  font-size: 0.78rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+/* Cuando la cuenta está cerrada: pista visual sutil */
+.master-toggle-wrap.metas-cerrado .master-btn-mula { opacity: 0.9; }
+
+/* ---------- Panel de la cuenta: vidrio esmerilado ---------- */
+#panel-metas {
+  background: rgba(20, 45, 30, 0.42);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 14px 12px 16px;
+  margin-top: 4px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
+}
+
+/* ---------- Cada PASO ---------- */
+.metas-paso {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 12px;
-  padding: 14px 16px;
-  margin: 4px 0 14px;
-  box-shadow: 0 1px 2px rgba(43, 33, 24, 0.06),
-              0 6px 16px rgba(43, 33, 24, 0.07);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.metas-paso-tit {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'ScothBrace', serif;
+  color: #fff;
+  font-size: 1.12rem;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+.metas-paso-tit.paso-suelto { margin: 4px 2px 8px; }
+.paso-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: var(--texto);
+  font-family: 'LiberationSans', sans-serif;
+  font-weight: bold;
+  font-size: 0.98rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+/* ---------- Rejilla tipo Excel (entradas del paso 1 y 2) ---------- */
+.excel {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+.excel-fila {
+  display: grid;
+  grid-template-columns: 1fr 155px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+.excel-fila:last-child { border-bottom: none; }
+.excel-celda {
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 0.86rem;
+}
+.excel-celda.etiqueta {
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: bold;
+}
+.excel-celda label { color: #fff; margin: 0; padding: 0; flex: none; }
+.excel-celda input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  color: var(--texto);
+  padding: 7px 8px;
+}
+
+/* Botón "Apuntar en mi lista": grande y verde (acción principal) */
+#metas #agregar-meta {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: var(--verde);
+  font-size: 0.98rem;
+  padding: 11px;
+}
+#metas #agregar-meta:hover { background: var(--verde-oscuro); }
+
+.metas-hint {
+  margin: 8px 2px 0;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+}
+
+/* ---------- Resumen (paso 3): "la cuenta de todo junto" ---------- */
+.meta-resumen {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin: 0 0 12px;
+  color: #fff;
+}
+.meta-resumen-tit {
+  font-family: 'ScothBrace', serif;
+  color: #fff;
+  font-size: 0.98rem;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Barra de progreso del ahorro */
 .meta-progreso {
-  height: 12px;
-  background: rgba(122, 74, 34, 0.14);
+  height: 13px;
+  background: rgba(0, 0, 0, 0.28);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 .meta-progreso-relleno {
   height: 100%;
@@ -751,74 +895,320 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   justify-content: space-between;
   align-items: baseline;
   font-size: 0.86rem;
-  margin: 5px 0;
-  color: var(--texto);
+  padding: 6px 2px;
+  color: #fff;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.22);
 }
-.meta-resumen-fila span { color: #5a4a36; }
+.meta-resumen-fila:last-of-type { border-bottom: none; }
+.meta-resumen-fila span { color: rgba(255, 255, 255, 0.85); }
 .meta-resumen-fila strong { font-variant-numeric: tabular-nums; }
-.meta-resumen-fila.destacado strong { color: var(--naranja-osc); font-size: 1.02rem; }
+.meta-resumen-fila.destacado strong { color: var(--dorado); font-size: 1.08rem; }
 
 .meta-frase {
   margin: 10px 0 0;
   font-size: 0.85rem;
   line-height: 1.4;
-  color: var(--verde-oscuro);
+  color: #fff;
 }
-.meta-frase.sub { color: var(--marron); font-size: 0.8rem; margin-top: 6px; }
-.meta-frase strong { color: var(--naranja-osc); }
+.meta-frase.sub { color: rgba(255, 255, 255, 0.85); font-size: 0.8rem; margin-top: 6px; }
+.meta-frase strong { color: var(--dorado); }
 
-/* Tarjeta de cada producto de la lista */
-.meta-item {
-  background: #fff;
-  border: 1px solid rgba(122, 74, 34, 0.14);
-  border-left: 3px solid var(--naranja);
+/* ---------- Lista de productos = tabla tipo Excel ---------- */
+.excel-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 10px;
-  padding: 10px 12px;
-  margin: 8px 0;
-  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
+  overflow: hidden;
+  font-size: 0.82rem;
+  color: #fff;
+  table-layout: fixed;
 }
-.meta-item-cab {
+.excel-tabla th,
+.excel-tabla td {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 8px;
+  text-align: left;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+.excel-tabla thead th {
+  background: rgba(20, 45, 30, 0.6);
+  font-family: 'ScothBrace', serif;
+  font-weight: normal;
+  font-size: 0.82rem;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+/* "Raya" la cuadrícula, un tono por producto */
+.excel-tabla tbody.grupo:nth-of-type(even) td { background: rgba(255, 255, 255, 0.07); }
+
+.excel-tabla .col-precio {
+  width: 82px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.excel-tabla .col-cuando { width: 118px; }
+.excel-tabla .col-x { width: 34px; text-align: center; padding: 4px; }
+
+.excel-tabla .celda-nombre { font-weight: bold; }
+
+.celda-cuando strong { display: block; color: var(--dorado); line-height: 1.15; }
+.celda-cuando .sub { display: block; font-size: 0.7rem; color: rgba(255, 255, 255, 0.82); }
+.celda-cuando .ok { color: #9cf0ad; font-weight: bold; }
+.celda-cuando .aviso { color: #ffe8a8; font-size: 0.74rem; }
+
+.excel-tabla .btn-eliminar {
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  background: var(--terracota);
+}
+.excel-tabla .btn-eliminar:hover { background: #9c2c20; }
+
+/* Franja de fecha bajo cada producto */
+.fila-fecha td { background: rgba(0, 0, 0, 0.16) !important; }
+.fila-fecha .linea {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
-.meta-item-nombre {
+.fila-fecha .fecha-info {
   flex: 1;
-  min-width: 0;
-  font-weight: bold;
-  font-size: 0.92rem;
-  color: var(--texto);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 150px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.3;
 }
-.meta-item-precio {
-  font-variant-numeric: tabular-nums;
-  font-weight: bold;
-  color: var(--verde-oscuro);
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-.meta-item-cab .btn-eliminar { padding: 3px 9px; font-size: 0.8rem; }
+.fila-fecha .fecha-info strong { color: var(--dorado); }
+.fila-fecha .aviso { color: #ffb3a8; }
 
-.meta-item-linea {
+/* Selectores de fecha dentro de la vista Metas (legibles sobre el vidrio) */
+#metas input[type="date"],
+.meta-item-fecha {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--texto);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 0.78rem;
+}
+
+#metas #sin-metas {
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  font-size: 0.86rem;
+}
+
+/* Utilidad: esconder sin borrar del DOM */
+.oculto { display: none !important; }
+
+/* ===========================================================
+   INTERRUPTOR DE VISTA (encendido/apagado horizontal)
+   Cambia entre la vista "Sencilla" (por pasos) y la "Hoja de cálculo".
+   =========================================================== */
+.vista-switch {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 7px;
-  font-size: 0.8rem;
-  color: #5a4a36;
-  line-height: 1.35;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
 }
-.meta-item-linea strong { color: var(--naranja-osc); }
-.meta-item-linea > span { flex: 1; min-width: 140px; }
-.meta-item-fecha {
-  padding: 4px 6px;
-  font-size: 0.76rem;
-  border: 1px solid #d9cdb0;
+.vs-label {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: bold;
+  transition: color 0.2s;
+  user-select: none;
+}
+.vs-label.activa { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* La palanca */
+.switch {
+  position: relative;
+  width: 58px;
+  height: 30px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--marron);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  transition: background 0.25s;
+}
+.switch:hover { background: var(--marron); }
+.switch.on { background: var(--verde); }
+.switch-perilla {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--crema);
+  transform: translateY(-50%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: left 0.25s;
+}
+.switch.on .switch-perilla { left: 29px; }
+
+/* ===========================================================
+   VISTA HOJA DE CÁLCULO (tipo Excel)
+   Cuadrícula real: números de fila, letras de columna A-E, celdas que se
+   escriben en blanco y columnas de cuenta que se llenan solas.
+   =========================================================== */
+.hoja-tit {
+  font-family: 'ScothBrace', serif;
+  color: #fff;
+  font-size: 1.12rem;
+  text-align: center;
+  margin: 2px 0 10px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.hoja {
+  border-collapse: collapse;
+  color: #fff;
+  font-size: 0.82rem;
+}
+
+/* Los dos datos de arriba */
+.hoja-datos {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 4px;
 }
+.hoja-datos td { border: 1px solid rgba(255, 255, 255, 0.25); padding: 8px 10px; }
+.hoja-rot { background: rgba(255, 255, 255, 0.1); font-weight: bold; width: 55%; }
+.hoja-cel { padding: 5px 8px !important; }
+
+/* La hoja grande: se desliza de lado si no cabe (como en Excel) */
+.hoja-scroll {
+  overflow-x: auto;
+  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.hoja-grande {
+  width: 100%;
+  min-width: 560px;             /* fuerza el look de hoja ancha */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+.hoja-grande th,
+.hoja-grande td {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 5px 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Fila de letras A-B-C (como Excel) */
+.hoja-abc th {
+  background: rgba(0, 0, 0, 0.28);
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.72rem;
+  padding: 2px;
+}
+/* Fila de nombres de columna */
+.hoja-encab th {
+  background: rgba(20, 45, 30, 0.6);
+  font-family: 'ScothBrace', serif;
+  font-weight: normal;
+  font-size: 0.78rem;
+  text-align: center;
+  color: #fff;
+  line-height: 1.15;
+}
+.hoja-grande .esq {
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  width: 30px;
+  font-size: 0.72rem;
+}
+
+/* Números de fila (columna izquierda gris, como Excel) */
+.hoja-num {
+  background: rgba(0, 0, 0, 0.22);
+  text-align: center;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.9);
+  width: 30px;
+}
+
+/* Celdas donde se escribe */
+.hoja-grande .celda { background: rgba(255, 255, 255, 0.04); padding: 2px; }
+.celda-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  color: var(--texto);
+  padding: 6px 6px;
+  font-size: 0.8rem;
+}
+.celda-num { text-align: right; font-variant-numeric: tabular-nums; }
+.celda-texto { min-width: 90px; }
+.celda-fecha { font-size: 0.74rem; padding: 5px 4px; }
+
+/* Celdas que se llenan solas (la cuenta) */
+.hoja-calc {
+  background: rgba(242, 178, 51, 0.12);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+  color: #fff;
+}
+.hoja-grande .celda-cuando { text-align: left; }
+.hoja-grande .celda-cuando strong { display: block; color: var(--dorado); line-height: 1.1; }
+.hoja-grande .celda-cuando .sub { display: block; font-size: 0.68rem; color: rgba(255, 255, 255, 0.8); }
+.hoja-grande .celda-cuando .ok { color: #9cf0ad; font-weight: bold; }
+.hoja-calc .aviso, .hoja-fecha-info .aviso { color: #ffe8a8; font-size: 0.72rem; }
+
+.hoja-fechacel { min-width: 120px; }
+.hoja-fecha-info {
+  margin-top: 3px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.2;
+}
+.hoja-fecha-info strong { color: var(--dorado); }
+
+/* Botón quitar y botón agregar dentro de la hoja */
+.hoja-x { width: 34px; text-align: center; padding: 3px !important; }
+.hoja-grande .btn-eliminar { padding: 3px 7px; font-size: 0.78rem; background: var(--terracota); }
+.hoja-btn-add {
+  padding: 3px 8px;
+  font-size: 1rem;
+  line-height: 1;
+  background: var(--verde);
+}
+.hoja-btn-add:hover { background: var(--verde-oscuro); }
+
+/* Fila en blanco para apuntar uno nuevo */
+.hoja-nueva td { background: rgba(46, 125, 64, 0.14); }
+.hoja-nueva .hoja-num { color: var(--dorado); }
+
+/* Fila de TOTAL */
+.hoja-total td {
+  background: rgba(20, 45, 30, 0.65);
+  font-weight: bold;
+  font-family: 'LiberationSans', sans-serif;
+}
+.hoja-total .hoja-calc { color: var(--dorado); }
 
 /* Pulso del precio cuando una pieza de la despensa cambia el total */
 .jornal-num.pulso { animation: precio-pulso 0.5s ease; }
