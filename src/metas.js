@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
       btnMetas.title = cerrado
         ? 'Toque la mula para ver su cuenta'
         : 'Toque la mula para ocultar su cuenta';
+      actualizarAnchoApp();   // el ancho de la hoja solo aplica con el panel abierto
     });
   }
 
@@ -97,9 +98,11 @@ function setVistaHoja(on) {
 // Al salir de Metas (o volver a "Sencilla") regresa al ancho normal.
 function actualizarAnchoApp() {
   const sw = document.getElementById('switchVista');
+  const panel = document.getElementById('panel-metas');
   const enHoja = !!(sw && sw.getAttribute('aria-checked') === 'true');
+  const abierto = !!(panel && !panel.classList.contains('cerrado'));
   const enMetas = (typeof vistaActiva === 'function') ? vistaActiva() === 'metas' : true;
-  document.body.classList.toggle('modo-hoja', enHoja && enMetas);
+  document.body.classList.toggle('modo-hoja', enHoja && enMetas && abierto);
 }
 
 // ----------------------------------------------------------------
