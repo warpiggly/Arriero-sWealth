@@ -9,17 +9,18 @@
 </head>
 <body>
   <!-- Navegación: estrellas para cambiar de vista.
-       Estrella 1 = Metas (el corazón: ¿cuándo puedo comprarlo?), es la principal.
-       Estrella 2 = Cotizar (para independientes, secundario).
-       Estrella 3 = Mi Despensa (piezas guardadas del cotizador). -->
+       Estrella 1 = Las dos mulas del arriero: Ahorro (Metas) y Cobrar (Cotizar).
+                    Se alterna entre ellas con las bolitas-mula de abajo.
+       Estrella 2 = Mi Despensa (piezas guardadas del cotizador).
+       Estrella 3 = En construcción (próximamente). -->
   <nav class="estrellas">
-    <button class="estrella activa" data-view="metas" title="¿Cuándo puedo comprarlo?">
-      <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
-    </button>
-    <button class="estrella" data-view="cotizar" title="Cobrar por mi trabajo">
+    <button class="estrella activa" data-view="metas" title="Ahorro y cobrar">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
     <button class="estrella" data-view="vista2" title="Mi Despensa">
+      <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
+    </button>
+    <button class="estrella" data-view="construccion" title="En construcción">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
   </nav>
@@ -56,27 +57,44 @@
     </div>
   </div>
 
+  <!-- Las DOS MULAS del arriero: el ÚNICO control de abajo. Reemplazan a los
+       viejos botones de "desplegar". Cada una es la misma raza, distinta postura
+       y distinta carga:
+         · Mula-cabeza = AHORRO -> abre la vista Metas   ("Te falta ahorrar")
+         · Mula-cuerpo = COBRAR -> abre la vista Cotizar ("Deberías cobrar")
+       Un toque: cambia de sección Y abre su contenido. Si se toca la que ya está
+       abierta, se cierra (interruptor). Solo se ven en la 1ª estrella.
+       Ambas siluetas son de Font Awesome (CC BY 4.0), con la paleta de la app. -->
+  <div id="bolitas-mulas" class="bolitas-mulas" role="tablist" aria-label="Ahorro o cobrar">
+    <button class="bolita-mula activa" data-view="metas" role="tab" aria-selected="true"
+            title="Ahorro: toque para abrir o cerrar su cuenta">
+      <span class="bolita-medalla">
+        <svg class="ico-mula" viewBox="0 0 640 512" fill="currentColor" aria-hidden="true">
+          <path d="M64 464V316.9c0-108.4 68.3-205.1 170.5-241.3L404.2 15.5C425.6 7.9 448 23.8 448 46.4c0 11-5.5 21.2-14.6 27.3L400 96c48.1 0 91.2 29.8 108.1 74.9l48.6 129.5c11.8 31.4 4.1 66.8-19.6 90.5c-16 16-37.8 25.1-60.5 25.1h-3.4c-26.1 0-50.9-11.6-67.6-31.7l-32.3-38.7c-11.7 4.1-24.2 6.4-37.3 6.4l-.1 0 0 0c-6.3 0-12.5-.5-18.6-1.5c-3.6-.6-7.2-1.4-10.7-2.3l0 0c-28.9-7.8-53.1-26.8-67.8-52.2c-4.4-7.6-14.2-10.3-21.9-5.8s-10.3 14.2-5.8 21.9c24 41.5 68.3 70 119.3 71.9l47.2 70.8c4 6.1 6.2 13.2 6.2 20.4c0 20.3-16.5 36.8-36.8 36.8H112c-26.5 0-48-21.5-48-48zM392 224a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/>
+        </svg>
+      </span>
+      <span class="bolita-lbl">Ahorro</span>
+    </button>
+    <button class="bolita-mula" data-view="cotizar" role="tab" aria-selected="false"
+            title="Cobrar: toque para abrir o cerrar su cálculo">
+      <span class="bolita-medalla">
+        <svg class="ico-mula" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true">
+          <path d="M448 238.1l0-78.1 16 0 9.8 19.6c12.5 25.1 42.2 36.4 68.3 26c20.5-8.2 33.9-28 33.9-50.1L576 80c0-19.1-8.4-36.3-21.7-48l5.7 0c8.8 0 16-7.2 16-16s-7.2-16-16-16L480 0 448 0C377.3 0 320 57.3 320 128l-96 0-20.8 0-54.4 0c-30.7 0-57.6 16.3-72.5 40.8C33.2 174.5 0 211.4 0 256l0 56c0 13.3 10.7 24 24 24s24-10.7 24-24l0-56c0-13.4 6.6-25.2 16.7-32.5c1.6 13 6.3 25.4 13.6 36.4l28.2 42.4c8.3 12.4 6.4 28.7-1.2 41.6c-16.5 28-20.6 62.2-10 93.9l17.5 52.4c4.4 13.1 16.6 21.9 30.4 21.9l33.7 0c21.8 0 37.3-21.4 30.4-42.1l-20.8-62.5c-2.1-6.4-.5-13.4 4.3-18.2l12.7-12.7c13.2-13.2 20.6-31.1 20.6-49.7c0-2.3-.1-4.6-.3-6.9l84 24c4.1 1.2 8.2 2.1 12.3 2.8L320 480c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-164.3c19.2-19.2 31.5-45.7 32-75.7c0 0 0 0 0 0l0-1.9zM496 64a16 16 0 1 1 0 32 16 16 0 1 1 0-32z"/>
+        </svg>
+      </span>
+      <span class="bolita-lbl">Cobrar</span>
+    </button>
+  </div>
+  <p id="mulas-hint" class="mulas-hint">Toque una mula para abrir su cuenta.</p>
+
 
   <!-- ===================== VISTA PRINCIPAL: METAS ===================== -->
   <!-- El corazón de la app: el usuario dice qué quiere comprar y la app le
        calcula cuánto le falta, cuánto ahorrar por día y cuándo lo logra. -->
   <div id="metas" class="vista activa">
- 
 
-    <!-- Botón maestro con la CABEZA DE CABALLO: abre/cierra toda la cuenta,
-         igual que el botón de "Cotizar". El SVG es de Font Awesome (CC BY 4.0),
-         recoloreado con la paleta de la app (silueta café sobre círculo dorado). -->
-    <div class="master-toggle-wrap metas-cerrado">
-      <button id="toggleMetas" class="master-btn master-btn-mula" title="Toque la mula para ver su cuenta">
-        <svg class="ico-mula" viewBox="0 0 640 512" fill="currentColor" aria-hidden="true">
-          <path d="M64 464V316.9c0-108.4 68.3-205.1 170.5-241.3L404.2 15.5C425.6 7.9 448 23.8 448 46.4c0 11-5.5 21.2-14.6 27.3L400 96c48.1 0 91.2 29.8 108.1 74.9l48.6 129.5c11.8 31.4 4.1 66.8-19.6 90.5c-16 16-37.8 25.1-60.5 25.1h-3.4c-26.1 0-50.9-11.6-67.6-31.7l-32.3-38.7c-11.7 4.1-24.2 6.4-37.3 6.4l-.1 0 0 0c-6.3 0-12.5-.5-18.6-1.5c-3.6-.6-7.2-1.4-10.7-2.3l0 0c-28.9-7.8-53.1-26.8-67.8-52.2c-4.4-7.6-14.2-10.3-21.9-5.8s-10.3 14.2-5.8 21.9c24 41.5 68.3 70 119.3 71.9l47.2 70.8c4 6.1 6.2 13.2 6.2 20.4c0 20.3-16.5 36.8-36.8 36.8H112c-26.5 0-48-21.5-48-48zM392 224a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/>
-        </svg>
-      </button>
-      <span class="master-hint-label">Toque la mula para abrir o cerrar su cuenta</span>
-    </div>
-
-    <!-- Toda la cuenta vive aquí dentro (como el panel de "Cotizar").
-         Arranca CERRADO: el usuario toca la mula para desplegarlo. -->
+    <!-- Toda la cuenta vive aquí dentro. Arranca CERRADO: se abre tocando la
+         mula de AHORRO de arriba (ya no hay botón propio de desplegar). -->
     <div id="panel-metas" class="master-contenido cerrado">
 
       <!-- Interruptor horizontal (encendido/apagado) para cambiar entre la
@@ -197,12 +215,9 @@
   <!-- ===================== VISTA: COTIZAR (para independientes) ===================== -->
   <div id="cotizar" class="vista">
 
-    <!-- Botón maestro: abre/cierra todo el cálculo -->
-    <div class="master-toggle-wrap">
-      <button id="toggleCalculo" class="master-btn" title="Ver cálculo">+</button>
-    </div>
-
-    <!-- Contenedor maestro: todas las secciones expandibles -->
+    <!-- Contenedor maestro: todas las secciones expandibles.
+         Arranca CERRADO: se abre tocando la mula de COBRAR de arriba
+         (ya no hay botón "+" propio de desplegar). -->
     <div id="panel-calculo" class="master-contenido cerrado">
 
     <!-- Tarifa por hora -->
@@ -399,6 +414,18 @@
       <h4>Descuentos</h4>
       <div id="lib-descuentos-container" class="lib-tabla"></div>
       <p id="lib-descuentos-vacio" class="frase-arriero">Todavía no ha guardado descuentos.</p>
+    </div>
+  </div>
+
+  <!-- ===================== VISTA: EN CONSTRUCCIÓN (próximamente) ===================== -->
+  <!-- Placeholder de la 3ª estrella. Todavía no hace nada: solo un aviso en la
+       voz del arriero para que el usuario sepa que aquí vendrá algo. -->
+  <div id="construccion" class="vista">
+    <div class="en-construccion">
+      <div class="en-construccion-ico" aria-hidden="true">🚧</div>
+      <h3>Aquí estamos trabajando, mijo</h3>
+      <p>Esta gaveta todavía está en obra. Vuelva prontico que le tenemos una sorpresa.</p>
+      <span class="en-construccion-firma">— Su arriero de confianza</span>
     </div>
   </div>
 

@@ -147,6 +147,147 @@ body::after {
 .estrella:hover { opacity: 0.85; transform: scale(1.1); }
 .estrella.activa { opacity: 1; transform: scale(1.25); }
 
+/* ---------- Las dos mulas del arriero: control de abajo (abre el contenido) ---------- */
+.bolitas-mulas {
+  display: flex;
+  justify-content: center;
+  gap: 34px;
+  margin: 2px 0 0;
+  padding: 4px 0 2px;
+}
+.bolitas-mulas.oculta { display: none; }
+
+/* Pista bajo las mulas. Se oculta junto con la barra (en Despensa / construcción). */
+.mulas-hint {
+  text-align: center;
+  margin: 4px 0 14px;
+  color: #fff;
+  font-size: 0.78rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.bolitas-mulas.oculta + .mulas-hint { display: none; }
+
+/* Curva de suavizado común: arranque decidido y aterrizaje calmado (sobrio). */
+.bolita-mula {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  opacity: 0.62;
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* La "medalla" dorada que contiene a la mula: acabado tipo moneda acuñada,
+   con degradado, brillo superior y sombra suave (aire empresarial). */
+.bolita-medalla {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: var(--marron);                 /* trazo de la mula */
+  background: linear-gradient(155deg, #F8C85A 0%, var(--dorado) 52%, var(--dorado-osc) 100%);
+  border: 3px solid var(--crema);
+  box-shadow: 0 4px 10px rgba(43, 33, 24, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transform: translateY(0) scale(1);
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.32s ease,
+              background 0.32s ease,
+              border-color 0.32s ease;
+}
+.bolita-medalla .ico-mula {
+  width: 32px;
+  height: 32px;
+  display: block;
+  transform-origin: 50% 85%;            /* que el cabeceo pivote desde las patas */
+}
+.bolita-lbl {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: color 0.28s ease;
+}
+
+/* Reposo -> hover: la mula se yergue un poco (se levanta), sin rebotes. */
+.bolita-mula:hover { opacity: 0.95; }
+.bolita-mula:hover .bolita-medalla {
+  transform: translateY(-3px) scale(1.05);
+  background: linear-gradient(155deg, #F6C24E 0%, var(--dorado-osc) 55%, #C98614 100%);
+  box-shadow: 0 9px 20px rgba(43, 33, 24, 0.42),
+              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.bolita-mula:active .bolita-medalla { transform: translateY(-1px) scale(0.99); }
+
+/* La mula elegida: al frente, con anillo dorado y un brillo cálido discreto. */
+.bolita-mula.activa { opacity: 1; }
+.bolita-mula.activa .bolita-lbl { color: #fff; }
+.bolita-mula.activa .bolita-medalla {
+  transform: translateY(0) scale(1.12);
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.5),
+              0 0 16px rgba(242, 178, 51, 0.35),
+              0 8px 20px rgba(43, 33, 24, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.bolita-mula.activa:hover .bolita-medalla { transform: translateY(-3px) scale(1.14); }
+
+/* La sección al frente Y desplegada: anillo verde para avisar que está abierta. */
+.bolita-mula.activa.abierta .bolita-medalla {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(46, 125, 64, 0.85),
+              0 0 16px rgba(46, 125, 64, 0.4),
+              0 8px 20px rgba(43, 33, 24, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* Toque de arriero: al seleccionarla, la mula da un cabeceo breve (una vez). */
+@keyframes mula-cabeceo {
+  0%   { transform: rotate(0deg) translateY(0); }
+  30%  { transform: rotate(-9deg) translateY(-1px); }
+  62%  { transform: rotate(4deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+.bolita-mula.activa .ico-mula {
+  animation: mula-cabeceo 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* Respeto por quien prefiere menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .bolita-mula,
+  .bolita-medalla,
+  .bolita-lbl { transition: none; }
+  .bolita-mula.activa .ico-mula { animation: none; }
+}
+
+/* ---------- Cartel "En construcción" (3ª estrella) ---------- */
+.en-construccion {
+  text-align: center;
+  margin: 26px 14px;
+  padding: 26px 20px;
+  background: var(--crema-trans);
+  border: 2px dashed var(--dorado-osc);
+  border-radius: 16px;
+  box-shadow: var(--sombra);
+}
+.en-construccion-ico { font-size: 2.6rem; line-height: 1; margin-bottom: 6px; }
+.en-construccion h3 { color: var(--verde-oscuro); margin: 6px 0; }
+.en-construccion p { color: var(--texto); margin: 6px 0; }
+.en-construccion-firma {
+  display: block;
+  margin-top: 12px;
+  color: var(--marron);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
 /* ---------- Encabezado / logo ---------- */
 .app-header { text-align: center; padding: 0 16px; }
 .app-logo { display: block; width: 82%; max-width: 1030px; margin: 0 auto 6px; }

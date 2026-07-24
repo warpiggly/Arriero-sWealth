@@ -47,20 +47,19 @@ document.addEventListener('DOMContentLoaded', function() {
     b.addEventListener('click', () => cambiarVista(b.dataset.view, b));
   });
 
+  // Las DOS MULAS (control de abajo): un toque cambia de sección Y abre su
+  // contenido. Si se toca la que ya está abierta al frente, se cierra.
+  // Mantienen marcada la 1ª estrella (no la bolita).
+  const estrellaUno = document.querySelector('.estrella[data-view="metas"]');
+  document.querySelectorAll('.bolita-mula').forEach(b => {
+    b.addEventListener('click', () => activarMula(b.dataset.view, estrellaUno));
+  });
+
   // Secciones expandibles: clic en el título alterna abierto/cerrado
   document.querySelectorAll('.colapsable h4').forEach(h => {
     h.addEventListener('click', () => h.parentElement.classList.toggle('cerrada'));
   });
-
-  // Botón maestro: abre/cierra todo el cálculo
-  const btnMaestro = document.getElementById('toggleCalculo');
-  const panel = document.getElementById('panel-calculo');
-  if (btnMaestro && panel) {
-    btnMaestro.addEventListener('click', () => {
-      const cerrado = panel.classList.toggle('cerrado');
-      btnMaestro.textContent = cerrado ? '+' : '−'; // + / −
-    });
-  }
+  // (El panel de "Cotizar" ya no tiene botón "+": lo abre la mula de Cobrar.)
 
   // ----- Captura rápida -----
 
@@ -139,6 +138,9 @@ function cambiarVista(idVista, estrella) {
   document.querySelectorAll('.estrella').forEach(e => e.classList.remove('activa'));
   if (estrella) estrella.classList.add('activa');
 
+  // Las dos mulas (bolitas) solo se ven en la 1ª estrella y resaltan la activa.
+  actualizarBolitas(idVista);
+
   // En "Mi Despensa" la cabecera se compacta (barra: logo · precio · refrán).
   // La animación y el nuevo layout los hace el CSS al ver esta clase en <body>.
   document.body.classList.toggle('modo-despensa', idVista === 'vista2');
@@ -148,6 +150,53 @@ function cambiarVista(idVista, estrella) {
 
   // Ajustar el ancho de la app: solo se ensancha en Metas + hoja de cálculo.
   if (typeof actualizarAnchoApp === 'function') actualizarAnchoApp();
+}
+
+// Panel colapsable que le corresponde a cada mula.
+function panelDeVista(idVista) {
+  if (idVista === 'metas')   return document.getElementById('panel-metas');
+  if (idVista === 'cotizar') return document.getElementById('panel-calculo');
+  return null;
+}
+
+// Abre o cierra el panel de una vista y refresca los efectos de layout
+// (el ancho de la app solo se ensancha con la hoja de cálculo abierta en Metas).
+function ponerPanel(idVista, abierto) {
+  const panel = panelDeVista(idVista);
+  if (panel) panel.classList.toggle('cerrado', !abierto);
+  const bolita = document.querySelector(`.bolita-mula[data-view="${idVista}"]`);
+  if (bolita) bolita.classList.toggle('abierta', abierto);
+  if (typeof actualizarAnchoApp === 'function') actualizarAnchoApp();
+}
+
+// Clic en una mula (el control de abajo). Un solo toque:
+//   · si su sección ya está al frente y abierta -> la cierra (interruptor);
+//   · si no -> cambia a su sección y abre su contenido.
+function activarMula(idVista, estrella) {
+  const panel = panelDeVista(idVista);
+  const yaAlFrente = vistaActiva() === idVista;
+  const abierto = !!(panel && !panel.classList.contains('cerrado'));
+  if (yaAlFrente && abierto) {
+    ponerPanel(idVista, false);
+  } else {
+    cambiarVista(idVista, estrella);
+    ponerPanel(idVista, true);
+  }
+}
+
+// Muestra la barra de las dos mulas SOLO en la 1ª estrella (Ahorro/Cobrar) y
+// resalta la mula que corresponde a la vista activa. En Despensa o En
+// construcción, la barra se oculta.
+function actualizarBolitas(idVista) {
+  const barra = document.getElementById('bolitas-mulas');
+  if (!barra) return;
+  const enPrimeraEstrella = (idVista === 'metas' || idVista === 'cotizar');
+  barra.classList.toggle('oculta', !enPrimeraEstrella);
+  barra.querySelectorAll('.bolita-mula').forEach(b => {
+    const activa = b.dataset.view === idVista;
+    b.classList.toggle('activa', activa);
+    b.setAttribute('aria-selected', activa ? 'true' : 'false');
+  });
 }
 
 // ¿Qué vista está activa ahora? Devuelve su id (ej: 'metas', 'cotizar').

@@ -34,20 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnAgregar = document.getElementById('agregar-meta');
   if (btnAgregar) btnAgregar.addEventListener('click', agregarMeta);
 
-  // Botón maestro de la MULA: abre/cierra toda la cuenta (igual que "Cotizar").
-  const btnMetas = document.getElementById('toggleMetas');
-  const panelMetas = document.getElementById('panel-metas');
-  if (btnMetas && panelMetas) {
-    btnMetas.addEventListener('click', () => {
-      const cerrado = panelMetas.classList.toggle('cerrado');
-      const wrap = btnMetas.closest('.master-toggle-wrap');
-      if (wrap) wrap.classList.toggle('metas-cerrado', cerrado);
-      btnMetas.title = cerrado
-        ? 'Toque la mula para ver su cuenta'
-        : 'Toque la mula para ocultar su cuenta';
-      actualizarAnchoApp();   // el ancho de la hoja solo aplica con el panel abierto
-    });
-  }
+  // (El panel de la cuenta ya no tiene botón propio: lo abre/cierra la mula de
+  //  AHORRO de arriba. Ver activarMula() en logic_quotation.js.)
 
   // Enter en cualquier campo del formulario = "Agregar" (helper global)
   if (typeof enterParaAgregar === 'function') {
