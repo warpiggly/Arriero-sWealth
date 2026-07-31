@@ -419,6 +419,7 @@ function renderPresupuestos() {
   cont.innerHTML = '';
 
   if (vacio) vacio.style.display = presupuestosGuardados.length ? 'none' : 'block';
+  pintarValorPresupuestos();
 
   presupuestosGuardados.forEach(p => {
     const div = document.createElement('div');
@@ -722,6 +723,23 @@ function eliminarHerramienta(id) {
 }
 
 // ----------------------------------------------------------------
+// Valores de los MOSAICOS de la vista Cobrar
+// Cada cuadro de la rejilla muestra su valor actual mientras está cerrado.
+// ----------------------------------------------------------------
+function ponerValorMosaico(id, texto) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = texto;
+}
+
+// Va aparte porque la lista de presupuestos cambia por su cuenta (al guardar o
+// borrar uno), sin pasar por recalcularCotizacion().
+function pintarValorPresupuestos() {
+  const n = presupuestosGuardados.length;
+  ponerValorMosaico('val-presupuestos',
+    n ? n + (n === 1 ? ' guardado' : ' guardados') : 'ninguno');
+}
+
+// ----------------------------------------------------------------
 // Cálculo principal
 // ----------------------------------------------------------------
 function recalcularCotizacion() {
@@ -764,6 +782,25 @@ function recalcularCotizacion() {
   document.getElementById('cotiz-ganancia').textContent = formatearDinero(ganancia);
   document.getElementById('cotiz-descuento-pct').textContent = descuento;
   document.getElementById('cotiz-descuento').textContent = '-' + formatearDinero(valorDescuento);
+
+  // Valor que muestra cada MOSAICO cerrado de la rejilla de Cobrar, para poder
+  // ver en qué va todo sin tener que abrir los cuadros uno por uno.
+  ponerValorMosaico('val-tarifa', tarifaHora > 0 ? formatearDinero(tarifaHora) + '/h' : '—');
+  ponerValorMosaico('val-tiempo', horasTrabajo > 0
+    ? formatearNumero(horasTrabajo) + ' h · ' + formatearDinero(costoManoObra)
+    : '—');
+  ponerValorMosaico('val-materiales', materialesCotizacion.length
+    ? materialesCotizacion.length + ' · ' + formatearDinero(subtotalMateriales)
+    : '—');
+  ponerValorMosaico('val-herramientas', herramientasCotizacion.length
+    ? herramientasCotizacion.length + ' · ' + formatearDinero(subtotalHerramientas)
+    : '—');
+  ponerValorMosaico('val-otros', (transporte + otros) > 0 ? formatearDinero(transporte + otros) : '—');
+  ponerValorMosaico('val-margen', margen + ' %');
+  ponerValorMosaico('val-descuento', descuento > 0 ? descuento + ' %' : 'sin descuento');
+  ponerValorMosaico('val-desglose', formatearDinero(costoTotal));
+  ponerValorMosaico('val-guardar', presupuestoEditandoId ? 'editando' : 'nuevo');
+  pintarValorPresupuestos();
 
   // Guardamos el precio para que la cabecera pueda repintarlo al volver a esta
   // vista, pero solo tocamos el número grande si Cotizar está al frente (si no,

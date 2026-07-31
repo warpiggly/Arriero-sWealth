@@ -268,161 +268,248 @@
          (ya no hay botón "+" propio de desplegar). -->
     <div id="panel-calculo" class="master-contenido cerrado">
 
+    <!-- REJILLA DE MOSAICOS: cada sección es un cuadro, dos por fila. Cerrado,
+         el cuadro muestra ícono, nombre y su valor actual (así se ve en qué va
+         todo sin abrir nada). Al tocar el cuadro se despliega y pasa a ocupar
+         el ancho completo de la fila: los formularios de adentro necesitan el
+         ancho, en media columna quedarían apretadísimos.
+
+         El <h4> es el que lleva todo el relleno del cuadro a propósito: así,
+         estando cerrado, el cuadro ENTERO es zona de clic (el manejador vive en
+         el h4, ver logic_quotation.js). El contenido va aparte en .cat-cuerpo.
+
+         Las clases .categoria-gastos y .colapsable se mantienen porque "Mi
+         Despensa" las comparte; todo el estilo nuevo va colgado de
+         .cotizar-rejilla para no tocar esa vista. -->
+    <div class="cotizar-rejilla">
+
     <!-- Tarifa por hora -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Tu tarifa por hora</h4>
-      <div class="gasto-item">
-        <label for="ingresoDeseado">Ingreso que quieres al mes:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="ingresoDeseado" placeholder="3.000.000">
-      </div>
-      <div class="gasto-item">
-        <label for="horasFacturables">Horas facturables al mes:</label>
-        <input type="number" inputmode="numeric" class="input-num" id="horasFacturables" min="0" placeholder="120">
-      </div>
-      <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
-      <div class="guardar-despensa">
-        <input type="text" class="nombre-despensa" id="save-tarifa-nombre" placeholder="Nombre (ej: Tarifa premium)">
-        <button type="button" class="btn-guardar-despensa" data-guardar="tarifa">💾 Guardar en despensa</button>
+      <h4>
+        <span class="cat-ico" aria-hidden="true">⏱</span>
+        <span class="cat-tit">Tu tarifa por hora</span>
+        <span class="cat-valor" id="val-tarifa">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="ingresoDeseado">Ingreso que quieres al mes:</label>
+          <input type="text" inputmode="numeric" class="input-num input-money" id="ingresoDeseado" placeholder="3.000.000">
+        </div>
+        <div class="gasto-item">
+          <label for="horasFacturables">Horas facturables al mes:</label>
+          <input type="number" inputmode="numeric" class="input-num" id="horasFacturables" min="0" placeholder="120">
+        </div>
+        <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
+        <div class="guardar-despensa">
+          <input type="text" class="nombre-despensa" id="save-tarifa-nombre" placeholder="Nombre (ej: Tarifa premium)">
+          <button type="button" class="btn-guardar-despensa" data-guardar="tarifa">💾 Guardar en despensa</button>
+        </div>
       </div>
     </div>
 
     <!-- Mano de obra -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Mano de obra (tu tiempo)</h4>
-      <div class="gasto-item">
-        <label for="horasTrabajo">Horas de este trabajo:</label>
-        <input type="number" inputmode="numeric" class="input-num" id="horasTrabajo" min="0" placeholder="0">
-      </div>
-      <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
-      <div class="guardar-despensa">
-        <input type="text" class="nombre-despensa" id="save-tiempo-nombre" placeholder="Nombre (ej: Jornada completa)">
-        <button type="button" class="btn-guardar-despensa" data-guardar="tiempo">💾 Guardar en despensa</button>
+      <h4>
+        <span class="cat-ico" aria-hidden="true">💪</span>
+        <span class="cat-tit">Mano de obra</span>
+        <span class="cat-valor" id="val-tiempo">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="horasTrabajo">Horas de este trabajo:</label>
+          <input type="number" inputmode="numeric" class="input-num" id="horasTrabajo" min="0" placeholder="0">
+        </div>
+        <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
+        <div class="guardar-despensa">
+          <input type="text" class="nombre-despensa" id="save-tiempo-nombre" placeholder="Nombre (ej: Jornada completa)">
+          <button type="button" class="btn-guardar-despensa" data-guardar="tiempo">💾 Guardar en despensa</button>
+        </div>
       </div>
     </div>
 
     <!-- Materiales -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Materiales / insumos</h4>
-      <div id="materiales-container"></div>
-      <div class="gasto-personalizado-form">
-        <div class="gasto-item">
-          <label for="material-nombre">Nombre:</label>
-          <input type="text" id="material-nombre" placeholder="Ej: Pintura">
+      <h4>
+        <span class="cat-ico" aria-hidden="true">📦</span>
+        <span class="cat-tit">Materiales</span>
+        <span class="cat-valor" id="val-materiales">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div id="materiales-container"></div>
+        <div class="gasto-personalizado-form">
+          <div class="gasto-item">
+            <label for="material-nombre">Nombre:</label>
+            <input type="text" id="material-nombre" placeholder="Ej: Pintura">
+          </div>
+          <div class="gasto-item">
+            <label for="material-costo">Costo unitario:</label>
+            <input type="text" inputmode="numeric" class="input-num input-money" id="material-costo">
+          </div>
+          <div class="gasto-item">
+            <label for="material-cantidad">Cantidad:</label>
+            <input type="number" inputmode="numeric" class="input-num" id="material-cantidad" min="1" value="1">
+          </div>
+          <button id="agregar-material">Agregar material</button>
+          <button type="button" class="btn-guardar-despensa" data-guardar="material">💾 Guardar en despensa</button>
+          <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
         </div>
-        <div class="gasto-item">
-          <label for="material-costo">Costo unitario:</label>
-          <input type="text" inputmode="numeric" class="input-num input-money" id="material-costo">
-        </div>
-        <div class="gasto-item">
-          <label for="material-cantidad">Cantidad:</label>
-          <input type="number" inputmode="numeric" class="input-num" id="material-cantidad" min="1" value="1">
-        </div>
-        <button id="agregar-material">Agregar material</button>
-        <button type="button" class="btn-guardar-despensa" data-guardar="material">💾 Guardar en despensa</button>
-        <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
+        <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
       </div>
-      <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
     </div>
 
     <!-- Herramientas -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Herramientas / equipos</h4>
-      <div id="herramientas-container"></div>
-      <div class="gasto-personalizado-form">
-        <div class="gasto-item">
-          <label for="herramienta-nombre">Nombre:</label>
-          <input type="text" id="herramienta-nombre" placeholder="Ej: Taladro">
+      <h4>
+        <span class="cat-ico" aria-hidden="true">🔧</span>
+        <span class="cat-tit">Herramientas</span>
+        <span class="cat-valor" id="val-herramientas">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div id="herramientas-container"></div>
+        <div class="gasto-personalizado-form">
+          <div class="gasto-item">
+            <label for="herramienta-nombre">Nombre:</label>
+            <input type="text" id="herramienta-nombre" placeholder="Ej: Taladro">
+          </div>
+          <div class="gasto-item">
+            <label for="herramienta-costo">Valor inicial:</label>
+            <input type="text" inputmode="numeric" class="input-num input-money" id="herramienta-costo">
+          </div>
+          <div class="gasto-item">
+            <label for="herramienta-anios">Años de vida:</label>
+            <input type="number" inputmode="numeric" class="input-num" id="herramienta-anios" min="0.5" step="0.5" placeholder="Ej: 5">
+          </div>
+          <div class="gasto-item">
+            <label for="herramienta-uso">Nivel de uso:</label>
+            <select id="herramienta-uso">
+              <option value="600">Poco uso (≈2 h/día)</option>
+              <option value="1200" selected>Medio uso (≈4 h/día)</option>
+              <option value="2400">Mucho uso (≈8 h/día)</option>
+            </select>
+          </div>
+          <button id="agregar-herramienta">Agregar herramienta</button>
+          <button type="button" class="btn-guardar-despensa" data-guardar="herramienta">💾 Guardar en despensa</button>
+          <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
         </div>
-        <div class="gasto-item">
-          <label for="herramienta-costo">Valor inicial:</label>
-          <input type="text" inputmode="numeric" class="input-num input-money" id="herramienta-costo">
-        </div>
-        <div class="gasto-item">
-          <label for="herramienta-anios">Años de vida:</label>
-          <input type="number" inputmode="numeric" class="input-num" id="herramienta-anios" min="0.5" step="0.5" placeholder="Ej: 5">
-        </div>
-        <div class="gasto-item">
-          <label for="herramienta-uso">Nivel de uso:</label>
-          <select id="herramienta-uso">
-            <option value="600">Poco uso (≈2 h/día)</option>
-            <option value="1200" selected>Medio uso (≈4 h/día)</option>
-            <option value="2400">Mucho uso (≈8 h/día)</option>
-          </select>
-        </div>
-        <button id="agregar-herramienta">Agregar herramienta</button>
-        <button type="button" class="btn-guardar-despensa" data-guardar="herramienta">💾 Guardar en despensa</button>
-        <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
+        <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
       </div>
-      <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
     </div>
 
     <!-- Otros costos -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Otros costos</h4>
-      <div class="gasto-item">
-        <label for="costoTransporte">Transporte:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="costoTransporte">
-      </div>
-      <div class="gasto-item">
-        <label for="otrosGastos">Otros gastos:</label>
-        <input type="text" inputmode="numeric" class="input-num input-money" id="otrosGastos">
+      <h4>
+        <span class="cat-ico" aria-hidden="true">🚚</span>
+        <span class="cat-tit">Otros costos</span>
+        <span class="cat-valor" id="val-otros">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="costoTransporte">Transporte:</label>
+          <input type="text" inputmode="numeric" class="input-num input-money" id="costoTransporte">
+        </div>
+        <div class="gasto-item">
+          <label for="otrosGastos">Otros gastos:</label>
+          <input type="text" inputmode="numeric" class="input-num input-money" id="otrosGastos">
+        </div>
       </div>
     </div>
 
     <!-- Margen -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Margen de ganancia</h4>
-      <div class="gasto-item">
-        <label for="margenGanancia">Margen (%):</label>
-        <input type="number" inputmode="numeric" class="input-num" id="margenGanancia" min="0" value="30">
-      </div>
-      <div class="margen-chips" id="margen-chips">
-        <button type="button" class="chip-margen" data-margen="20">20%</button>
-        <button type="button" class="chip-margen" data-margen="30">30%</button>
-        <button type="button" class="chip-margen" data-margen="40">40%</button>
-        <button type="button" class="chip-margen" data-margen="50">50%</button>
+      <h4>
+        <span class="cat-ico" aria-hidden="true">📈</span>
+        <span class="cat-tit">Margen de ganancia</span>
+        <span class="cat-valor" id="val-margen">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="margenGanancia">Margen (%):</label>
+          <input type="number" inputmode="numeric" class="input-num" id="margenGanancia" min="0" value="30">
+        </div>
+        <div class="margen-chips" id="margen-chips">
+          <button type="button" class="chip-margen" data-margen="20">20%</button>
+          <button type="button" class="chip-margen" data-margen="30">30%</button>
+          <button type="button" class="chip-margen" data-margen="40">40%</button>
+          <button type="button" class="chip-margen" data-margen="50">50%</button>
+        </div>
       </div>
     </div>
 
     <!-- Descuento -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Descuento</h4>
-      <div class="gasto-item">
-        <label for="descuentoPorcentaje">Descuento (%):</label>
-        <input type="number" inputmode="numeric" class="input-num" id="descuentoPorcentaje" min="0" value="0">
-      </div>
-      <div class="guardar-despensa">
-        <input type="text" class="nombre-despensa" id="save-descuento-nombre" placeholder="Nombre (ej: Cliente frecuente)">
-        <button type="button" class="btn-guardar-despensa" data-guardar="descuento">💾 Guardar en despensa</button>
+      <h4>
+        <span class="cat-ico" aria-hidden="true">🏷️</span>
+        <span class="cat-tit">Descuento</span>
+        <span class="cat-valor" id="val-descuento">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="descuentoPorcentaje">Descuento (%):</label>
+          <input type="number" inputmode="numeric" class="input-num" id="descuentoPorcentaje" min="0" value="0">
+        </div>
+        <div class="guardar-despensa">
+          <input type="text" class="nombre-despensa" id="save-descuento-nombre" placeholder="Nombre (ej: Cliente frecuente)">
+          <button type="button" class="btn-guardar-despensa" data-guardar="descuento">💾 Guardar en despensa</button>
+        </div>
       </div>
     </div>
 
     <!-- Desglose de costos -->
-    <div id="resultado-cotizacion" class="colapsable cerrada">
-      <h4>Desglose de costos</h4>
-      <p><strong>Costo total:</strong> <span id="cotiz-costo-total">$0</span></p>
-      <p><strong>Ganancia (<span id="cotiz-margen-pct">30</span>%):</strong> <span id="cotiz-ganancia">$0</span></p>
-      <p><strong>Descuento (<span id="cotiz-descuento-pct">0</span>%):</strong> <span id="cotiz-descuento">$0</span></p>
+    <div id="resultado-cotizacion" class="categoria-gastos colapsable cerrada">
+      <h4>
+        <span class="cat-ico" aria-hidden="true">🧾</span>
+        <span class="cat-tit">Desglose de costos</span>
+        <span class="cat-valor" id="val-desglose">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <p><strong>Costo total:</strong> <span id="cotiz-costo-total">$0</span></p>
+        <p><strong>Ganancia (<span id="cotiz-margen-pct">30</span>%):</strong> <span id="cotiz-ganancia">$0</span></p>
+        <p><strong>Descuento (<span id="cotiz-descuento-pct">0</span>%):</strong> <span id="cotiz-descuento">$0</span></p>
+      </div>
     </div>
 
     <!-- Guardar este presupuesto con nombre -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Guardar este presupuesto</h4>
-      <div class="gasto-item">
-        <label for="nombrePresupuesto">Nombre:</label>
-        <input type="text" id="nombrePresupuesto" placeholder="Ej: DJ set 4 horas">
+      <h4>
+        <span class="cat-ico" aria-hidden="true">💾</span>
+        <span class="cat-tit">Guardar presupuesto</span>
+        <span class="cat-valor" id="val-guardar">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div class="gasto-item">
+          <label for="nombrePresupuesto">Nombre:</label>
+          <input type="text" id="nombrePresupuesto" placeholder="Ej: DJ set 4 horas">
+        </div>
+        <p id="estado-edicion" class="frase-arriero"></p>
+        <button id="guardarPresupuesto" class="btn-principal">Guardar presupuesto</button>
+        <button id="nuevoPresupuesto" class="btn-secundario">Empezar uno nuevo</button>
       </div>
-      <p id="estado-edicion" class="frase-arriero"></p>
-      <button id="guardarPresupuesto" class="btn-principal">Guardar presupuesto</button>
-      <button id="nuevoPresupuesto" class="btn-secundario">Empezar uno nuevo</button>
     </div>
 
     <!-- Presupuestos guardados -->
     <div class="categoria-gastos colapsable cerrada">
-      <h4>Mis presupuestos</h4>
-      <div id="presupuestos-container"></div>
-      <p id="sin-presupuestos" class="frase-arriero">Todavía no ha guardado ninguno, mijo.</p>
+      <h4>
+        <span class="cat-ico" aria-hidden="true">📋</span>
+        <span class="cat-tit">Mis presupuestos</span>
+        <span class="cat-valor" id="val-presupuestos">—</span>
+        <span class="cat-flecha" aria-hidden="true"></span>
+      </h4>
+      <div class="cat-cuerpo">
+        <div id="presupuestos-container"></div>
+        <p id="sin-presupuestos" class="frase-arriero">Todavía no ha guardado ninguno, mijo.</p>
+      </div>
     </div>
+
+    </div><!-- /.cotizar-rejilla -->
 
     </div><!-- /#panel-calculo -->
   </div>

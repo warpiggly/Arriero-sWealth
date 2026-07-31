@@ -2032,3 +2032,156 @@ html.calc-abierta body { overflow: hidden; }
   color: var(--marron);
   text-align: center;
 }
+
+/* ===========================================================
+   VISTA COBRAR — REJILLA DE MOSAICOS
+
+   Cada sección desplegable es un cuadro, dos por fila. Cerrado, el cuadro
+   muestra ícono + nombre + su valor actual. Al tocarlo se despliega y pasa a
+   ocupar el ancho completo de la fila (los formularios de adentro no caben en
+   media columna: la etiqueta y el campo quedarían apretadísimos).
+
+   OJO: todo va colgado de .cotizar-rejilla. Las clases .categoria-gastos y
+   .colapsable las comparte la vista "Mi Despensa", que NO se toca aquí.
+
+   Sobre la letra: los títulos pasan de ScothBrace a LiberationSans. ScothBrace
+   es una fuente DISPLAY y a tamaño chico se vuelve difícil de leer; en cuerpo de
+   texto a 0.78rem se lee mucho mejor, que era el punto de "más entendible".
+   =========================================================== */
+.cotizar-rejilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+/* --- El cuadro --- */
+.cotizar-rejilla > .colapsable {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;                 /* el relleno lo lleva el h4 (zona de clic) */
+  margin: 0;                  /* la separación la da el gap de la rejilla */
+  border-radius: 11px;
+  overflow: hidden;
+  transition: border-color 0.24s ease, background 0.24s ease;
+}
+
+/* #resultado-cotizacion trae padding y margin puestos por ID, que le ganan en
+   especificidad a la regla de arriba. Hay que anularlos a mano. Su borde
+   izquierdo verde sí se conserva: distingue el resultado de los datos. */
+.cotizar-rejilla > #resultado-cotizacion {
+  padding: 0;
+  margin: 0;
+  border-radius: 11px;
+}
+.cotizar-rejilla > #resultado-cotizacion .cat-cuerpo p { font-size: 0.8rem; }
+
+/* Abierto = ocupa la fila completa */
+.cotizar-rejilla > .colapsable:not(.cerrada) {
+  grid-column: 1 / -1;
+  border-left-color: var(--naranja);
+  background: #FFFDF6;
+}
+/* El desglose mantiene su acento verde incluso abierto */
+.cotizar-rejilla > #resultado-cotizacion:not(.cerrada) { border-left-color: var(--verde); }
+
+/* --- La cabecera: ES el cuadro cuando está cerrado --- */
+.cotizar-rejilla .colapsable h4 {
+  display: flex;
+  flex-direction: column;      /* cerrado: ícono, nombre y valor uno bajo otro */
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 3px;
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 22px 11px 11px;   /* el hueco de la derecha es para la flecha */
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.78rem;
+  font-weight: bold;
+  color: var(--verde-oscuro);
+  line-height: 1.25;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+.cotizar-rejilla .colapsable h4:hover { background: rgba(242, 178, 51, 0.16); }
+/* Fuera el +/− de texto del estilo viejo: aquí la señal es la flecha */
+.cotizar-rejilla .colapsable h4::after { content: none; }
+/* Y el estilo base le quitaba el relleno de abajo al cerrarse */
+.cotizar-rejilla .colapsable.cerrada h4 { padding-bottom: 11px; }
+
+/* Abierto: la cabecera se pone en una sola línea horizontal */
+.cotizar-rejilla .colapsable:not(.cerrada) h4 {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 10px 24px 10px 12px;
+  border-bottom: 1px solid rgba(122, 74, 34, 0.16);
+  font-size: 0.86rem;
+}
+.cotizar-rejilla .colapsable:not(.cerrada) .cat-valor { margin-left: auto; }
+
+.cat-ico {
+  font-size: 0.98rem;
+  line-height: 1;
+  flex-shrink: 0;
+  /* Los emoji vienen muy saturados: se bajan un poco para que no griten */
+  filter: saturate(0.85);
+}
+.cat-tit { display: block; }
+
+/* El valor actual de la sección: lo que hace útil el mosaico cerrado */
+.cat-valor {
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.76rem;
+  font-weight: bold;
+  color: var(--naranja-osc);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Flechita: a la derecha cerrado, abajo abierto */
+.cat-flecha {
+  position: absolute;
+  top: 13px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-left: 4.5px solid transparent;
+  border-right: 4.5px solid transparent;
+  border-top: 5.5px solid var(--dorado-osc);
+  transform: rotate(-90deg);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cotizar-rejilla .colapsable:not(.cerrada) .cat-flecha { transform: rotate(0deg); }
+
+/* --- El contenido --- */
+.cotizar-rejilla .cat-cuerpo {
+  padding: 11px 13px 13px;
+  margin-top: 0;              /* el estilo base ponía margin-top: 8px */
+  animation: cat-abre 0.26s ease both;
+}
+@keyframes cat-abre {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Letra de adentro: más pequeña, pero con más contraste para que se lea --- */
+.cotizar-rejilla .gasto-item { font-size: 0.8rem; margin: 8px 0; }
+.cotizar-rejilla .gasto-item label { color: #4A3C2A; }
+.cotizar-rejilla .cat-cuerpo p { font-size: 0.8rem; }
+.cotizar-rejilla .hint { font-size: 0.7rem; }
+.cotizar-rejilla .cat-cuerpo button { font-size: 0.82rem; }
+
+/* Con el panel de Metas ensanchado no aplica, pero si algún día la app se
+   ensancha en Cobrar, la rejilla pasa sola a tres columnas. */
+@media (min-width: 640px) {
+  body.modo-hoja .cotizar-rejilla { grid-template-columns: repeat(3, 1fr); }
+}
