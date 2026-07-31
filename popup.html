@@ -107,6 +107,20 @@
         <span class="vs-label vs-der" id="vs-lbl-hoja">Hoja de cálculo</span>
       </div>
 
+      <!-- Botón que saca la calculadora. Va aquí arriba para que sirva tanto en
+           la vista Sencilla como en la Hoja de cálculo. La ventana flotante y
+           toda su lógica viven en src/calculadora.js -->
+      <button type="button" id="abrir-calculadora" class="btn-calculadora"
+              title="Sacar la calculadora">
+        <svg class="ico-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="2.5" width="16" height="19" rx="2.5"/>
+          <rect x="7.2" y="5.5" width="9.6" height="4" rx="1"/>
+          <path d="M8.2 13.2h0M12 13.2h0M15.8 13.2h0M8.2 17.4h0M12 17.4h0M15.8 17.4h0"/>
+        </svg>
+        <span class="btn-calc-txt">Saque la calculadora</span>
+      </button>
+
       <!-- ============ VISTA A: SENCILLA (por pasos) ============ -->
       <div id="metas-sencilla">
 
@@ -118,52 +132,86 @@
       Usted no tiene que sumar ni restar nada.
     </p>
 
+        <!-- Los tres pasos se PLIEGAN para ahorrar espacio: el título es un
+             botón que abre y cierra su cuerpo. Arrancan cerrados y la app
+             recuerda cuáles dejó abiertos el usuario (ver initPasos() en
+             metas.js). Cuando está cerrado, .paso-resumen muestra un
+             resumencito para no tener que abrirlo solo por mirar. -->
+
         <!-- PASO 1: sus ahorros -->
-        <section class="metas-paso">
-          <div class="metas-paso-tit"><span class="paso-num">1</span> Mis ahorros</div>
-          <div class="excel">
-            <div class="excel-fila">
-              <div class="excel-celda etiqueta"><label for="ahorroMensual">Puedo guardar al mes</label></div>
-              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000"></div>
-            </div>
-            <div class="excel-fila">
-              <div class="excel-celda etiqueta"><label for="ahorrosActuales">Lo que ya tengo guardado</label></div>
-              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0"></div>
+        <section class="metas-paso cerrado" data-paso="ahorros">
+          <button type="button" class="metas-paso-tit" aria-expanded="false">
+            <span class="paso-num">1</span>
+            <span class="paso-txt">Mis ahorros</span>
+            <span class="paso-resumen"></span>
+            <span class="paso-flecha" aria-hidden="true"></span>
+          </button>
+          <div class="metas-paso-cuerpo">
+            <div class="metas-paso-dentro">
+              <div class="excel">
+                <div class="excel-fila">
+                  <div class="excel-celda etiqueta"><label for="ahorroMensual">Puedo guardar al mes</label></div>
+                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000"></div>
+                </div>
+                <div class="excel-fila">
+                  <div class="excel-celda etiqueta"><label for="ahorrosActuales">Lo que ya tengo guardado</label></div>
+                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0"></div>
+                </div>
+              </div>
+              <p class="metas-hint">Con estos dos datitos ya le hago la cuenta.</p>
             </div>
           </div>
-          <p class="metas-hint">Con estos dos datitos ya le hago la cuenta.</p>
         </section>
 
         <!-- PASO 2: qué quiere comprar -->
-        <section class="metas-paso">
-          <div class="metas-paso-tit"><span class="paso-num">2</span> ¿Qué quiere comprar?</div>
-          <div class="excel">
-            <div class="excel-fila">
-              <div class="excel-celda etiqueta"><label for="meta-nombre">¿Qué quiere?</label></div>
-              <div class="excel-celda"><input type="text" id="meta-nombre" placeholder="Ej: Bicicleta"></div>
-            </div>
-            <div class="excel-fila">
-              <div class="excel-celda etiqueta"><label for="meta-precio">¿Cuánto cuesta?</label></div>
-              <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0"></div>
-            </div>
-            <div class="excel-fila">
-              <div class="excel-celda etiqueta"><label for="meta-fecha">¿Para cuándo? (si quiere)</label></div>
-              <div class="excel-celda"><input type="date" id="meta-fecha"></div>
+        <section class="metas-paso cerrado" data-paso="comprar">
+          <button type="button" class="metas-paso-tit" aria-expanded="false">
+            <span class="paso-num">2</span>
+            <span class="paso-txt">¿Qué quiere comprar?</span>
+            <span class="paso-resumen"></span>
+            <span class="paso-flecha" aria-hidden="true"></span>
+          </button>
+          <div class="metas-paso-cuerpo">
+            <div class="metas-paso-dentro">
+              <div class="excel">
+                <div class="excel-fila">
+                  <div class="excel-celda etiqueta"><label for="meta-nombre">¿Qué quiere?</label></div>
+                  <div class="excel-celda"><input type="text" id="meta-nombre" placeholder="Ej: Bicicleta"></div>
+                </div>
+                <div class="excel-fila">
+                  <div class="excel-celda etiqueta"><label for="meta-precio">¿Cuánto cuesta?</label></div>
+                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0"></div>
+                </div>
+                <div class="excel-fila">
+                  <div class="excel-celda etiqueta"><label for="meta-fecha">¿Para cuándo? (si quiere)</label></div>
+                  <div class="excel-celda"><input type="date" id="meta-fecha"></div>
+                </div>
+              </div>
+              <button id="agregar-meta">✚ Apuntar en mi lista</button>
+              <p class="metas-hint">O en cualquier página, señale el precio con el clic derecho.</p>
             </div>
           </div>
-          <button id="agregar-meta">✚ Apuntar en mi lista</button>
-          <p class="metas-hint">O en cualquier página, señale el precio con el clic derecho.</p>
         </section>
 
         <!-- PASO 3: la cuenta hecha -->
-        <div class="metas-paso-tit paso-suelto"><span class="paso-num">3</span> Mi cuenta</div>
+        <section class="metas-paso cerrado" data-paso="cuenta">
+          <button type="button" class="metas-paso-tit" aria-expanded="false">
+            <span class="paso-num">3</span>
+            <span class="paso-txt">Mi cuenta</span>
+            <span class="paso-resumen"></span>
+            <span class="paso-flecha" aria-hidden="true"></span>
+          </button>
+          <div class="metas-paso-cuerpo">
+            <div class="metas-paso-dentro">
+              <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
+              <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
 
-        <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
-        <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
-
-        <!-- La lista tipo Excel (celdas). La llena metas.js -->
-        <div id="metas-container"></div>
-        <p id="sin-metas" class="frase-arriero">Todavía no ha apuntado nada, mijo. Escriba un producto arriba, o señale un precio en cualquier página con el clic derecho.</p>
+              <!-- La lista tipo Excel (celdas). La llena metas.js -->
+              <div id="metas-container"></div>
+              <p id="sin-metas" class="frase-arriero">Todavía no ha apuntado nada, mijo. Escriba un producto arriba, o señale un precio en cualquier página con el clic derecho.</p>
+            </div>
+          </div>
+        </section>
 
       </div><!-- /#metas-sencilla -->
 
@@ -429,10 +477,89 @@
     </div>
   </div>
 
+  <!-- ===================== LA CALCULADORA DEL ARRIERO ===================== -->
+  <!-- Ventana flotante que sale con el botón "Saque la calculadora" de la vista
+       de Ahorro. Va al final del <body> y usa position:absolute (NO fixed): el
+       <body> tiene zoom:0.75 y eso descuadra el centrado de los elementos fijos.
+       Con absolute + left:50% queda centrada de verdad en cualquier equipo.
+       Toda la lógica está en src/calculadora.js -->
+  <div id="calc-fondo" class="calc-fondo oculto"></div>
+
+  <div id="calc-ventana" class="calc-ventana oculto" role="dialog" aria-modal="true"
+       aria-labelledby="calc-titulo">
+
+    <div class="calc-cabecera">
+      <h4 id="calc-titulo" class="calc-titulo">La calculadora del arriero</h4>
+      <button type="button" id="calc-cerrar" class="calc-cerrar" title="Cerrar (Esc)">✕</button>
+    </div>
+
+    <!-- Pantalla: arriba la operación que va haciendo, abajo el número grande -->
+    <div class="calc-pantalla">
+      <div id="calc-operacion" class="calc-operacion"></div>
+      <div id="calc-numero" class="calc-numero">0</div>
+    </div>
+
+    <!-- Atajos de arriero: las cuentas que uno hace siempre para ahorrar -->
+    <div class="calc-atajos">
+      <button type="button" class="calc-atajo" data-atajo="mes"  title="Reparte lo de la pantalla en 12 meses">÷ 12 · al mes</button>
+      <button type="button" class="calc-atajo" data-atajo="dia"  title="Reparte lo de la pantalla en 30 días">÷ 30 · al día</button>
+      <button type="button" class="calc-atajo" data-atajo="anio" title="Lo de la pantalla, doce veces">× 12 · al año</button>
+      <button type="button" class="calc-atajo" data-atajo="diez" title="La décima parte de lo de la pantalla">10 % de esto</button>
+    </div>
+
+    <!-- Teclado tradicional -->
+    <div class="calc-teclado">
+      <button type="button" class="calc-tecla t-limpiar" data-accion="limpiar" title="Limpiar todo">C</button>
+      <button type="button" class="calc-tecla t-borrar"  data-accion="borrar"  title="Borrar el último">⌫</button>
+      <button type="button" class="calc-tecla t-op"      data-accion="porcentaje" title="Convertir en porcentaje">%</button>
+      <button type="button" class="calc-tecla t-op"      data-op="÷">÷</button>
+
+      <button type="button" class="calc-tecla t-num" data-num="7">7</button>
+      <button type="button" class="calc-tecla t-num" data-num="8">8</button>
+      <button type="button" class="calc-tecla t-num" data-num="9">9</button>
+      <button type="button" class="calc-tecla t-op"  data-op="×">×</button>
+
+      <button type="button" class="calc-tecla t-num" data-num="4">4</button>
+      <button type="button" class="calc-tecla t-num" data-num="5">5</button>
+      <button type="button" class="calc-tecla t-num" data-num="6">6</button>
+      <button type="button" class="calc-tecla t-op"  data-op="−">−</button>
+
+      <button type="button" class="calc-tecla t-num" data-num="1">1</button>
+      <button type="button" class="calc-tecla t-num" data-num="2">2</button>
+      <button type="button" class="calc-tecla t-num" data-num="3">3</button>
+      <button type="button" class="calc-tecla t-op"  data-op="+">+</button>
+
+      <button type="button" class="calc-tecla t-num" data-accion="signo" title="Cambiar de signo">±</button>
+      <button type="button" class="calc-tecla t-num" data-num="0">0</button>
+      <button type="button" class="calc-tecla t-num" data-num="," title="Coma decimal">,</button>
+      <button type="button" class="calc-tecla t-igual" data-accion="igual">=</button>
+    </div>
+
+    <!-- Guardar la cuenta en la cinta -->
+    <div class="calc-guardar">
+      <input type="text" id="calc-nombre" class="calc-nombre" maxlength="42"
+             placeholder="¿De qué es esta cuenta?">
+      <button type="button" id="calc-guardar-btn" class="calc-btn-guardar">Guardar en la cinta</button>
+    </div>
+
+    <!-- La cinta: las cuentas guardadas, como el rollo de papel de una
+         calculadora de escritorio. Toque una para volver a usar su resultado. -->
+    <div class="calc-cinta-caja">
+      <div class="calc-cinta-cab">
+        <span class="calc-cinta-tit">Mi cinta de cuentas</span>
+        <button type="button" id="calc-cinta-limpiar" class="calc-cinta-limpiar">Borrar todo</button>
+      </div>
+      <div id="calc-cinta" class="calc-cinta"></div>
+      <p id="calc-cinta-vacia" class="calc-cinta-vacia">Todavía no ha guardado ninguna cuenta, mijo.</p>
+    </div>
+
+  </div><!-- /#calc-ventana -->
+
   <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
        cambiarVista, pintarJornal…) que metas.js reutiliza. -->
   <script src="src/logic_quotation.js"></script>
   <script src="src/metas.js"></script>
+  <script src="src/calculadora.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>

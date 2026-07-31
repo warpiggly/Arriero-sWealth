@@ -135,17 +135,53 @@ body::after {
   padding: 14px 0 6px;
 }
 .estrella {
+  position: relative;
   background: none;
   border: none;
-  padding: 0;
+  padding: 3px;
   cursor: pointer;
   line-height: 0;
-  opacity: 0.55;
-  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0.5;
+  /* La sombra se hace con filter: drop-shadow, que sigue la SILUETA de la
+     estrella. Con box-shadow quedaría un recuadro detrás del botón. */
+  filter: drop-shadow(0 1px 2px rgba(43, 33, 24, 0.32));
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.32s ease;
 }
 .estrella img { width: 28px; height: 28px; display: block; object-fit: contain; }
-.estrella:hover { opacity: 0.85; transform: scale(1.1); }
-.estrella.activa { opacity: 1; transform: scale(1.25); }
+.estrella:hover {
+  opacity: 0.88;
+  transform: scale(1.12) rotate(-7deg);
+  filter: drop-shadow(0 2px 5px rgba(43, 33, 24, 0.38));
+}
+.estrella:active { transform: scale(1.03) rotate(-2deg); }
+.estrella.activa {
+  opacity: 1;
+  transform: scale(1.25);
+  /* Halo cálido: también con drop-shadow -> respeta la forma de estrella. */
+  filter: drop-shadow(0 0 5px rgba(242, 178, 51, 0.9))
+          drop-shadow(0 2px 4px rgba(43, 33, 24, 0.38));
+}
+.estrella.activa:hover { transform: scale(1.3) rotate(-7deg); }
+
+/* Anillo de foco por teclado: redondo, hecho con outline (no box-shadow). */
+.estrella:focus-visible {
+  outline: 2px solid rgba(242, 178, 51, 0.9);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+/* Destello de una sola vez al elegir la estrella. Va en la <img> (no en el
+   botón) para no pisar el transform del hover. */
+@keyframes estrella-destello {
+  0%   { transform: scale(0.78) rotate(-18deg); }
+  55%  { transform: scale(1.12) rotate(6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.estrella.activa img {
+  animation: estrella-destello 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 /* ---------- Las dos mulas del arriero: control de abajo (abre el contenido) ---------- */
 .bolitas-mulas {
@@ -167,40 +203,141 @@ body::after {
 }
 .bolitas-mulas.oculta + .mulas-hint { display: none; }
 
+/* ===========================================================
+   POR QUÉ AQUÍ NO SE USA NI UN box-shadow
+   -----------------------------------------------------------
+   box-shadow se dibuja a partir de la CAJA del elemento. En los
+   equipos donde Chrome pinta sin aceleración por hardware (muy
+   común en Windows: es el mismo problema que ya documentamos
+   arriba con el fondo y las mariposas), esas sombras y anillos
+   se rasterizan como un RECUADRO detrás de la moneda en vez de
+   seguir el círculo. Ese era "el cuadro feo" que se veía detrás
+   de las dos mulas.
+
+   Solución: la medalla se arma por capas y TODAS son círculos de
+   verdad (border-radius: 50% sobre un elemento real), y la sombra
+   proyectada se hace con filter: blur(), que sí respeta la forma.
+   Así no queda un solo píxel cuadrado en ningún equipo.
+
+   Las capas, de atrás hacia adelante:
+     1. .bolita-mula::before   -> pedestal: sombra/aura redonda
+     2. .bolita-medalla        -> la moneda (degradado + canto crema)
+     3. .bolita-medalla::before-> lustre (brillo superior del metal)
+     4. .ico-mula              -> la silueta de la mula
+     5. .bolita-medalla::after -> anillo de estado (elegida / abierta)
+     6. .bolita-mula::after    -> onda de selección (una sola vez)
+   =========================================================== */
+
 /* Curva de suavizado común: arranque decidido y aterrizaje calmado (sobrio). */
 .bolita-mula {
+  position: relative;
+  isolation: isolate;          /* las capas no se salen de su botón */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 7px;
   background: none;
   border: none;
-  padding: 4px 6px;
+  padding: 5px 6px 4px;
   cursor: pointer;
   opacity: 0.62;
-  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* La "medalla" dorada que contiene a la mula: acabado tipo moneda acuñada,
-   con degradado, brillo superior y sombra suave (aire empresarial). */
+
+/* CAPA 1 — Pedestal: la sombra redonda sobre la que se apoya la moneda.
+   Es un círculo difuminado, no un box-shadow. Al elegir la mula se entibia
+   y crece: hace de aura dorada. */
+.bolita-mula::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 5px;                    /* alineado con el padding-top del botón */
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+              rgba(43, 33, 24, 0.55) 42%,
+              rgba(43, 33, 24, 0) 74%);
+  filter: blur(6px);
+  transform: translateY(5px) scale(0.96);
+  pointer-events: none;
+  transition: transform 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.36s ease;
+}
+
+/* CAPA 6 — Onda de selección: anillo que se expande UNA vez al elegir la
+   mula. Invisible en reposo. */
+.bolita-mula::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* CAPA 2 — La moneda acuñada. Sin sombras: el canto crema y el lustre
+   bastan para que se lea en relieve. */
 .bolita-medalla {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 52px;
   height: 52px;
   border-radius: 50%;
+  box-sizing: border-box;
   color: var(--marron);                 /* trazo de la mula */
   background: linear-gradient(155deg, #F8C85A 0%, var(--dorado) 52%, var(--dorado-osc) 100%);
   border: 3px solid var(--crema);
-  box-shadow: 0 4px 10px rgba(43, 33, 24, 0.35),
-              inset 0 1px 0 rgba(255, 255, 255, 0.55);
   transform: translateY(0) scale(1);
-  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.32s ease,
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
               background 0.32s ease,
               border-color 0.32s ease;
 }
+
+/* CAPA 3 — Lustre del metal: brillo suave arriba, penumbra abajo. */
+.bolita-medalla::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg,
+              rgba(255, 255, 255, 0.5) 0%,
+              rgba(255, 255, 255, 0.1) 38%,
+              rgba(120, 74, 20, 0.16) 100%);
+  pointer-events: none;
+  transition: opacity 0.32s ease;
+}
+
+/* CAPA 5 — Anillo de estado. Vive DENTRO de la medalla para crecer junto
+   con ella. Es un círculo con borde: nunca un box-shadow. */
+.bolita-medalla::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.32s ease, border-color 0.32s ease;
+}
+
+/* CAPA 4 — La silueta, por encima del lustre. */
 .bolita-medalla .ico-mula {
+  position: relative;
+  z-index: 1;
   width: 32px;
   height: 32px;
   display: block;
@@ -216,55 +353,96 @@ body::after {
   transition: color 0.28s ease;
 }
 
-/* Reposo -> hover: la mula se yergue un poco (se levanta), sin rebotes. */
+/* Reposo -> hover: la mula se yergue y la sombra se abre debajo (como si
+   levantara el vuelo un poquito). Sin rebotes ni saltos. */
 .bolita-mula:hover { opacity: 0.95; }
 .bolita-mula:hover .bolita-medalla {
   transform: translateY(-3px) scale(1.05);
-  background: linear-gradient(155deg, #F6C24E 0%, var(--dorado-osc) 55%, #C98614 100%);
-  box-shadow: 0 9px 20px rgba(43, 33, 24, 0.42),
-              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  background: linear-gradient(155deg, #FBD070 0%, var(--dorado) 55%, var(--dorado-osc) 100%);
 }
-.bolita-mula:active .bolita-medalla { transform: translateY(-1px) scale(0.99); }
+.bolita-mula:hover::before {
+  transform: translateY(8px) scale(1.06);
+  background: radial-gradient(circle,
+              rgba(43, 33, 24, 0.5) 40%,
+              rgba(43, 33, 24, 0) 76%);
+}
+.bolita-mula:active .bolita-medalla { transform: translateY(-1px) scale(0.98); }
+.bolita-mula:active::before { transform: translateY(3px) scale(0.92); }
 
-/* La mula elegida: al frente, con anillo dorado y un brillo cálido discreto. */
+/* Foco por teclado: se enciende el mismo anillo redondo del estado. */
+.bolita-mula:focus-visible { outline: none; }
+.bolita-mula:focus-visible .bolita-medalla::after {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+/* La mula elegida: al frente, con anillo dorado y un aura cálida discreta. */
 .bolita-mula.activa { opacity: 1; }
 .bolita-mula.activa .bolita-lbl { color: #fff; }
 .bolita-mula.activa .bolita-medalla {
-  transform: translateY(0) scale(1.12);
+  transform: translateY(-1px) scale(1.12);
   border-color: #fff;
-  box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.5),
-              0 0 16px rgba(242, 178, 51, 0.35),
-              0 8px 20px rgba(43, 33, 24, 0.45),
-              inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
-.bolita-mula.activa:hover .bolita-medalla { transform: translateY(-3px) scale(1.14); }
+.bolita-mula.activa .bolita-medalla::after {
+  opacity: 1;
+  border-color: rgba(242, 178, 51, 0.8);
+}
+.bolita-mula.activa::before {
+  transform: translateY(6px) scale(1.16);
+  background: radial-gradient(circle,
+              rgba(242, 178, 51, 0.55) 30%,
+              rgba(200, 94, 30, 0.28) 55%,
+              rgba(43, 33, 24, 0) 78%);
+}
+.bolita-mula.activa:hover .bolita-medalla { transform: translateY(-4px) scale(1.14); }
+.bolita-mula.activa:hover::before { transform: translateY(9px) scale(1.22); }
 
-/* La sección al frente Y desplegada: anillo verde para avisar que está abierta. */
-.bolita-mula.activa.abierta .bolita-medalla {
-  border-color: #fff;
-  box-shadow: 0 0 0 3px rgba(46, 125, 64, 0.85),
-              0 0 16px rgba(46, 125, 64, 0.4),
-              0 8px 20px rgba(43, 33, 24, 0.45),
-              inset 0 1px 0 rgba(255, 255, 255, 0.55);
+/* La sección al frente Y desplegada: anillo verde para avisar que está
+   abierta, con un latido muy lento (se nota sin distraer). */
+.bolita-mula.activa.abierta .bolita-medalla::after {
+  opacity: 1;
+  border-color: rgba(46, 125, 64, 0.95);
+  animation: mula-anillo-latido 2.6s ease-in-out infinite;
+}
+@keyframes mula-anillo-latido {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(1.06); }
 }
 
-/* Toque de arriero: al seleccionarla, la mula da un cabeceo breve (una vez). */
+/* Onda de selección: una sola pasada al elegir la mula. */
+@keyframes mula-onda {
+  0%   { opacity: 0.6; transform: scale(0.9); }
+  100% { opacity: 0;   transform: scale(1.7); }
+}
+.bolita-mula.activa::after {
+  animation: mula-onda 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Toque de arriero: al seleccionarla, la mula da un cabeceo breve (una vez).
+   Más corto y con menos giro que antes: se lee como un gesto, no como un
+   brinco de dibujo animado. */
 @keyframes mula-cabeceo {
-  0%   { transform: rotate(0deg) translateY(0); }
-  30%  { transform: rotate(-9deg) translateY(-1px); }
-  62%  { transform: rotate(4deg) translateY(0); }
-  100% { transform: rotate(0deg) translateY(0); }
+  0%   { transform: rotate(0deg) translateY(1px) scale(0.94); }
+  40%  { transform: rotate(-4.5deg) translateY(-1px) scale(1.02); }
+  72%  { transform: rotate(1.5deg) translateY(0) scale(1); }
+  100% { transform: rotate(0deg) translateY(0) scale(1); }
 }
 .bolita-mula.activa .ico-mula {
-  animation: mula-cabeceo 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation: mula-cabeceo 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Respeto por quien prefiere menos movimiento. */
 @media (prefers-reduced-motion: reduce) {
+  .estrella,
   .bolita-mula,
+  .bolita-mula::before,
   .bolita-medalla,
+  .bolita-medalla::after,
   .bolita-lbl { transition: none; }
-  .bolita-mula.activa .ico-mula { animation: none; }
+  .estrella.activa img,
+  .bolita-mula.activa::after,
+  .bolita-mula.activa .ico-mula,
+  .bolita-mula.activa.abierta .bolita-medalla::after { animation: none; }
 }
 
 /* ---------- Cartel "En construcción" (3ª estrella) ---------- */
@@ -919,25 +1097,98 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
 }
 
-/* ---------- Cada PASO ---------- */
+/* ---------- Cada PASO (se pliega para ahorrar espacio) ----------
+   El título es un <button>: al tocarlo abre o cierra el cuerpo del paso. La
+   apertura se anima con el truco de grid-template-rows 0fr <-> 1fr, que sirve
+   para contenido de cualquier alto (no hace falta saber los píxeles de antemano
+   como con max-height). Quién está abierto lo recuerda metas.js. */
 .metas-paso {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;                 /* que el título respete la esquina redonda */
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
+.metas-paso:not(.cerrado) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+/* Hay que desandar el estilo global de <button> (naranja, blanco, redondeado). */
 .metas-paso-tit {
   display: flex;
   align-items: center;
   gap: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  margin: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  cursor: pointer;
   font-family: 'ScothBrace', serif;
+  font-weight: normal;
   color: #fff;
   font-size: 1.12rem;
-  margin-bottom: 10px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  transition: background 0.24s ease;
 }
-.metas-paso-tit.paso-suelto { margin: 4px 2px 8px; }
+.metas-paso-tit:hover { background: rgba(255, 255, 255, 0.12); }
+.metas-paso-tit:active { transform: none; }   /* no se hunde: no es un botón de acción */
+.metas-paso-tit:focus-visible {
+  outline: 2px solid rgba(242, 178, 51, 0.9);
+  outline-offset: -3px;
+}
+.paso-txt { flex-shrink: 0; }
+
+/* El resumencito de la derecha: solo se lee cuando el paso está cerrado, para
+   no tener que abrirlo únicamente por mirar en qué va. */
+.paso-resumen {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+.metas-paso.cerrado .paso-resumen { opacity: 1; }
+
+/* Flechita de triángulo: apunta a la derecha cerrado, abajo abierto. */
+.paso-flecha {
+  flex-shrink: 0;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--dorado);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.metas-paso.cerrado .paso-flecha { transform: rotate(-90deg); }
+
+/* El cuerpo que se abre y se cierra.
+   Va con minmax(0, …) a propósito: con un simple `0fr` la pista conserva su
+   mínimo automático (min-content) y el paso cerrado dejaba asomando un pedazo
+   del contenido. El minmax(0, 0fr) obliga a que el mínimo sea cero. */
+.metas-paso-cuerpo {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  transition: grid-template-rows 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.metas-paso.cerrado .metas-paso-cuerpo { grid-template-rows: minmax(0, 0fr); }
+.metas-paso-dentro {
+  overflow: hidden;
+  min-height: 0;
+  padding: 0 12px 12px;
+}
 .paso-num {
   display: inline-flex;
   align-items: center;
@@ -1391,3 +1642,393 @@ body.modo-hoja .hoja-grande { min-width: 0; }
      .jornal-num.pulso { animation: none; }
      .app-logo, .jornal-box, .jornal-label, .jornal-num { transition: none; }
    } */
+
+/* ===========================================================
+   BOTÓN QUE SACA LA CALCULADORA (vista de Ahorro)
+   Acabado de "tecla de marfil": crema con el canto marrón abajo, para que se
+   sienta como algo que se presiona. Sin box-shadow (ver la nota de las mulas).
+   =========================================================== */
+.btn-calculadora {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  background: linear-gradient(178deg, #FFFDF5 0%, #F4EAD0 100%);
+  color: var(--marron);
+  border: 1px solid rgba(122, 74, 34, 0.3);
+  border-bottom: 3px solid rgba(122, 74, 34, 0.45);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  transition: background 0.24s ease, color 0.24s ease,
+              border-color 0.24s ease, transform 0.12s ease;
+}
+.btn-calculadora:hover {
+  background: linear-gradient(178deg, #FFFFFF 0%, #FBF5E2 100%);
+  color: var(--texto);
+  border-color: var(--dorado-osc);
+}
+.btn-calculadora:active { transform: translateY(2px); }
+.btn-calculadora:focus-visible {
+  outline: 2px solid rgba(242, 178, 51, 0.95);
+  outline-offset: 2px;
+}
+.ico-calc { width: 20px; height: 20px; flex-shrink: 0; }
+.btn-calc-txt { font-family: 'LiberationSans', sans-serif; font-weight: bold; }
+
+/* ===========================================================
+   LA CALCULADORA DEL ARRIERO (ventana flotante)
+
+   OJO CON EL POSICIONAMIENTO: el <body> lleva zoom: 0.75, y eso descuadra a los
+   elementos con position: fixed (el fondo de la app ya lo compensa con /0.75).
+   Probado: con `fixed` el centrado horizontal se va para un lado. Por eso la
+   ventana va con position: absolute dentro del <body> (que ya es relative):
+   left: 50% + translateX(-50%) queda centrada de verdad, sin cuentas de zoom.
+   Por lo mismo, aquí no se usan unidades vw/vh.
+
+   Como es absolute sobre TODO el documento, al abrirla calculadora.js sube el
+   scroll al tope y le pone .calc-abierta al <html> para que la app no se
+   desplace por detrás.
+   =========================================================== */
+html.calc-abierta,
+html.calc-abierta body { overflow: hidden; }
+
+/* El fondo oscurecido. Cubre el documento completo menos el marco naranja, que
+   queda a la vista a propósito: sigue siendo la ventana de la app. */
+.calc-fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(18, 32, 22, 0.55);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
+  animation: calc-fondo-entra 0.24s ease both;
+}
+@keyframes calc-fondo-entra { from { opacity: 0; } to { opacity: 1; } }
+
+/* La tarjeta: papel cremita con marco naranja, como el resto de la app. */
+.calc-ventana {
+  position: absolute;
+  z-index: 41;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 344px;
+  max-height: 740px;          /* tope fijo en px: el zoom deforma los vh */
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 14px 15px 15px;
+  background: linear-gradient(178deg, #FDF8E9 0%, var(--crema) 45%, #F4EAD0 100%);
+  border: 2px solid var(--naranja);
+  border-radius: 18px;
+  /* Sombra con filter: sigue la forma de la tarjeta, no su caja. */
+  filter: drop-shadow(0 14px 30px rgba(18, 32, 22, 0.5));
+  animation: calc-entra 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes calc-entra {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* ---------- Cabecera ---------- */
+.calc-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 11px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(122, 74, 34, 0.22);
+}
+/* ScothBrace es una fuente ancha: a 1.16rem el título se partía en dos
+   renglones dentro de la tarjeta. A 1rem entra completo en una sola línea. */
+.calc-titulo {
+  font-family: 'ScothBrace', serif;
+  color: var(--verde-oscuro);
+  font-size: 1rem;
+  line-height: 1.15;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border: none;               /* el h4 global trae border-bottom */
+}
+.calc-cerrar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(122, 74, 34, 0.12);
+  color: var(--marron);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: background 0.22s ease, color 0.22s ease, transform 0.28s ease;
+}
+.calc-cerrar:hover {
+  background: var(--terracota);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* ---------- Pantalla (la "pizarra" verde) ---------- */
+.calc-pantalla {
+  padding: 9px 13px 11px;
+  margin-bottom: 11px;
+  background: linear-gradient(170deg, #1D5636 0%, var(--verde-oscuro) 100%);
+  border: 2px solid rgba(122, 74, 34, 0.35);
+  border-radius: 12px;
+  text-align: right;
+  overflow: hidden;
+}
+/* La cuenta que va haciendo, en chiquito y dorado */
+.calc-operacion {
+  min-height: 15px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(242, 178, 51, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* El número grande. tabular-nums = todos los dígitos del mismo ancho, así el
+   número no "baila" mientras se escribe. */
+.calc-numero {
+  font-family: 'LiberationSans', sans-serif;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #FDF8E9;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ---------- Atajos de arriero ---------- */
+.calc-atajos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 11px;
+}
+.calc-atajo {
+  padding: 7px 6px;
+  font-size: 0.73rem;
+  background: rgba(46, 125, 64, 0.1);
+  color: var(--verde-oscuro);
+  border: 1px solid rgba(46, 125, 64, 0.32);
+  border-radius: 9px;
+  transition: background 0.2s ease, color 0.2s ease,
+              border-color 0.2s ease, transform 0.11s ease;
+}
+.calc-atajo:hover {
+  background: var(--verde);
+  color: #fff;
+  border-color: var(--verde-oscuro);
+}
+.calc-atajo:active { transform: translateY(1px); }
+
+/* ---------- Teclado ---------- */
+.calc-teclado {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 12px;
+}
+/* Cada tecla lleva el canto de abajo más gordo: se ve y se siente como tecla.
+   Al presionar baja 2px, como si se hundiera. */
+.calc-tecla {
+  padding: 11px 0 10px;
+  font-size: 1.06rem;
+  border: 1px solid rgba(122, 74, 34, 0.28);
+  border-bottom-width: 3px;
+  border-radius: 11px;
+  transition: background 0.18s ease, transform 0.1s ease;
+}
+.calc-tecla:active { transform: translateY(2px); }
+.calc-tecla:focus-visible {
+  outline: 2px solid rgba(242, 178, 51, 0.95);
+  outline-offset: 1px;
+}
+
+.calc-tecla.t-num {
+  background: linear-gradient(178deg, #FFFDF5 0%, #F6EFDC 100%);
+  color: var(--texto);
+  border-bottom-color: rgba(122, 74, 34, 0.42);
+}
+.calc-tecla.t-num:hover { background: linear-gradient(178deg, #FFFFFF 0%, #FBF5E2 100%); }
+
+.calc-tecla.t-op {
+  background: linear-gradient(178deg, #F8C85A 0%, var(--dorado) 100%);
+  color: var(--texto);
+  border-color: rgba(122, 74, 34, 0.32);
+  border-bottom-color: var(--dorado-osc);
+  font-size: 1.14rem;
+}
+.calc-tecla.t-op:hover { background: linear-gradient(178deg, #FBD070 0%, var(--dorado-osc) 100%); }
+
+.calc-tecla.t-limpiar {
+  background: linear-gradient(178deg, #D4503F 0%, var(--terracota) 100%);
+  color: #fff;
+  border-color: rgba(122, 74, 34, 0.4);
+  border-bottom-color: #97281C;
+}
+.calc-tecla.t-limpiar:hover { background: linear-gradient(178deg, #C0392B 0%, #9C2C20 100%); }
+
+.calc-tecla.t-borrar {
+  background: linear-gradient(178deg, #9A6438 0%, var(--marron) 100%);
+  color: #fff;
+  border-color: rgba(122, 74, 34, 0.4);
+  border-bottom-color: #5C3517;
+}
+.calc-tecla.t-borrar:hover { background: linear-gradient(178deg, #7A4A22 0%, #5C3517 100%); }
+
+.calc-tecla.t-igual {
+  background: linear-gradient(178deg, #3E9553 0%, var(--verde) 100%);
+  color: #fff;
+  border-color: rgba(20, 83, 45, 0.5);
+  border-bottom-color: var(--verde-oscuro);
+  font-size: 1.2rem;
+}
+.calc-tecla.t-igual:hover { background: linear-gradient(178deg, #2E7D40 0%, var(--verde-oscuro) 100%); }
+
+/* ---------- Guardar en la cinta ---------- */
+.calc-guardar {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.calc-nombre {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  background: #fff;
+  border: 1px solid #D9CDB0;
+  border-radius: 9px;
+}
+.calc-btn-guardar {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  background: var(--verde);
+  border-radius: 9px;
+}
+.calc-btn-guardar:hover { background: var(--verde-oscuro); }
+
+/* ---------- La cinta (el rollo de papel) ---------- */
+.calc-cinta-caja {
+  padding: 10px 11px 11px;
+  background: rgba(122, 74, 34, 0.06);
+  border: 1px solid rgba(122, 74, 34, 0.18);
+  border-radius: 12px;
+}
+.calc-cinta-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.calc-cinta-tit {
+  font-family: 'ScothBrace', serif;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--verde-oscuro);
+}
+.calc-cinta-limpiar {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  font-size: 0.68rem;
+  white-space: nowrap;
+  background: none;
+  color: var(--terracota);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.calc-cinta-limpiar:hover { background: var(--terracota); color: #fff; }
+
+.calc-cinta {
+  max-height: 122px;
+  overflow-y: auto;
+}
+/* Cada cuenta guardada = un renglón separado con línea de puntos, como el
+   papelito que escupe una calculadora de escritorio. */
+.calc-cinta-fila {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  border-bottom: 1px dashed rgba(122, 74, 34, 0.28);
+}
+.calc-cinta-fila:last-child { border-bottom: none; }
+
+.calc-cinta-usar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 7px 6px;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  text-align: left;
+  transition: background 0.18s ease;
+}
+.calc-cinta-usar:hover { background: rgba(242, 178, 51, 0.25); }
+.calc-cinta-usar:active { transform: none; }
+
+.calc-cinta-nombre,
+.calc-cinta-oper {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'LiberationSans', sans-serif;
+}
+.calc-cinta-nombre { font-size: 0.74rem; font-weight: bold; color: var(--verde-oscuro); }
+.calc-cinta-oper   { font-size: 0.7rem;  font-weight: normal; color: var(--marron); }
+.calc-cinta-res {
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: bold;
+  color: var(--texto);
+}
+.calc-cinta-res::before { content: '= '; color: var(--naranja); }
+
+.calc-cinta-x {
+  flex-shrink: 0;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 0.68rem;
+  line-height: 1;
+  background: rgba(192, 57, 43, 0.14);
+  color: var(--terracota);
+  border-radius: 50%;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.calc-cinta-x:hover { background: var(--terracota); color: #fff; }
+
+/* Guiño verde cuando se acaba de guardar una cuenta */
+.calc-cinta-fila.recien { animation: calc-recien 0.9s ease both; }
+@keyframes calc-recien {
+  0%   { background: rgba(46, 125, 64, 0.4); }
+  100% { background: transparent; }
+}
+
+.calc-cinta-vacia {
+  margin: 4px 0 0;
+  font-family: 'LiberationSans', sans-serif;
+  font-style: italic;
+  font-size: 0.76rem;
+  color: var(--marron);
+  text-align: center;
+}

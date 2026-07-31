@@ -60,9 +60,85 @@ document.addEventListener('DOMContentLoaded', function () {
     setVistaHoja(!!data.metasVistaHoja);
   });
 
+  // Los tres pasos de la vista sencilla se pliegan para ahorrar espacio
+  initPasos();
+
   // ¿Venimos de un clic derecho sobre un precio en una página?
   revisarPrecioCapturado();
 });
+
+// ----------------------------------------------------------------
+// PASOS PLEGABLES (vista sencilla)
+// Cada <section class="metas-paso"> tiene su título como botón. Arrancan todos
+// CERRADOS (así el panel entra de una en la pantalla) y recordamos cuáles dejó
+// abiertos el usuario. Con el paso cerrado mostramos un resumencito en el
+// título para no tener que abrirlo solo por mirar.
+// ----------------------------------------------------------------
+const PASOS_KEY = 'metasPasosAbiertos';
+let pasosAbiertos = {};        // { ahorros: true, comprar: false, cuenta: false }
+
+function initPasos() {
+  document.querySelectorAll('#metas-sencilla .metas-paso').forEach(function (sec) {
+    const tit = sec.querySelector('.metas-paso-tit');
+    if (tit) tit.addEventListener('click', function () { togglePaso(sec); });
+  });
+
+  if (chrome.storage && chrome.storage.sync) {
+    chrome.storage.sync.get([PASOS_KEY], function (data) {
+      pasosAbiertos = (data && data[PASOS_KEY]) || {};
+      aplicarPasos();
+    });
+  } else {
+    aplicarPasos();
+  }
+}
+
+function togglePaso(sec) {
+  const clave = sec.dataset.paso;
+  if (!clave) return;
+  pasosAbiertos[clave] = !pasosAbiertos[clave];
+  if (chrome.storage && chrome.storage.sync) {
+    const datos = {};
+    datos[PASOS_KEY] = pasosAbiertos;
+    chrome.storage.sync.set(datos);
+  }
+  aplicarPasos();
+}
+
+function aplicarPasos() {
+  document.querySelectorAll('#metas-sencilla .metas-paso').forEach(function (sec) {
+    const abierto = !!pasosAbiertos[sec.dataset.paso];
+    sec.classList.toggle('cerrado', !abierto);
+    const tit = sec.querySelector('.metas-paso-tit');
+    if (tit) tit.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+  });
+  pintarResumenPasos();
+}
+
+// El resumencito que se ve en el título cuando el paso está cerrado.
+function pintarResumenPasos() {
+  const total = metasLista.reduce(function (s, m) { return s + m.precio; }, 0);
+  const falta = Math.max(0, total - economia.ahorrosActuales);
+
+  // Cortitos a propósito: el título del paso ya ocupa lo suyo y el resumen se
+  // corta con puntos suspensivos si se pasa de ancho.
+  const textos = {
+    ahorros: economia.ahorroMensual > 0
+      ? formatearDinero(economia.ahorroMensual) + '/mes'
+      : 'falta llenar',
+    comprar: metasLista.length
+      ? metasLista.length + (metasLista.length === 1 ? ' cosa' : ' cosas')
+      : 'nada aún',
+    cuenta: metasLista.length
+      ? (falta > 0 ? 'falta ' + formatearDinero(falta) : '¡ya tiene con qué!')
+      : 'sin cuentas'
+  };
+
+  document.querySelectorAll('#metas-sencilla .metas-paso').forEach(function (sec) {
+    const span = sec.querySelector('.paso-resumen');
+    if (span) span.textContent = textos[sec.dataset.paso] || '';
+  });
+}
 
 // Cambia entre la vista sencilla (por pasos) y la hoja de cálculo tipo Excel.
 function setVistaHoja(on) {
@@ -275,6 +351,7 @@ function recalcularMetas() {
   renderListaMetas();
   renderHoja();
   sincronizarEconomiaEnInputs();
+  pintarResumenPasos();
   // Si Metas es la vista activa, refrescar también el número grande de arriba.
   if (typeof vistaActiva === 'function' && vistaActiva() === 'metas') {
     metasPintarJornal();
