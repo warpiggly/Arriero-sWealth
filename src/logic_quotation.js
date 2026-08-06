@@ -330,6 +330,8 @@ function refrescarTodo() {
   recalcularCotizacion();
   // Las metas también muestran dinero: que se repinten con la nueva moneda.
   if (typeof metasRefrescar === 'function') metasRefrescar();
+  // Y los sobres de la calculadora, que son casi puro dinero.
+  if (typeof sobresPintar === 'function') sobresPintar();
 }
 
 // ----------------------------------------------------------------

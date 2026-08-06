@@ -580,6 +580,60 @@
       <button type="button" id="calc-cerrar" class="calc-cerrar" title="Cerrar (Esc)">✕</button>
     </div>
 
+    <!-- ============ MI PLATA: el marcador de los sobres ============
+         Va ARRIBA de la pantalla a propósito: primero la respuesta que la
+         persona vino a buscar ("¿cuánto me queda?"), después las teclas.
+         Toda la lógica está en src/sobres.js -->
+    <div class="sob-marcador">
+      <div class="sob-marcador-cab">
+        <span class="sob-rot" id="sob-rot">Me queda</span>
+        <button type="button" id="sob-editar" class="sob-editar" aria-expanded="false"
+                title="Cambiar cuánto recibo y cada cuánto me pagan">✎ mi plata</button>
+      </div>
+
+      <div id="sob-queda" class="sob-queda">$0</div>
+
+      <!-- La barra se vacía como el tanque de gasolina: llena = tiene toda su plata -->
+      <div id="sob-barra" class="sob-barra oculto">
+        <div id="sob-barra-relleno" class="sob-barra-relleno nivel-alto"></div>
+      </div>
+
+      <div class="sob-renglon">
+        <span id="sob-dias" class="sob-dias"></span>
+        <span id="sob-pordia" class="sob-pordia"></span>
+      </div>
+
+      <p id="sob-frase" class="sob-frase tono-neutro"></p>
+      <p id="sob-lider" class="sob-lider-txt oculto"></p>
+
+      <button type="button" id="sob-btn-pago-ya" class="sob-btn-pago oculto">💰 Recibí mi pago</button>
+
+      <!-- El cuadrito de los dos datos. Plegado: se abre con el ✎ y se guarda
+           solito mientras escribe (no hay botón de "guardar" que se olvide). -->
+      <div id="sob-config" class="sob-config oculto">
+        <div class="sob-config-fila">
+          <label for="sob-ingreso">Recibí</label>
+          <input type="text" inputmode="numeric" class="input-num input-money"
+                 id="sob-ingreso" placeholder="1.200.000">
+        </div>
+        <div class="sob-config-fila">
+          <label for="sob-frecuencia">Me pagan</label>
+          <select id="sob-frecuencia">
+            <option value="semanal">Cada semana</option>
+            <option value="quincenal">Cada quincena</option>
+            <option value="mensual">Cada mes</option>
+          </select>
+        </div>
+        <!-- Cómo le fue la vez pasada. Va aquí y no en el marcador: es un
+             "bueno saber", no la respuesta que la persona vino a buscar. -->
+        <p id="sob-antes" class="sob-antes oculto"></p>
+
+        <button type="button" id="sob-btn-pago" class="sob-btn-pago">💰 Recibí mi pago</button>
+        <p class="sob-config-hint">Tóquelo cuando le llegue la plata: los sobres
+          vuelven a cero y le guardo la cuenta del ciclo que terminó.</p>
+      </div>
+    </div>
+
     <!-- Pantalla: arriba la operación que va haciendo, abajo el número grande -->
     <div class="calc-pantalla">
       <div id="calc-operacion" class="calc-operacion"></div>
@@ -622,6 +676,27 @@
       <button type="button" class="calc-tecla t-igual" data-accion="igual">=</button>
     </div>
 
+    <!-- ============ LOS SOBRES ============
+         Van DEBAJO del teclado, como una última fila de teclas: así el orden es
+         el de una calculadora de verdad (pantalla · teclas · sobres) y, sobre
+         todo, TODO lo esencial cabe en una pantalla sin tener que rodar la
+         ventana — que con este público es lo que más pesa.
+
+         El gesto completo son dos toques: escribo el número y toco el sobre.
+         Los cuadritos los arma sobres.js desde la lista SOBRES. -->
+    <div class="sob-zona">
+      <div class="sob-zona-cab">
+        <span class="sob-zona-tit">¿En qué fue?</span>
+        <!-- El instructivo se queda SIEMPRE: es el único gesto que hay que
+             aprender en toda la vista y no cuesta ni un renglón. -->
+        <span class="sob-zona-hint">toque el sobre y queda guardado</span>
+      </div>
+      <!-- Seis gastos + el Ahorro, que ocupa dos casillas y va en verde porque
+           no es un gasto sino plata que se guarda. Los arma sobres.js. -->
+      <div id="sob-rejilla" class="sob-rejilla"></div>
+      <div id="sob-aviso" class="sob-aviso oculto" role="status" aria-live="polite"></div>
+    </div>
+
     <!-- Guardar la cuenta en la cinta -->
     <div class="calc-guardar">
       <input type="text" id="calc-nombre" class="calc-nombre" maxlength="42"
@@ -629,15 +704,23 @@
       <button type="button" id="calc-guardar-btn" class="calc-btn-guardar">Guardar en la cinta</button>
     </div>
 
-    <!-- La cinta: las cuentas guardadas, como el rollo de papel de una
-         calculadora de escritorio. Toque una para volver a usar su resultado. -->
-    <div class="calc-cinta-caja">
+    <!-- La cinta: las cuentas guardadas y los gastos de los sobres, como el
+         rollo de papel de una calculadora de escritorio. Toque un renglón para
+         volver a usar su resultado; la ✕ le devuelve la plata a su sobre.
+         Arranca PLEGADA para que la ventana no quede tan larga. -->
+    <div id="calc-cinta-caja" class="calc-cinta-caja">
       <div class="calc-cinta-cab">
-        <span class="calc-cinta-tit">Mi cinta de cuentas</span>
+        <button type="button" id="calc-cinta-toggle" class="calc-cinta-toggle" aria-expanded="false">
+          <span class="calc-cinta-tit">Mi cinta de cuentas</span>
+          <span id="calc-cinta-cuenta" class="calc-cinta-cuenta"></span>
+          <span class="calc-cinta-flecha" aria-hidden="true"></span>
+        </button>
         <button type="button" id="calc-cinta-limpiar" class="calc-cinta-limpiar">Borrar todo</button>
       </div>
-      <div id="calc-cinta" class="calc-cinta"></div>
-      <p id="calc-cinta-vacia" class="calc-cinta-vacia">Todavía no ha guardado ninguna cuenta, mijo.</p>
+      <div class="calc-cinta-cuerpo">
+        <div id="calc-cinta" class="calc-cinta"></div>
+        <p id="calc-cinta-vacia" class="calc-cinta-vacia">Todavía no ha guardado ninguna cuenta, mijo.</p>
+      </div>
     </div>
 
   </div><!-- /#calc-ventana -->
@@ -647,6 +730,9 @@
   <script src="src/logic_quotation.js"></script>
   <script src="src/metas.js"></script>
   <script src="src/calculadora.js"></script>
+  <!-- sobres.js va DESPUÉS de calculadora.js: le pide prestados el almacén y los
+       puentes (calcValorPantalla, calcCintaAgregar…). -->
+  <script src="src/sobres.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
