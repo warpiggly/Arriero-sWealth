@@ -36,6 +36,11 @@
 //   recibo ya esté probado.
 // =================================================================
 
+// Cómo se lee un precio escrito por humanos. Un service worker no tiene
+// <script>, así que se carga con importScripts. La regla vive en un solo
+// archivo para que el menú contextual y la libreta lean igual.
+importScripts('/src/precio.js');
+
 // (Aquí estaba un importScripts('/src/db.js'). Se quitó al llegar la Fase 3:
 // este archivo ya no guarda en la libreta, así que no la necesita. Si algún
 // día el menú contextual vuelve a escribir directo — por ejemplo para la
@@ -83,44 +88,23 @@ chrome.runtime.onInstalled.addListener(() => {
   botarLoViejo();
 });
 
-// Extrae un precio (número) de un texto como "$1.999.900", "1,999.900 COP",
-// "US$ 49.99", etc. Devuelve un número o null si no encuentra nada usable.
+// (Aquí vivía extraerPrecio(). Se fue a src/precio.js como leerPrecio(),
+// porque estaba MAL y porque la libreta necesitaba la misma regla.
 //
-// Regla sencilla y robusta para Latinoamérica y USA: nos quedamos solo con
-// dígitos, puntos y comas; luego decidimos cuál es el separador decimal según
-// cuál aparezca de último. Así "1.999.900" -> 1999900 y "49.99" -> 49.99.
-function extraerPrecio(texto) {
-  if (!texto) return null;
-
-  // Dejar solo dígitos y separadores
-  const limpio = texto.replace(/[^\d.,]/g, '');
-  if (!limpio) return null;
-
-  const ultimaComa = limpio.lastIndexOf(',');
-  const ultimoPunto = limpio.lastIndexOf('.');
-
-  let normalizado;
-  if (ultimaComa > ultimoPunto) {
-    // La coma va de última => es el separador decimal (formato europeo/latino:
-    // "1.999.900,50"). Quitamos puntos (miles) y la coma pasa a punto decimal.
-    normalizado = limpio.replace(/\./g, '').replace(',', '.');
-  } else if (ultimoPunto > ultimaComa) {
-    // El punto va de último => separador decimal (formato USA: "1,999,900.50").
-    normalizado = limpio.replace(/,/g, '');
-  } else {
-    // No hay separadores decimales claros: quitamos ambos (son miles).
-    normalizado = limpio.replace(/[.,]/g, '');
-  }
-
-  const num = parseFloat(normalizado);
-  return isNaN(num) ? null : num;
-}
+// Qué estaba mal: leía "$6.110" como 6 pesos con 11 centavos, y "$1.999.900"
+// como 1,999 — un precio de casi dos millones se convertía en dos pesos.
+// Tomaba el punto por separador decimal siempre que no hubiera una coma
+// después, y en Colombia el punto es de MILES. Solo acertaba cuando la página
+// traía los centavos completos, como hace Amazon con "$6,110.00".
+//
+// La regla nueva mira cuántos dígitos van detrás del separador: tres son
+// miles, uno o dos son centavos. Ver el encabezado de src/precio.js.)
 
 // Manejar el clic en el menú contextual
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== "calcularCompra") return;
 
-  const precio = extraerPrecio(info.selectionText);
+  const precio = leerPrecio(info.selectionText);
 
   if (precio === null || precio <= 0) {
     // No se pudo leer un precio: avisamos discretamente en la página.

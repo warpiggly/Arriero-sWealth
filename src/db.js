@@ -118,8 +118,19 @@ function dbLimpiarTexto(v, tope) {
 }
 
 function dbLimpiarPrecio(v) {
-  const n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.'));
-  if (!isFinite(n) || n < 0) return 0;
+  // Si el precio llega como texto, se lee con la MISMA regla que usa el menú
+  // contextual (src/precio.js): así "6.110" son seis mil ciento diez aquí y
+  // allá. Antes esta función hacía su propio parseFloat y leía "6.110" como
+  // 6,11 — el mismo error que tenía el menú contextual.
+  let n;
+  if (typeof v === 'number') {
+    n = v;
+  } else if (typeof leerPrecio === 'function') {
+    n = leerPrecio(v);
+  } else {
+    n = parseFloat(String(v).replace(',', '.'));
+  }
+  if (n === null || !isFinite(n) || n < 0) return 0;
   // Redondeo a dos decimales: más allá de eso no hay plata que valga.
   return Math.round(n * 100) / 100;
 }

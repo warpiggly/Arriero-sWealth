@@ -735,9 +735,12 @@
   <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
        cambiarVista, pintarJornal...) que reutiliza el resto de la app. -->
   <script src="src/logic_quotation.js"></script>
+  <!-- Como se lee un precio escrito por humanos. Va PRIMERO porque db.js lo
+       usa al guardar, y el service worker del menu contextual lo carga aparte
+       con importScripts. -->
+  <script src="src/precio.js"></script>
   <!-- La libreta (IndexedDB) y lo que la app sabe de la persona. Ninguno de
-       los dos toca la pantalla: db.js lo usa tambien el service worker del
-       menu contextual, con importScripts. -->
+       los dos toca la pantalla. -->
   <script src="src/db.js"></script>
   <script src="src/ajustes.js"></script>
   <!-- Las cuentas. Tampoco toca la pantalla: funciones puras que reciben los

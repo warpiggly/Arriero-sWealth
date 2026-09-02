@@ -119,6 +119,14 @@ function recAtar(id, evento, hacer) {
 }
 
 // Los números entran como la gente los escribe: "1.200.000" o "1200000".
+//
+// A PROPÓSITO NO USA leerPrecio(): son dos trabajos distintos. leerPrecio
+// adivina el formato de una página web desconocida, que puede venir en
+// cualquier país. Aquí la persona escribe en la convención de la app —
+// el punto es de miles y la coma es el decimal, como en es-CO — y eso es lo
+// mismo que muestra el campo cuando uno sale de él (formatearInputMoneda).
+// Si esto usara leerPrecio, "49.99" se calcularía como 49,99 y el campo lo
+// mostraría como 4.999 al salir: dos números distintos para lo mismo.
 function recNumero(txt) {
   if (typeof txt === 'number') return txt;
   const limpio = String(txt || '').replace(/[^\d,.-]/g, '');
