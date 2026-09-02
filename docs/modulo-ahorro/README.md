@@ -1,17 +1,28 @@
 # Módulo de Ahorro — rediseño
 
-**Estado:** especificación acordada. **Fase 1 hecha** (el terreno quedó
-limpio); las fases 2, 3 y 4 sin empezar.
+**Estado:** especificación acordada y **construida: las cuatro fases están
+hechas** (ver [PLAN.md](PLAN.md)). Falta la única prueba que importa: sentar a
+una persona mayor frente a la app, sin decirle nada.
 **Fecha:** 1 de septiembre de 2026. Última actualización: 2 de septiembre.
 **Autor del diseño:** David Salazar (diagrama hecho a mano, aquí abajo).
 
 Este documento reemplaza lo que hoy hace la vista de Ahorro. Cuando el código y
 este documento no coincidan, **manda este documento**.
 
-El orden en que se va a construir está en **[PLAN.md](PLAN.md)**: cuatro fases,
-cada una con la prueba que hay que hacer al final. **La Fase 1 (borrar) está
-hecha**, y ahí quedó anotado lo que apareció al hacerla. La siguiente es la
-Fase 2: el menú contextual y la base de datos.
+El orden en que se construyó está en **[PLAN.md](PLAN.md)**: cuatro fases,
+cada una con la prueba que hay que hacer al final. **Las cuatro están hechas**,
+y en cada una quedó anotado lo que apareció al hacerla — incluidos tres errores
+que solo se vieron cuando hubo una pantalla de verdad tocándolo todo.
+
+**Dónde vive cada cosa ahora:**
+
+| Archivo | Qué hace |
+|---|---|
+| `src/db.js` | La libreta (IndexedDB): nombre, precio, link, grupo, fecha |
+| `src/ajustes.js` | Lo que la app sabe de la persona (en `chrome.storage.sync`) |
+| `src/ahorro.js` | **Las cuentas.** Funciones puras: ni pantalla ni almacén |
+| `src/recibo.js` | El recibo de dos caras. Lo único que toca la pantalla |
+| `src/calculadora.js` | La calculadora, suelta y sin conectar a nada |
 
 **Condición del proyecto:** David es el único que usa la app y todavía no está
 publicada en ninguna parte. Por eso no hay que trasladar datos viejos, ni

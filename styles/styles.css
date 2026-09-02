@@ -1046,35 +1046,21 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 
 /* ===========================================================
-   VISTA DE AHORRO — EN REDISENO (Fase 1)
+   VISTA DE AHORRO — "¿cuándo puedo comprarlo, mijo?"
 
-   Aqui vivian los estilos de la vista de Ahorro que se borro:
-     · VISTA METAS ("cuaderno de cuadricula sobre vidrio"): el panel de la
-       cuenta, los tres pasos plegables, la rejilla tipo Excel, el resumen con
-       su barra de progreso y la lista de productos.
-     · MODO HOJA DE CALCULO: la app se ensanchaba a 700px (body.modo-hoja).
-     · INTERRUPTOR DE VISTA: el switch Sencilla / Hoja de calculo.
-     · VISTA HOJA DE CALCULO: la cuadricula con letras de columna A-E.
+   Dos cosas y nada más: la calculadora (el gesto de escribir un número) y la
+   factura de tienda (la respuesta). La app no inventa metáforas nuevas.
 
-   El plan de lo que viene a ocupar este lugar esta en
-   docs/modulo-ahorro/README.md: el recibo de dos caras (con su giro), los
-   botones de plazo, el veredicto y "cuanto le afecta en su economia".
-
-   DOS COSAS QUE HAY QUE RECORDAR AL DISENAR EL RECIBO:
-     · el <body> lleva zoom: 0.75 -- todo nace 25 % mas chico de lo que se
-       escribe aqui (PLAN.md, Fase 4);
-     · el veredicto se dice SIEMPRE en palabras, no solo en color.
-
-   Lo que quedo vivo de esta zona: .master-contenido (lo comparte el panel de
-   Cobrar), .oculto (que era una utilidad global mal guardada y ya esta arriba,
-   con las otras utilidades) y el pulso del precio de la cabecera, que sigue
-   justo abajo.
+   OJO CON EL TAMAÑO DE LA LETRA: el <body> lleva zoom: 0.75, así que todo
+   nace 25 % más chico de lo que se escribe aquí. Los tamaños de esta sección
+   están puestos GRANDES a propósito, contando con eso — el recibo tiene que
+   leerse con el brazo estirado. Si algún día se cambia ese zoom, hay que
+   volver a mirar el recibo de lejos antes de dar nada por bueno.
    =========================================================== */
 
 /* ---------- Panel de la cuenta: vidrio esmerilado ----------
-   Es la caja donde hoy viven el botón de la calculadora y el letrero temporal,
-   y donde va a vivir el recibo. Se queda tal cual: este acabado de vidrio
-   sobre el paisaje del fondo es de la app, no de la vista que se borró. */
+   La caja donde vive todo. El acabado de vidrio sobre el paisaje del fondo es
+   de la app, no de la vista. */
 #panel-metas {
   background: rgba(20, 45, 30, 0.42);
   backdrop-filter: blur(9px);
@@ -1086,240 +1072,758 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.32);
 }
 
-/* El letrero temporal, sobre el vidrio: las letras van en blanco (los estilos
-   de .en-construccion son para el fondo claro de la 3a estrella). Todo esto se
-   va cuando llegue el recibo. */
-#panel-metas .en-construccion { color: #fff; }
-#panel-metas .en-construccion h3,
-#panel-metas .en-construccion p { color: #fff; }
-#panel-metas .en-construccion-firma { color: var(--dorado); }
-
-/* ---------- VENTANITA DE PRUEBAS (Fase 2) ----------
-   SE BOTA EN LA FASE 4, junto con src/pruebas.js y su bloque de popup.html.
-   Es fea a proposito: no es una pantalla para nadie, es el tablero para
-   revisar que la plomeria sirve. Letra chica y monoespaciada, cero cariño.
-   Aun asi, legible: el <body> lleva zoom 0.75 y aqui se lee de cerca. */
-.pruebas {
-  margin-top: 14px;
-  padding: 9px 10px 10px;
-  background: rgba(0, 0, 0, 0.42);
-  border: 1px dashed rgba(255, 255, 255, 0.45);
-  border-radius: 8px;
-  font-family: 'LiberationSans', monospace;
+/* ---------- Cosas comunes de la vista ---------- */
+.ah-tit {
+  margin: 0 0 3px;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.34rem;
+  font-weight: normal;
+  line-height: 1.15;
   color: #fff;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  text-wrap: balance;
 }
 
-.pruebas-tit {
+.ah-guia {
+  margin: 0 0 9px;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+}
+.ah-guia strong { color: #fff; }
+.ah-guia-chica { margin: 7px 0 0; font-size: 0.78rem; opacity: 0.82; }
+
+/* Un par de campos, uno al lado del otro */
+.ah-par { display: flex; gap: 7px; align-items: center; }
+.ah-par + .ah-par { margin-top: 6px; }
+.ah-par-chico { gap: 6px; }
+
+.ah-rot {
+  flex: 0 0 46%;
+  font-size: 0.84rem;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ah-campo {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 11px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 1rem;
+  color: var(--texto);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 9px;
+}
+.ah-campo:focus-visible {
+  outline: 3px solid var(--dorado);
+  outline-offset: 1px;
+}
+/* El campo del número va más grande: es el que la gente viene a llenar. */
+.ah-campo-grande {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.ah-check {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 0.86rem;
-  font-weight: bold;
-  margin-bottom: 8px;
+  gap: 7px;
+  margin-top: 9px;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
 }
-.pruebas-etiqueta {
-  font-size: 0.68rem;
-  font-weight: normal;
+.ah-check input { width: 17px; height: 17px; margin: 0; flex-shrink: 0; }
+
+.ah-flecha {
+  flex-shrink: 0;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid rgba(255, 255, 255, 0.8);
+  transition: transform 0.22s ease;
+}
+
+/* ---------- 1. Lo que usted gana ---------- */
+.ah-yo { margin-bottom: 12px; }
+
+/* Plegado: un renglón que dice lo que la app sabe */
+.ah-yo-resumen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 11px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.86rem;
+  text-align: left;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.ah-yo-resumen:hover { background: rgba(255, 255, 255, 0.2); }
+.ah-yo-resumen-txt { flex: 1; min-width: 0; line-height: 1.35; }
+.ah-yo-resumen-cambiar {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--dorado);
+  text-decoration: underline;
+}
+
+.ah-yo-cuerpo {
+  padding: 12px 12px 13px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+}
+
+/* Los gastos: plegados, porque nadie tiene que llenar un formulario antes de
+   recibir una respuesta. */
+.ah-gastos { margin-top: 12px; }
+.ah-gastos-tit {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.88rem;
+  text-align: left;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.ah-gastos-tit:hover { background: rgba(255, 255, 255, 0.18); }
+.ah-gastos-tit-txt { flex: 1; min-width: 0; }
+.ah-gastos-resumen {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  color: var(--dorado);
+}
+.ah-gastos:not(.cerrado) .ah-flecha { transform: rotate(180deg); }
+
+.ah-gastos-cuerpo {
+  overflow: hidden;
+  max-height: 620px;
+  padding-top: 10px;
+  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+}
+.ah-gastos.cerrado .ah-gastos-cuerpo {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
+
+/* ---------- 2. La pregunta ---------- */
+.ah-pregunta {
+  padding: 12px 12px 13px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+}
+/* Cuando el bloque de "lo que gana" está abierto (la primera vez), la
+   pregunta se aparta: primero un dato, después la pregunta. */
+.ah-pregunta-lejos { opacity: 0.55; }
+
+/* ---------- 4. La libreta ---------- */
+.ah-libreta { margin-top: 13px; }
+.ah-libreta-tit {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 10px;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.02rem;
+  text-align: left;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.ah-libreta-tit:hover { background: rgba(255, 255, 255, 0.18); }
+.ah-libreta-tit-txt { flex: 1; min-width: 0; }
+.ah-libreta-cuenta { flex-shrink: 0; font-size: 0.78rem; color: var(--dorado); }
+.ah-libreta:not(.cerrado) .ah-flecha { transform: rotate(180deg); }
+
+.ah-libreta-cuerpo {
+  overflow: hidden;
+  max-height: 400px;
+  padding-top: 8px;
+  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+}
+.ah-libreta.cerrado .ah-libreta-cuerpo {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
+
+/* Cada cosa apuntada. Es un botón: se toca y sale SU recibo (el "Ver" del
+   diagrama). Bien alto, para poder apuntarle sin cuidado. */
+.ah-lib-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 11px 11px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.94rem;
+  text-align: left;
+  color: var(--texto);
+  background: rgba(251, 245, 226, 0.94);
+  border: 1px solid rgba(122, 74, 34, 0.3);
+  border-bottom-width: 3px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.ah-lib-item:hover { background: #fff; }
+.ah-lib-item:active { transform: translateY(1px); border-bottom-width: 2px; }
+.ah-lib-item:focus-visible { outline: 3px solid var(--dorado); outline-offset: 1px; }
+
+.ah-lib-grupo {
+  background: rgba(46, 125, 64, 0.92);
+  border-color: rgba(20, 83, 45, 0.6);
+  color: #fff;
+}
+.ah-lib-grupo:hover { background: var(--verde); }
+
+.ah-lib-nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+.ah-lib-det { flex-shrink: 0; font-size: 0.78rem; opacity: 0.85; }
+.ah-lib-plata { flex-shrink: 0; font-weight: bold; white-space: nowrap; }
+.ah-lib-x {
+  flex-shrink: 0;
   padding: 2px 6px;
-  background: var(--terracota, #A2543A);
-  border-radius: 20px;
+  font-size: 0.86rem;
+  color: var(--terracota);
+  border-radius: 5px;
+}
+.ah-lib-x:hover { color: #fff; background: var(--terracota); }
+
+/* El aviso de "quedó apuntado" */
+.ah-aviso {
+  margin: 11px 0 0;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  text-align: center;
+  color: #fff;
+  background: rgba(46, 125, 64, 0.9);
+  border-radius: 9px;
+}
+
+/* ===========================================================
+   EL RECIBO DE DOS CARAS
+
+   El centro de todo el rediseño y lo que hace que la app se entienda sin que
+   nadie la explique. Se ve y se lee como el recibo que le dan en una tienda,
+   pero trae de más lo que ninguna tienda le dice.
+
+   Cinco cosas, en este orden:
+     1. qué es y cuánto cuesta   (como en cualquier factura)
+     2. cuánto ahorra            (para que el número no salga de la nada)
+     3. cuándo lo puede comprar
+     4. si es válido para él      (el veredicto)
+     5. el Consejo Arriero
+   =========================================================== */
+
+.rec-caja {
+  margin: 13px 0 0;
+  perspective: 1800px;
+}
+
+.rec-giro {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.62s cubic-bezier(0.22, 0.68, 0.3, 1);
+}
+.rec-caja.volteado .rec-giro { transform: rotateY(180deg); }
+
+.rec-cara {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #FDFBF3;
+  color: var(--texto);
+  border-radius: 5px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 14px 30px -10px rgba(0, 0, 0, 0.5),
+    0 3px 9px rgba(0, 0, 0, 0.3);
+}
+/* La cara de atrás va encima, girada: así las dos ocupan el mismo sitio y el
+   papel no "crece" al voltear. */
+.rec-atras {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  overflow-y: auto;
+}
+
+.rec-cuerpo { padding: 16px 16px 6px; }
+
+/* --- El encabezado del ticket --- */
+.rec-cab { text-align: center; padding-bottom: 10px; }
+.rec-marca {
+  margin: 0;
+  font-family: 'ScothBrace', serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--marron);
+}
+.rec-sub {
+  margin: 1px 0 0;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: rgba(43, 33, 24, 0.55);
+}
+
+/* --- La línea de puntos: la costura del recibo --- */
+.rec-puntos {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: repeating-linear-gradient(to right,
+    rgba(43, 33, 24, 0.45) 0 3px, transparent 3px 7px);
+}
+
+/* --- 1. Qué es y cuánto cuesta --- */
+.rec-que-es { padding: 15px 0 13px; text-align: center; }
+.rec-nombre {
+  margin: 0 0 4px;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.78rem;
+  font-weight: normal;
+  line-height: 1.1;
+  color: var(--texto);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+.rec-precio {
+  display: block;
+  font-size: 2.15rem;
+  font-weight: bold;
+  line-height: 1.1;
+  color: var(--verde-oscuro);
+  font-variant-numeric: tabular-nums;
+}
+.rec-donde {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.76rem;
+  color: rgba(43, 33, 24, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pruebas-bloque {
-  margin-bottom: 9px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-.pruebas-bloque:last-of-type { border-bottom: 0; padding-bottom: 0; }
-
-.pruebas-bloque-tit {
+/* --- 2 y 3. Cuánto ahorra y cuándo lo tiene --- */
+.rec-renglones { padding: 12px 0; }
+.rec-renglon {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-  font-size: 0.76rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.8;
-  margin-bottom: 5px;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 1rem;
 }
-.pruebas-cuenta { font-size: 0.72rem; text-transform: none; letter-spacing: 0; }
-
-.pruebas-renglon { display: flex; gap: 6px; }
-.pruebas-campo {
+.rec-rot { color: rgba(43, 33, 24, 0.72); white-space: nowrap; }
+.rec-lin {
   flex: 1;
-  min-width: 0;
-  padding: 6px 7px;
-  font-size: 0.82rem;
-  font-family: inherit;
-  color: var(--texto, #2B2B2B);
-  background: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 5px;
+  height: 1px;
+  margin-bottom: 4px;
+  background: repeating-linear-gradient(to right,
+    rgba(43, 33, 24, 0.35) 0 2px, transparent 2px 6px);
+}
+.rec-val {
+  font-weight: bold;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rec-renglon-fuerte .rec-val { font-size: 1.16rem; color: var(--verde-oscuro); }
+.rec-val em {
+  font-style: normal;
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: rgba(43, 33, 24, 0.6);
 }
 
-.pruebas-eco {
-  margin: 5px 0 0;
+/* --- 4. El veredicto ---
+   El COLOR ACOMPAÑA, LA FRASE MANDA. Un semáforo verde o rojo no le dice nada
+   a quien no distingue bien los colores, y una frase sí. Por eso cada tono
+   trae SIEMPRE su texto y su señal (✓ ! × ⏳), nunca solo el color. */
+.rec-veredicto {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 11px 0 0;
+  padding: 12px 13px;
+  border-radius: 9px;
+  border-left: 5px solid;
+}
+.rec-v-ico {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #fff;
+}
+.rec-v-dice { flex: 1; min-width: 0; }
+.rec-v-frase {
+  display: block;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.24rem;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.rec-v-porque {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: rgba(43, 33, 24, 0.78);
+}
+
+.rec-v-bien  { border-left-color: var(--verde); background: rgba(46, 125, 64, 0.1); }
+.rec-v-bien  .rec-v-ico { background: var(--verde); }
+.rec-v-bien  .rec-v-frase { color: var(--verde-oscuro); }
+
+.rec-v-ojo   { border-left-color: var(--naranja-osc); background: rgba(200, 94, 30, 0.1); }
+.rec-v-ojo   .rec-v-ico { background: var(--naranja-osc); }
+.rec-v-ojo   .rec-v-frase { color: #8F3F10; }
+
+.rec-v-no    { border-left-color: var(--terracota); background: rgba(192, 57, 43, 0.1); }
+.rec-v-no    .rec-v-ico { background: var(--terracota); }
+.rec-v-no    .rec-v-frase { color: #8E2018; }
+
+.rec-v-lento { border-left-color: var(--dorado-osc); background: rgba(242, 178, 51, 0.16); }
+.rec-v-lento .rec-v-ico { background: var(--dorado-osc); }
+.rec-v-lento .rec-v-frase { color: #7A5B04; }
+
+/* --- El aviso de cuando no sabemos sus gastos --- */
+.rec-aviso {
+  margin: 11px 0 0;
+  padding: 11px 13px;
+  font-size: 0.9rem;
+  line-height: 1.42;
+  background: rgba(242, 178, 51, 0.18);
+  border-left: 5px solid var(--dorado-osc);
+  border-radius: 9px;
+}
+.rec-aviso b { display: block; margin-bottom: 2px; color: #7A5B04; }
+.rec-aviso .rec-btn-g { margin-top: 8px; width: 100%; }
+
+/* --- Cuánto le va a afectar en su economía ---
+   La regla: decirlo en algo que la persona vive, no en un porcentaje. */
+.rec-afecta {
+  margin: 11px 0 0;
+  padding: 11px 12px;
+  background: rgba(122, 74, 34, 0.07);
+  border: 1px dashed rgba(122, 74, 34, 0.34);
+  border-radius: 9px;
+}
+.rec-rot-chico {
+  display: block;
+  margin-bottom: 3px;
   font-size: 0.7rem;
-  line-height: 1.35;
-  opacity: 0.85;
-  word-break: break-word;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--marron);
 }
+.rec-afecta p { margin: 0; font-size: 0.98rem; line-height: 1.4; }
 
-/* La lista. Rueda sola si crece: la ventanita no puede empujar la app. */
-.pruebas-lista {
-  max-height: 190px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.pruebas-vacio {
-  margin: 4px 0;
-  font-size: 0.72rem;
-  line-height: 1.35;
-  opacity: 0.8;
-}
-
-.pruebas-fila {
-  padding: 5px 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
-}
-.pruebas-fila:last-child { border-bottom: 0; }
-
-.pruebas-fila-arriba {
+/* --- El desglose del recibo grupal --- */
+.rec-desglose { padding: 12px 0 0; }
+.rec-desglose-fila {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  font-size: 0.8rem;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dotted rgba(122, 74, 34, 0.3);
+  font-size: 0.94rem;
 }
-.pruebas-fila-arriba strong {
+.rec-d-cosa {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.pruebas-precio { color: var(--dorado, #C9A227); white-space: nowrap; }
-
-.pruebas-x {
+.rec-d-plata { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rec-d-cuanto {
   flex-shrink: 0;
-  padding: 1px 5px;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  color: #fff;
-  background: rgba(162, 84, 58, 0.85);
-  border: 0;
-  border-radius: 4px;
+  min-width: 66px;
+  text-align: right;
+  font-size: 0.82rem;
+  color: rgba(43, 33, 24, 0.62);
+}
+.rec-desglose-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 2px solid var(--texto);
+  font-size: 1.06rem;
+  font-weight: bold;
+}
+.rec-desglose-total .rec-d-plata { color: var(--verde-oscuro); }
+
+/* --- Los plazos: botones gordos, sin calendario --- */
+.rec-plazos { margin: 13px 0 0; }
+.rec-plazos-preg {
+  margin: 0 0 7px;
+  font-size: 0.94rem;
+  color: rgba(43, 33, 24, 0.75);
+}
+.rec-plazos-fila { display: flex; gap: 7px; }
+.rec-plazo-btn {
+  flex: 1;
+  padding: 12px 4px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.98rem;
+  font-weight: bold;
+  color: var(--marron);
+  background: #FDFBF3;
+  border: 2px solid rgba(122, 74, 34, 0.42);
+  border-bottom-width: 4px;
+  border-radius: 10px;
   cursor: pointer;
+  transition: background 0.14s, transform 0.1s, color 0.14s;
 }
-.pruebas-x:hover { background: var(--terracota, #A2543A); }
-
-.pruebas-fila-abajo,
-.pruebas-link {
-  font-size: 0.67rem;
-  line-height: 1.3;
-  opacity: 0.72;
-  word-break: break-all;
+.rec-plazo-btn:hover { background: var(--crema); }
+.rec-plazo-btn:active { transform: translateY(1px); border-bottom-width: 2px; }
+.rec-plazo-btn[aria-pressed="true"] {
+  color: #fff;
+  background: var(--marron);
+  border-color: #5B3616;
 }
-.pruebas-link { opacity: 0.6; }
+.rec-plazo-btn:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
-.pruebas-botones {
+.rec-plazo-dice {
+  margin: 9px 0 0;
+  padding: 11px 12px;
+  font-size: 0.94rem;
+  line-height: 1.42;
+  background: var(--crema);
+  border-radius: 9px;
+}
+.rec-plazo-malo { color: #8E2018; }
+
+/* --- 5. El consejo del arriero --- */
+.rec-consejo {
+  display: flex;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(122, 74, 34, 0.3);
+}
+.rec-carriel { flex-shrink: 0; width: 26px; }
+.rec-carriel img { display: block; width: 100%; height: auto; }
+.rec-consejo-txt {
+  margin: 0;
+  font-size: 0.96rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--marron);
+}
+
+/* --- Los tres botones del final del cálculo --- */
+.rec-guardar {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 9px;
+  gap: 6px;
+  margin: 14px 0 0;
 }
-.pruebas-btn {
-  flex: 1;
-  min-width: 88px;
-  padding: 6px 7px;
-  font-family: inherit;
-  font-size: 0.72rem;
+.rec-btn-g {
+  flex: 1 1 46%;
+  padding: 12px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.94rem;
+  font-weight: bold;
   color: #fff;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 5px;
+  background: var(--verde);
+  border: 0;
+  border-bottom: 3px solid var(--verde-oscuro);
+  border-radius: 10px;
   cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
 }
-.pruebas-btn:hover { background: rgba(255, 255, 255, 0.28); }
-.pruebas-btn-malo {
-  background: rgba(162, 84, 58, 0.55);
-  border-color: rgba(162, 84, 58, 0.8);
+.rec-btn-g:hover { background: var(--verde-oscuro); }
+.rec-btn-g:active { transform: translateY(1px); border-bottom-width: 2px; }
+.rec-btn-g:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+/* "Déjelo así" no es un botón de castigo, pero tampoco compite con guardar:
+   quien solo quería el número se va por aquí sin sentir que hizo algo mal. */
+.rec-btn-g-suave {
+  flex-basis: 100%;
+  color: var(--marron);
+  background: transparent;
+  border: 1px solid rgba(122, 74, 34, 0.4);
+  border-bottom-width: 3px;
 }
-.pruebas-btn-malo:hover { background: var(--terracota, #A2543A); }
+.rec-btn-g-suave:hover { color: var(--texto); background: rgba(122, 74, 34, 0.1); }
 
-/* El prellenado y los campos con rotulo al lado */
-.pruebas-renglon + .pruebas-renglon { margin-top: 4px; }
-.pruebas-rot {
-  flex: 0 0 42%;
-  align-self: center;
-  font-size: 0.72rem;
-  line-height: 1.25;
-  opacity: 0.85;
+/* --- Escoger el grupo: los que ya tiene, o uno nuevo --- */
+.rec-grupos {
+  margin: 12px 0 0;
+  padding: 11px 12px;
+  background: rgba(46, 125, 64, 0.09);
+  border: 1px solid rgba(46, 125, 64, 0.3);
+  border-radius: 10px;
 }
-.pruebas-check {
+.rec-grupos-lista { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+.rec-grupo-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 0.7rem;
-  opacity: 0.85;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.96rem;
+  font-weight: bold;
+  text-align: left;
+  color: #fff;
+  background: var(--verde);
+  border: 0;
+  border-bottom: 3px solid var(--verde-oscuro);
+  border-radius: 9px;
   cursor: pointer;
 }
-.pruebas-check input { margin: 0; }
+.rec-grupo-btn:hover { background: var(--verde-oscuro); }
+.rec-grupo-btn-cuantos { font-size: 0.78rem; font-weight: normal; opacity: 0.85; }
+.rec-grupos .ah-campo { background: #fff; }
 
-/* La salida de la cuenta: renglon de rotulo + valor */
-.pruebas-salida { margin-top: 7px; }
-.pruebas-dato {
+/* --- El asa para voltear ---
+   Dice QUÉ VA A PASAR, no es una flechita muda: si hay que explicarle a
+   alguien que el recibo se voltea, está mal diseñado. */
+.rec-voltear {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 3px 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.15);
-  font-size: 0.73rem;
-  line-height: 1.35;
-}
-.pruebas-dato:last-child { border-bottom: 0; }
-.pruebas-dato-rot {
-  flex: 0 0 34%;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.62;
-}
-.pruebas-dato-val { flex: 1; min-width: 0; word-break: break-word; }
-
-.pruebas-porque {
-  margin: 3px 0;
-  font-size: 0.7rem;
-  line-height: 1.4;
-  opacity: 0.8;
-  word-break: break-word;
-}
-
-.pruebas-aviso {
-  margin: 7px 0 0;
-  padding: 7px 9px;
-  font-size: 0.72rem;
-  line-height: 1.4;
-  color: #fff;
-  background: rgba(242, 178, 51, 0.22);
-  border-left: 3px solid var(--dorado, #F2B233);
-  border-radius: 4px;
-}
-
-/* Un grupo, con su cuenta grupal */
-.pruebas-grupo {
-  margin-bottom: 8px;
-  padding: 7px 8px;
-  background: rgba(46, 125, 64, 0.16);
-  border: 1px solid rgba(46, 125, 64, 0.4);
-  border-radius: 6px;
-}
-.pruebas-grupo-tit {
-  font-size: 0.76rem;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 12px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.92rem;
   font-weight: bold;
-  line-height: 1.35;
-  word-break: break-word;
+  color: var(--marron);
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(122, 74, 34, 0.22);
+  cursor: pointer;
+}
+.rec-voltear:hover { color: var(--verde-oscuro); background: rgba(122, 74, 34, 0.06); }
+.rec-voltear:focus-visible { outline: 3px solid var(--dorado); outline-offset: -3px; }
+.rec-flecha { font-size: 1.1rem; transition: transform 0.4s ease; display: inline-block; }
+.rec-voltear:hover .rec-flecha { transform: rotate(-180deg); }
+
+/* --- La cara de atrás: la hoja para corregir ---
+   Solo las filas de ESTE recibo. Dar la vuelta es "corregir lo que estoy
+   mirando", nunca "abrir el archivo completo de mi vida". */
+.rec-atras-cab {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 3px;
+}
+.rec-atras-cab h4 {
+  margin: 0;
+  font-family: 'ScothBrace', serif;
+  font-size: 1.24rem;
+  font-weight: normal;
+  color: var(--texto);
+}
+.rec-atras-cab span { font-size: 0.76rem; color: rgba(43, 33, 24, 0.5); }
+.rec-atras .ah-guia { color: rgba(43, 33, 24, 0.72); }
+.rec-atras .ah-guia strong { color: var(--texto); }
+
+.rec-hoja-scroll { overflow-x: auto; }
+.rec-hoja {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.rec-hoja th, .rec-hoja td {
+  padding: 0;
+  text-align: left;
+  border: 1px solid rgba(122, 74, 34, 0.3);
+}
+.rec-hoja thead th {
+  padding: 6px 8px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--marron);
+  background: rgba(122, 74, 34, 0.1);
+}
+.rec-hoja-num {
+  width: 26px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(43, 33, 24, 0.5);
+  background: rgba(122, 74, 34, 0.07);
+}
+.rec-hoja td.rec-hoja-num { padding: 6px 3px; }
+.rec-hoja-plata { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Las celdas blancas son las que se escriben: la señal de "aquí sí se puede
+   tocar" tiene que verse sin leer nada. */
+.rec-hoja-input {
+  width: 100%;
+  padding: 9px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.94rem;
+  color: var(--texto);
+  background: #fff;
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(46, 125, 64, 0.25);
+}
+.rec-hoja-plata .rec-hoja-input {
+  text-align: right;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+.rec-hoja-input:focus {
+  outline: 0;
+  box-shadow: inset 0 0 0 2px var(--verde);
+}
+.rec-hoja-total td {
+  padding: 7px 8px;
+  font-weight: bold;
+  background: rgba(46, 125, 64, 0.1);
+}
+
+.rec-atras-link { margin: 11px 0 0; font-size: 0.84rem; }
+.rec-atras-link a { color: var(--verde-oscuro); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-giro,
+  .rec-flecha,
+  .ah-gastos-cuerpo,
+  .ah-libreta-cuerpo,
+  .ah-flecha { transition: none; }
 }
 
 /* Pulso del precio cuando una pieza de la despensa cambia el total */
@@ -1546,13 +2050,16 @@ html.calc-abierta body { overflow: hidden; }
   margin-bottom: 10px;
 }
 /* Cada tecla lleva el canto de abajo más gordo: se ve y se siente como tecla.
-   Al presionar baja 2px, como si se hundiera. */
+   Al presionar baja 2px, como si se hundiera.
+
+   LAS TECLAS VOLVIERON A SER GORDAS (Fase 4). Estaban apretadas a 9/8 px por
+   una razón que ya no existe: el marcador y los sobres compartían esta ventana
+   y cada par de píxeles por tecla eran 20 de alto en las cinco filas. Los
+   sobres se borraron en la Fase 1, así que el espacio volvió — y este público
+   necesita teclas a las que se les pueda apuntar sin cuidado y sin gafas. */
 .calc-tecla {
-  /* 9/8 en vez de 11/10: con el marcador y los sobres en la misma ventana, cada
-     par de píxeles por tecla son 20 de alto en las cinco filas. Las teclas
-     siguen bien gordas para apuntarles sin cuidado. */
-  padding: 9px 0 8px;
-  font-size: 1.06rem;
+  padding: 15px 0 13px;
+  font-size: 1.3rem;
   border: 1px solid rgba(122, 74, 34, 0.28);
   border-bottom-width: 3px;
   border-radius: 11px;
@@ -1576,7 +2083,7 @@ html.calc-abierta body { overflow: hidden; }
   color: var(--texto);
   border-color: rgba(122, 74, 34, 0.32);
   border-bottom-color: var(--dorado-osc);
-  font-size: 1.14rem;
+  font-size: 1.42rem;
 }
 .calc-tecla.t-op:hover { background: linear-gradient(178deg, #FBD070 0%, var(--dorado-osc) 100%); }
 

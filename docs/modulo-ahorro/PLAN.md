@@ -11,15 +11,23 @@ estamos sin preguntar.
 **La regla de oro:** nada se borra ni se cambia sin que usted lo haya visto
 escrito antes. Este documento es ese "antes".
 
-> **Estado al 2 de septiembre de 2026: FASES 1, 2 y 3 hechas.** El terreno
-> quedó limpio (1), la app guarda y recuerda (2) y ya sabe responder (3): la
-> cuenta base, los cuatro veredictos, los tres plazos, "lo que le pesa" en
-> palabras, y las cuentas del grupo. Todavía **sin cara**: los números salen
-> pelados en la ventanita de pruebas, que es justo lo que el plan pide para no
-> juntar "hacer las cuentas" con "ponerle la cara". Falta la Fase 4: el recibo.
+> **Estado al 2 de septiembre de 2026: LAS CUATRO FASES ESTÁN HECHAS.** El
+> terreno quedó limpio (1), la app guarda y recuerda (2), sabe responder (3) y
+> ya tiene su cara (4): el recibo de dos caras, con su giro, sus botones de
+> plazo y su hoja para corregir. La ventanita de pruebas se botó y el letrero
+> temporal se quitó.
 >
-> **El recibo de mentiras ya está** (recomendación 5), esperando su
-> "así sí" o "así no" antes de construirlo de verdad.
+> **Lo que falta no lo puedo hacer yo: son las dos pruebas de verdad.**
+>
+> 1. Las cinco preguntas del **recibo de mentiras** (recomendación 5), que
+>    quedó publicado esperando su "así sí" o "así no". Si algo del recibo hay
+>    que cambiar, es cambio de CSS y HTML: la lógica no se toca y sale barato.
+> 2. La prueba de la Fase 4: **sentar a una persona mayor frente a la app, sin
+>    decirle nada.** Si hay que explicarle algo, eso está mal diseñado. Esa es
+>    la única prueba que importa y no la puede hacer una máquina.
+>
+> Todo el trabajo está en la rama `rediseno-ahorro`. Lo de antes sigue intacto
+> en `main` y en el tag `antes-del-rediseno`.
 >
 > Todo el trabajo va en la rama `rediseno-ahorro`. Lo de antes está intacto en
 > `main` y en el tag `antes-del-rediseno`.
@@ -287,13 +295,49 @@ El `<body>` de la app lleva un `zoom: 0.75`. **Todo nace 25 % más chico de lo
 que se escribe.** Si el recibo se diseña sin tener eso en cuenta, en la pantalla
 real va a quedar ilegible para quien no ve bien.
 
-- [ ] El recibo por delante
-- [ ] El recibo por detrás (el Excel de sus filas)
-- [ ] El giro
-- [ ] Recibo de una cosa y recibo de grupo
-- [ ] La cara de la calculadora
-- [ ] Se botó la ventanita de pruebas
-- [ ] Se quitó el letrero temporal de la Fase 1
+- [x] El recibo por delante
+- [x] El recibo por detrás (el Excel de sus filas)
+- [x] El giro
+- [x] Recibo de una cosa y recibo de grupo
+- [x] La cara de la calculadora
+- [x] Se botó la ventanita de pruebas
+- [x] Se quitó el letrero temporal de la Fase 1
+
+### Lo que apareció al hacerla — 2 de septiembre de 2026
+
+Al ponerle la cara salieron **tres errores que estaban escondidos** en lo de
+abajo. Ninguno se veía hasta que hubo una pantalla de verdad tocándolo todo:
+
+1. **Los gastos se perdían al escribirlos.** No hay botón de "guardar": se
+   guarda mientras la persona escribe, así que cada tecla disparaba un
+   guardado. Cada guardado leía el almacén, cambiaba su parte y escribía — y
+   como el almacén responde cuando quiere, varias lecturas salían a la vez,
+   todas veían el estado viejo, y **la última escritura pisaba a las demás**.
+   En la práctica: usted llenaba los cinco renglones de gastos y solo quedaba
+   el último. La cuenta salía mal y nada avisaba por qué.
+   Arreglado: ahora hay **un solo objeto en memoria** que es el que manda, y la
+   escritura al almacén se agrupa (una vez, no una por tecla — que además cuida
+   la cuota de `chrome.storage.sync`, que solo admite unas 120 por minuto y no
+   avisa cuando uno se pasa).
+
+2. **"Ya tengo guardado" no se guardaba nunca.** El campo no estaba en la lista
+   de los que se copian al normalizar los ajustes, así que **se borraba solo en
+   cada guardado**. El efecto era cruel: quien ya tenía la plata junta recibía
+   un "espere cuatro meses" en vez de un "ya le alcanza". Arreglado, y con una
+   nota puesta en el código para que a nadie se le olvide al añadir campos
+   nuevos.
+
+3. **Un aviso que nadie escuchaba.** `ajustes.js` llamaba a un gancho para
+   avisar que los datos cambiaron en otro computador (`storage.sync` viaja), y
+   ese gancho no estaba implementado en ninguna parte: la pantalla se habría
+   quedado mostrando una cuenta hecha con datos viejos. Ahora el recibo lo
+   escucha y se repinta.
+
+Y una cosa que salió bien de gratis: **las teclas de la calculadora volvieron a
+ser gordas.** Estaban apretadas a 9 píxeles por una razón que ya no existe —
+compartían la ventana con el marcador y los sobres, y cada par de píxeles por
+tecla eran 20 de alto en las cinco filas. Los sobres se borraron en la Fase 1,
+así que el espacio volvió.
 
 ### 👀 Prueba que usted hace al final de la Fase 4
 

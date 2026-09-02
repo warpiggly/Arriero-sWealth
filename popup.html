@@ -89,15 +89,21 @@
 
 
   <!-- ===================== VISTA PRINCIPAL: AHORRO ===================== -->
-  <!-- EN REDISENO -- Fase 1 del plan (docs/modulo-ahorro/PLAN.md).
-       Aqui vivia la vista de Ahorro completa: la vista sencilla por pasos, la
-       hoja tipo Excel y los dos datos tecleados a mano (ahorroMensual y
-       ahorrosActuales). Todo eso se borro para dejar el terreno limpio y
-       construir de nuevo desde el diagrama.
+  <!-- El corazon de la app: "&iquest;cuando puedo comprarlo, mijo?"
+       Redise&ntilde;ada de cero desde el diagrama; la especificacion manda y esta en
+       docs/modulo-ahorro/README.md.
 
-       Lo que viene a ocupar este lugar (docs/modulo-ahorro/README.md): el
-       recibo de dos caras, los botones de plazo, el veredicto y la casilla
-       nueva de "cuanto le va a afectar en su economia".
+       COMO SE LEE ESTA VISTA, DE ARRIBA ABAJO
+         1. lo que usted gana ....... el unico dato obligatorio. Se pliega a un
+                                      renglon en cuanto esta puesto
+         2. la pregunta ............. que quiere y cuanto cuesta
+         3. EL RECIBO DE DOS CARAS .. la respuesta. Se voltea para corregir
+         4. la libreta .............. lo apuntado; se toca y sale su recibo
+
+       LAS DOS COSAS QUE LA APP NO INVENTA
+       No hay metaforas nuevas: se apoya en la calculadora (el gesto de
+       escribir un numero) y en la factura de tienda (la respuesta). Todo el
+       mundo ya sabe usar las dos.
 
        OJO CON EL id="panel-metas": no es decorativo. panelDeVista() y
        activarMula(), en src/logic_quotation.js, lo buscan por ese id para que
@@ -125,121 +131,236 @@
         <span class="btn-calc-txt">Saque la calculadora</span>
       </button>
 
-      <!-- LETRERO TEMPORAL de la Fase 1: solo esta aqui para que la vista no
-           quede en blanco mientras se trabaja. Reusa el estilo de la vista "En
-           construccion", que ya existia. Se quita al final de la Fase 4. -->
-      <div class="en-construccion">
-        <div class="en-construccion-ico" aria-hidden="true">&#128679;</div>
-        <h3>Estamos arreglando esto, mijo.</h3>
-        <p>Vuelva pronto.</p>
-        <span class="en-construccion-firma">&#8212; Su arriero de confianza</span>
-      </div>
+      <!-- ============ 1. LO QUE USTED GANA ============
+           El unico dato obligatorio (README, punto 3.1). Arranca ABIERTO la
+           primera vez, porque sin esto no hay cuenta que hacer; en cuanto
+           esta puesto se pliega a un renglon y le deja el frente a la
+           pregunta de verdad. Puede ser 0: es un caso normal, no un error. -->
+      <div id="ah-yo" class="ah-yo">
 
-      <!-- ============ VENTANITA DE PRUEBAS (Fase 2) ============
-           SE BOTA EN LA FASE 4. Fea a proposito: no es una pantalla para
-           nadie, es el tablero para revisar que la plomeria de la Fase 2
-           sirve. Sin esto, la unica forma de supervisar esta fase seria
-           abrirle las tripas al navegador.
-           Toda su logica esta en src/pruebas.js -->
-      <div id="pruebas" class="pruebas">
-        <div class="pruebas-tit">
-          Ventanita de pruebas
-          <span class="pruebas-etiqueta">Fase 2 &#183; se bota despues</span>
-        </div>
+        <!-- Plegado: un renglon que dice lo que sabemos y se toca para
+             corregir -->
+        <button type="button" id="ah-yo-resumen" class="ah-yo-resumen oculto"
+                aria-expanded="false">
+          <span id="ah-yo-resumen-txt" class="ah-yo-resumen-txt"></span>
+          <span class="ah-yo-resumen-cambiar">cambiar</span>
+        </button>
 
-        <!-- Lo de la persona: se guarda APARTE, en storage.sync, porque es
-             poquita cosa y viaja entre sus computadores. -->
-        <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">Lo que usted gana <span class="pruebas-cuenta">lo &#250;nico obligatorio</span></div>
-          <div class="pruebas-renglon">
-            <input type="text" inputmode="numeric" id="pruebas-ingreso"
-                   class="pruebas-campo" placeholder="1200000">
-            <select id="pruebas-frecuencia" class="pruebas-campo">
+        <div id="ah-yo-cuerpo" class="ah-yo-cuerpo">
+          <h3 class="ah-tit">&#191;Cu&#225;nto gana, mijo?</h3>
+          <p class="ah-guia">Con este solo dato ya le hago la cuenta.</p>
+
+          <div class="ah-par">
+            <input type="text" inputmode="numeric" id="ah-ingreso"
+                   class="ah-campo ah-campo-grande" placeholder="1.200.000"
+                   aria-label="Cu&#225;nto gana">
+            <select id="ah-frecuencia" class="ah-campo" aria-label="Cada cu&#225;nto">
               <option value="dia">cada d&#237;a</option>
               <option value="semana">cada semana</option>
               <option value="quincena">cada quincena</option>
-              <option value="mes">cada mes</option>
+              <option value="mes" selected>cada mes</option>
             </select>
           </div>
-          <p id="pruebas-eco" class="pruebas-eco"></p>
-        </div>
 
-        <!-- El prellenado. LLEGA EN CERO: la app no adivina los gastos de
-             nadie (decision del 2 de septiembre). Los campos los arma
-             pruebas.js desde la lista RENGLONES de src/ajustes.js, y cada
-             uno dice si resta o no. -->
-        <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">
-            Sus gastos
-            <span class="pruebas-cuenta">todo opcional &#183; llega en cero</span>
-          </div>
-          <div id="pruebas-prellenado"></div>
-        </div>
+          <!-- Los gastos: TODO OPCIONAL y todo en cero. La app no adivina.
+               Va plegado porque nadie tiene que llenar un formulario antes de
+               recibir una respuesta. -->
+          <div id="ah-gastos" class="ah-gastos cerrado">
+            <button type="button" id="ah-gastos-tit" class="ah-gastos-tit"
+                    aria-expanded="false">
+              <span class="ah-gastos-tit-txt">&#191;En qu&#233; se le va la plata?</span>
+              <span id="ah-gastos-resumen" class="ah-gastos-resumen"></span>
+              <span class="ah-flecha" aria-hidden="true"></span>
+            </button>
+            <div class="ah-gastos-cuerpo">
+              <p class="ah-guia">
+                Nada de esto es obligatorio. Llene solo lo que quiera y la
+                cuenta le sale m&#225;s ajustada a su vida.
+              </p>
+              <!-- Los campos los arma recibo.js desde la lista RENGLONES -->
+              <div id="ah-gastos-campos"></div>
 
-        <!-- Lo que ya tiene juntado y su reserva -->
-        <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">Lo que ya tiene</div>
-          <div class="pruebas-renglon">
-            <label class="pruebas-rot" for="pruebas-juntado">Guardado</label>
-            <input type="text" inputmode="numeric" id="pruebas-juntado"
-                   class="pruebas-campo" placeholder="0">
+              <div class="ah-par ah-par-chico">
+                <label class="ah-rot" for="ah-juntado">Ya tengo guardado</label>
+                <input type="text" inputmode="numeric" id="ah-juntado"
+                       class="ah-campo" placeholder="0">
+              </div>
+              <div class="ah-par ah-par-chico">
+                <label class="ah-rot" for="ah-colchon-juntado">Tengo de colch&#243;n</label>
+                <input type="text" inputmode="numeric" id="ah-colchon-juntado"
+                       class="ah-campo" placeholder="0">
+              </div>
+              <label class="ah-check">
+                <input type="checkbox" id="ah-usa-colchon" checked>
+                Yo manejo un colch&#243;n para emergencias
+              </label>
+            </div>
           </div>
-          <div class="pruebas-renglon">
-            <label class="pruebas-rot" for="pruebas-colchon-juntado">En el colch&#243;n</label>
-            <input type="text" inputmode="numeric" id="pruebas-colchon-juntado"
-                   class="pruebas-campo" placeholder="0">
-          </div>
-          <label class="pruebas-check">
-            <input type="checkbox" id="pruebas-usa-colchon" checked>
-            Usar colch&#243;n (hay gente que no lo maneja as&#237;)
-          </label>
-        </div>
-
-        <!-- ============ LA CUENTA (Fase 3) ============
-             Numeros pelados, sin recibo y sin colores: el plan dice que no se
-             junta "hacer las cuentas" con "ponerle la cara". El recibo de
-             verdad es la Fase 4. -->
-        <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">
-            La cuenta
-            <span class="pruebas-cuenta">Fase 3</span>
-          </div>
-          <div class="pruebas-renglon">
-            <input type="text" id="pruebas-nombre" class="pruebas-campo"
-                   placeholder="&#191;qu&#233; quiere?">
-            <input type="text" inputmode="numeric" id="pruebas-precio"
-                   class="pruebas-campo" placeholder="&#191;cu&#225;nto cuesta?">
-          </div>
-          <p id="pruebas-capturado" class="pruebas-eco oculto"></p>
-          <div id="pruebas-cuenta-salida" class="pruebas-salida"></div>
-
-          <!-- Los tres botones del final del calculo. Guardar no es un camino
-               aparte: es el final del primero. Y "dejarlo asi" existe porque
-               quien solo queria el numero tiene que poder irse sin guardar
-               nada (README, punto 4). -->
-          <div id="pruebas-guardar-zona" class="pruebas-botones oculto">
-            <button type="button" id="pruebas-guardar-suelto" class="pruebas-btn">guardar suelto</button>
-            <button type="button" id="pruebas-guardar-grupo" class="pruebas-btn">guardar en un grupo</button>
-            <button type="button" id="pruebas-dejarlo" class="pruebas-btn">dejarlo as&#237;</button>
-          </div>
-          <p id="pruebas-aviso-zona" class="pruebas-aviso oculto"></p>
-        </div>
-
-        <!-- La libreta: lo que hay guardado en IndexedDB -->
-        <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">
-            La libreta
-            <span id="pruebas-cuenta" class="pruebas-cuenta"></span>
-          </div>
-          <div id="pruebas-lista" class="pruebas-lista"></div>
-        </div>
-
-        <div class="pruebas-botones">
-          <button type="button" id="pruebas-inventar" class="pruebas-btn">apuntar algo de mentiras</button>
-          <button type="button" id="pruebas-refrescar" class="pruebas-btn">refrescar</button>
-          <button type="button" id="pruebas-borrar" class="pruebas-btn pruebas-btn-malo">botar todo</button>
         </div>
       </div>
+
+      <!-- ============ 2. LA PREGUNTA ============ -->
+      <div id="ah-pregunta" class="ah-pregunta">
+        <h3 class="ah-tit">&#191;Cu&#225;ndo puedo comprarlo?</h3>
+        <div class="ah-par">
+          <input type="text" id="ah-nombre" class="ah-campo"
+                 placeholder="&#191;Qu&#233; quiere?" aria-label="Qu&#233; quiere">
+          <input type="text" inputmode="numeric" id="ah-precio"
+                 class="ah-campo ah-campo-grande" placeholder="&#191;Cu&#225;nto cuesta?"
+                 aria-label="Cu&#225;nto cuesta">
+        </div>
+        <p class="ah-guia ah-guia-chica">
+          O en cualquier p&#225;gina se&#241;ale el precio y haga clic derecho.
+        </p>
+      </div>
+
+      <!-- ============ 3. EL RECIBO DE DOS CARAS ============
+           El centro de todo el redise&#241;o. Se lee como el recibo que le dan en
+           una tienda, y trae de mas lo que ninguna tienda le dice.
+           Se le da la vuelta y aparece la hoja para corregir precios y
+           nombres -- solo las filas de ESTE recibo, no la libreta entera.
+           Lo pinta src/recibo.js -->
+      <div id="ah-recibo" class="rec-caja oculto">
+        <div class="rec-giro">
+
+          <!-- ---------- CARA DE ADELANTE ---------- -->
+          <div class="rec-cara rec-frente">
+            <div class="rec-cuerpo">
+
+              <div class="rec-cab">
+                <p class="rec-marca">Arriero&rsquo;s Wealth</p>
+                <p class="rec-sub" id="rec-sub">&iquest;cu&aacute;ndo puedo comprarlo, mijo?</p>
+              </div>
+              <hr class="rec-puntos">
+
+              <!-- 1. Que es y cuanto cuesta -->
+              <div class="rec-que-es">
+                <h3 id="rec-nombre" class="rec-nombre"></h3>
+                <span id="rec-precio" class="rec-precio"></span>
+                <span id="rec-donde" class="rec-donde"></span>
+              </div>
+              <hr class="rec-puntos">
+
+              <!-- El desglose (solo en el recibo de un grupo) -->
+              <div id="rec-desglose" class="rec-desglose oculto"></div>
+
+              <!-- 2 y 3. Cuanto ahorra y cuando lo tiene -->
+              <div id="rec-renglones" class="rec-renglones"></div>
+              <hr class="rec-puntos">
+
+              <!-- 4. El veredicto -->
+              <div id="rec-veredicto" class="rec-veredicto"></div>
+
+              <!-- El aviso de cuando no sabemos sus gastos -->
+              <div id="rec-aviso" class="rec-aviso oculto"></div>
+
+              <!-- Cuanto le va a afectar en su economia -->
+              <div id="rec-afecta" class="rec-afecta"></div>
+
+              <!-- Los plazos: botones gordos, sin calendario -->
+              <div class="rec-plazos">
+                <p class="rec-plazos-preg">&#191;Y si lo quiero en&hellip;?</p>
+                <div id="rec-plazos-fila" class="rec-plazos-fila" role="group"
+                     aria-label="Plazos"></div>
+                <p id="rec-plazo-dice" class="rec-plazo-dice"></p>
+              </div>
+
+              <!-- 5. El consejo del arriero -->
+              <div class="rec-consejo">
+                <span class="rec-carriel" aria-hidden="true">
+                  <img src="assets/images/Cirrel Arriero.png" alt="">
+                </span>
+                <p id="rec-consejo-txt" class="rec-consejo-txt"></p>
+              </div>
+
+              <!-- Los tres botones del final. Guardar no es un camino aparte:
+                   es el final del calculo. Y "dejarlo asi" existe porque quien
+                   solo queria el numero tiene que poder irse sin guardar nada
+                   ni haber decidido nada de antemano (README, punto 4). -->
+              <div id="rec-guardar" class="rec-guardar">
+                <button type="button" id="rec-g-suelto" class="rec-btn-g">
+                  Gu&#225;rdemelo
+                </button>
+                <button type="button" id="rec-g-grupo" class="rec-btn-g">
+                  Gu&#225;rdelo en un grupo
+                </button>
+                <button type="button" id="rec-g-dejar" class="rec-btn-g rec-btn-g-suave">
+                  D&#233;jelo as&#237;
+                </button>
+              </div>
+
+              <!-- Escoger el grupo: los que ya tiene, o uno nuevo. Sale al
+                   tocar "guardelo en un grupo". -->
+              <div id="rec-grupos" class="rec-grupos oculto">
+                <p class="rec-plazos-preg">&#191;En qu&#233; grupo?</p>
+                <div id="rec-grupos-lista" class="rec-grupos-lista"></div>
+                <div class="ah-par">
+                  <input type="text" id="rec-grupo-nuevo" class="ah-campo"
+                         placeholder="o escriba un grupo nuevo" maxlength="60">
+                  <button type="button" id="rec-grupo-crear" class="rec-btn-g">Listo</button>
+                </div>
+              </div>
+
+              <button type="button" class="rec-voltear" data-voltear="1">
+                <span class="rec-flecha" aria-hidden="true">&#8634;</span>
+                <span id="rec-voltear-txt">Voltear para corregir el precio</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ---------- CARA DE ATRAS ---------- -->
+          <div class="rec-cara rec-atras">
+            <div class="rec-cuerpo">
+              <div class="rec-atras-cab">
+                <h4>Corregir</h4>
+                <span id="rec-atras-cuantas"></span>
+              </div>
+              <p class="ah-guia">
+                Solo lo de <strong>este</strong> recibo. Escriba en los
+                cuadritos blancos.
+              </p>
+
+              <div class="rec-hoja-scroll">
+                <table class="rec-hoja">
+                  <thead>
+                    <tr>
+                      <th class="rec-hoja-num">&#8470;</th>
+                      <th>Qu&#233; es</th>
+                      <th class="rec-hoja-plata">Cu&#225;nto cuesta</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rec-hoja-cuerpo"></tbody>
+                </table>
+              </div>
+
+              <p id="rec-atras-link" class="rec-atras-link"></p>
+
+              <button type="button" class="rec-voltear" data-voltear="1">
+                <span class="rec-flecha" aria-hidden="true">&#8634;</span>
+                Voltear y ver la cuenta
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============ 4. LA LIBRETA ============
+           Lo que tiene apuntado. Es el "Ver" del diagrama: se toca una cosa o
+           un grupo y sale SU recibo. -->
+      <div id="ah-libreta" class="ah-libreta">
+        <button type="button" id="ah-libreta-tit" class="ah-libreta-tit"
+                aria-expanded="true">
+          <span class="ah-libreta-tit-txt">Lo que tengo apuntado</span>
+          <span id="ah-libreta-cuenta" class="ah-libreta-cuenta"></span>
+          <span class="ah-flecha" aria-hidden="true"></span>
+        </button>
+        <div class="ah-libreta-cuerpo">
+          <div id="ah-libreta-lista"></div>
+        </div>
+      </div>
+
+      <p id="ah-aviso" class="ah-aviso oculto" role="status" aria-live="polite"></p>
 
     </div><!-- /#panel-metas -->
   </div>
@@ -625,8 +746,8 @@
   <!-- La calculadora quedo suelta: no le pide nada a nadie ni nadie le pide
        nada a ella (ver el encabezado de src/calculadora.js). -->
   <script src="src/calculadora.js"></script>
-  <!-- La ventanita de pruebas de la Fase 2. SE BOTA EN LA FASE 4. -->
-  <script src="src/pruebas.js"></script>
+  <!-- El recibo: lo unico de la vista de Ahorro que toca la pantalla. -->
+  <script src="src/recibo.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
