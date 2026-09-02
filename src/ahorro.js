@@ -502,11 +502,17 @@ function ahorroParteDelGrupo(precio, total) {
 // ----------------------------------------------------------------
 // Formato de plata
 //
-// Se queda aquí y no en logic_quotation.js para que este archivo se pueda
-// probar solo, sin cargar media app. Si algún día hay una sola función de
-// dinero para toda la app, esta se cambia por esa.
+// Las cifras van METIDAS DENTRO de las frases del veredicto ("tendría que
+// sacar $800.000 del colchón"), así que este archivo necesita saber escribir
+// dinero. Pero no tiene por qué saber de monedas: si la app le presta su
+// función, la usa — y así el recibo respeta la moneda que la persona escogió
+// arriba. Si no está (por ejemplo cuando se prueba este archivo solo, sin
+// cargar media app), se arregla con pesos colombianos.
 // ----------------------------------------------------------------
 function ahorroPlata(n) {
+  if (typeof formatearDineroLimpio === 'function') {
+    return formatearDineroLimpio(Number(n) || 0);
+  }
   const num = Math.round(Number(n) || 0);
   return '$' + num.toLocaleString('es-CO');
 }

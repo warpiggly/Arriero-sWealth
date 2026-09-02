@@ -128,8 +128,24 @@ function recNumero(txt) {
   return isFinite(n) && n > 0 ? n : 0;
 }
 
+// La plata, en la moneda que la persona escogió arriba. Si la función de la
+// app no está cargada, pesos colombianos (ver ahorroPlata, misma idea).
 function recPlata(n) {
+  if (typeof formatearDineroLimpio === 'function') {
+    return formatearDineroLimpio(Number(n) || 0);
+  }
   return '$' + Math.round(Number(n) || 0).toLocaleString('es-CO');
+}
+
+// Rehacer TODO lo que se está viendo. Lo llama refrescarTodo() de
+// logic_quotation.js cuando la persona cambia la moneda: no basta con
+// repintar, porque las frases del veredicto llevan las cifras metidas por
+// dentro y quedarían en la moneda vieja.
+function recRefrescar() {
+  recPintarJornal();
+  recPintarYo();
+  if (recAhora) recRehacerLoQueSeEstaViendo();
+  recPintarLibreta();
 }
 
 // Los campos de dinero se comportan como en TODA la app: al enfocarlos se ven
@@ -247,10 +263,34 @@ function recPintarYo() {
   }
 
   // La cabecera de la app: el número grande de arriba
-  if (typeof pintarJornal === 'function' && typeof vistaActiva === 'function' &&
-      vistaActiva() === 'metas') {
-    pintarJornal('Puede guardar:', recPlata(cap.alMes));
+  recPintarJornal();
+}
+
+// EL NÚMERO GRANDE DE LA CABECERA, en la vista de Ahorro.
+//
+// Lo llama src/logic_quotation.js cada vez que se cambia de vista (es decir,
+// cada vez que se toca la mula de AHORRO), y también esta pantalla cuando los
+// datos cambian. Tiene que existir con este nombre: si no, la cabecera se
+// queda con el guion del marcador temporal.
+//
+// Qué muestra:
+//   · todavía no ha dicho cuánto gana  ->  un guion, porque no sabemos
+//   · no le queda nada, o está en rojo ->  $0, que es la respuesta honesta a
+//     "cuánto puede guardar". Que le falta plata lo explica el recibo, con
+//     todas sus palabras: la caja dorada no es el lugar para un número
+//     negativo que nadie sabe leer
+//   · el caso normal                   ->  lo que puede guardar al mes
+function recPintarJornal() {
+  if (typeof pintarJornal !== 'function') return;
+
+  const a = recAjustes;
+  if (!a || !ajustesTieneIngreso(a)) {
+    pintarJornal('Puede guardar:', '—');
+    return;
   }
+
+  const cap = ahorroCapacidad(a);
+  pintarJornal('Puede guardar:', recPlata(Math.max(0, cap.alMes)));
 }
 
 function recPonerValor(id, valor) {

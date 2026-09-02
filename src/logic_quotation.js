@@ -209,24 +209,31 @@ function pintarJornal(etiqueta, valorTexto) {
   if (num) num.textContent = valorTexto;
 }
 
-// Repinta la cabecera con lo que corresponde a la vista activa.
+// Repinta la cabecera con lo que corresponde a la vista activa: en AHORRO,
+// "Puede guardar"; en Cotizar y Mi Despensa, "Deberías cobrar".
 //
-// En Cotizar y Mi Despensa muestra "Deberías cobrar". En AHORRO, mientras el
-// módulo se reconstruye (Fase 1 del rediseño), no hay ninguna cuenta que
-// mostrar: quien pintaba ese número era metasPintarJornal(), que vivía en el
-// metas.js que se borró. Así que la cabecera dice la verdad — un guion — en
-// vez de pisar la vista con el "Deberías cobrar" del cotizador, que ahí no
-// significa nada.
-//
-// Cuando llegue el recibo (Fase 4), este es el lugar donde el número grande de
-// la vista de Ahorro vuelve a tener dueño.
+// OJO: ESTA FUNCIÓN CORRE CADA VEZ QUE SE CAMBIA DE VISTA, así que lo que
+// escriba aquí PISA lo que la vista haya pintado por su cuenta. En la Fase 1
+// del rediseño esto tenía un guion de marcador temporal, y al llegar el recibo
+// se quedó sin cambiar: el número aparecía un instante y la mula de Ahorro lo
+// borraba. Quien manda sobre ese número es la vista, no esta función; aquí solo
+// se le pide que lo pinte.
 function actualizarCabecera() {
   const vista = vistaActiva();
+
   if (vista === 'metas') {
-    pintarJornal('Su ahorro:', '—');
-  } else {
-    pintarJornal('Deberías cobrar:', formatearDinero(window.__precioVentaActual || 0));
+    // El dueño del número es src/recibo.js, que es el que sabe cuánto puede
+    // guardar la persona. La guarda de typeof es para que la app no se caiga
+    // si algún día esa vista no está cargada.
+    if (typeof recPintarJornal === 'function') {
+      recPintarJornal();
+    } else {
+      pintarJornal('Puede guardar:', '—');
+    }
+    return;
   }
+
+  pintarJornal('Deberías cobrar:', formatearDinero(window.__precioVentaActual || 0));
 }
 
 // ----------------------------------------------------------------
@@ -295,6 +302,28 @@ function formatearDinero(valor) {
   }).format(seguro);
 }
 
+// Igual que formatearDinero, pero SIN los centavos cuando el monto es redondo.
+// Lo usa el recibo del ahorro, y la razón es el público de la app: "$ 850.000"
+// se lee de un golpe, y "$ 850.000,00" hay que descifrarlo. Cuando el monto
+// trae centavos de verdad, sí se muestran — no se pierde precisión, solo se
+// quita el ruido.
+//
+// Va aquí, al lado de formatearDinero, porque las dos tienen que mirar la
+// MISMA moneda: si algún día se le agrega una moneda a MONEDAS, las dos la
+// heredan sin que nadie se acuerde de esta.
+function formatearDineroLimpio(valor) {
+  const m = monedaConfig();
+  const num = parseFloat(valor);
+  const seguro = isNaN(num) ? 0 : num;
+  const redondo = Math.abs(seguro - Math.round(seguro)) < 0.005;
+  return new Intl.NumberFormat(m.locale, {
+    style: 'currency',
+    currency: m.codigo,
+    minimumFractionDigits: redondo ? 0 : 2,
+    maximumFractionDigits: redondo ? 0 : 2
+  }).format(seguro);
+}
+
 // Llena el menú <select> con todas las monedas disponibles.
 function poblarSelectorMoneda() {
   const sel = document.getElementById('selector-moneda');
@@ -332,9 +361,12 @@ function refrescarTodo() {
   renderHerramientas();
   renderPresupuestos();
   recalcularCotizacion();
-  // La vista de Ahorro no entra aquí por ahora: está en obra y no muestra
-  // ningún dinero (Fase 1 del rediseño). Cuando el recibo exista, este es el
-  // lugar donde hay que volver a repintarlo al cambiar de moneda.
+
+  // El recibo del ahorro es casi puro dinero: si cambió la moneda, hay que
+  // REHACERLO, no solo repintarlo — las frases del veredicto llevan las cifras
+  // metidas por dentro ("tendría que sacar $800.000 del colchón"), así que un
+  // repintado dejaría números de la moneda vieja dentro de las frases.
+  if (typeof recRefrescar === 'function') recRefrescar();
 }
 
 // ----------------------------------------------------------------
