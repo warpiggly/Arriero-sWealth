@@ -1094,6 +1094,161 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 #panel-metas .en-construccion p { color: #fff; }
 #panel-metas .en-construccion-firma { color: var(--dorado); }
 
+/* ---------- VENTANITA DE PRUEBAS (Fase 2) ----------
+   SE BOTA EN LA FASE 4, junto con src/pruebas.js y su bloque de popup.html.
+   Es fea a proposito: no es una pantalla para nadie, es el tablero para
+   revisar que la plomeria sirve. Letra chica y monoespaciada, cero cariño.
+   Aun asi, legible: el <body> lleva zoom 0.75 y aqui se lee de cerca. */
+.pruebas {
+  margin-top: 14px;
+  padding: 9px 10px 10px;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  font-family: 'LiberationSans', monospace;
+  color: #fff;
+}
+
+.pruebas-tit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.pruebas-etiqueta {
+  font-size: 0.68rem;
+  font-weight: normal;
+  padding: 2px 6px;
+  background: var(--terracota, #A2543A);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pruebas-bloque {
+  margin-bottom: 9px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.pruebas-bloque:last-of-type { border-bottom: 0; padding-bottom: 0; }
+
+.pruebas-bloque-tit {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  margin-bottom: 5px;
+}
+.pruebas-cuenta { font-size: 0.72rem; text-transform: none; letter-spacing: 0; }
+
+.pruebas-renglon { display: flex; gap: 6px; }
+.pruebas-campo {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 7px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: var(--texto, #2B2B2B);
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+}
+
+.pruebas-eco {
+  margin: 5px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  opacity: 0.85;
+  word-break: break-word;
+}
+
+/* La lista. Rueda sola si crece: la ventanita no puede empujar la app. */
+.pruebas-lista {
+  max-height: 190px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.pruebas-vacio {
+  margin: 4px 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+
+.pruebas-fila {
+  padding: 5px 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
+}
+.pruebas-fila:last-child { border-bottom: 0; }
+
+.pruebas-fila-arriba {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+.pruebas-fila-arriba strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pruebas-precio { color: var(--dorado, #C9A227); white-space: nowrap; }
+
+.pruebas-x {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: #fff;
+  background: rgba(162, 84, 58, 0.85);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.pruebas-x:hover { background: var(--terracota, #A2543A); }
+
+.pruebas-fila-abajo,
+.pruebas-link {
+  font-size: 0.67rem;
+  line-height: 1.3;
+  opacity: 0.72;
+  word-break: break-all;
+}
+.pruebas-link { opacity: 0.6; }
+
+.pruebas-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+.pruebas-btn {
+  flex: 1;
+  min-width: 88px;
+  padding: 6px 7px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.pruebas-btn:hover { background: rgba(255, 255, 255, 0.28); }
+.pruebas-btn-malo {
+  background: rgba(162, 84, 58, 0.55);
+  border-color: rgba(162, 84, 58, 0.8);
+}
+.pruebas-btn-malo:hover { background: var(--terracota, #A2543A); }
+
 /* Pulso del precio cuando una pieza de la despensa cambia el total */
 .jornal-num.pulso { animation: precio-pulso 0.5s ease; }
 @keyframes precio-pulso {

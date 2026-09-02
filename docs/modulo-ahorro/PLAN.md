@@ -11,11 +11,11 @@ estamos sin preguntar.
 **La regla de oro:** nada se borra ni se cambia sin que usted lo haya visto
 escrito antes. Este documento es ese "antes".
 
-> **Estado al 2 de septiembre de 2026: la FASE 1 está hecha.** El terreno quedó
-> limpio: la vista de Ahorro, los sobres y la cinta de la calculadora se
-> borraron, y en su lugar hay un letrero temporal. La calculadora quedó suelta y
-> haciendo cuentas. Falta que usted haga la prueba de la Fase 1 (está más
-> abajo); si pasa, sigue la Fase 2.
+> **Estado al 2 de septiembre de 2026: FASES 1 y 2 hechas.** El terreno quedó
+> limpio (Fase 1) y la app ya guarda y recuerda (Fase 2): la libreta nueva es
+> IndexedDB, el clic derecho se queda con el link y el título, y lo que usted
+> gana se guarda aparte. Hay una ventanita de pruebas, fea a propósito, para
+> que pueda revisarlo con los ojos. Siguen las cuentas (Fase 3).
 >
 > Todo el trabajo va en la rama `rediseno-ahorro`. Lo de antes está intacto en
 > `main` y en el tag `antes-del-rediseno`.
@@ -181,10 +181,10 @@ borrarlo todo. Se bota en la Fase 4.
 Sin esa ventanita, la única forma de revisar esta fase sería abrirle las
 tripas al navegador. Con ella, usted mira una lista y ya.
 
-- [ ] La base de datos guarda y recuerda
-- [ ] El clic derecho guarda precio + link + título
-- [ ] Los datos de la persona se guardan aparte
-- [ ] Está la ventanita de pruebas
+- [x] La base de datos guarda y recuerda
+- [x] El clic derecho guarda precio + link + título
+- [x] Los datos de la persona se guardan aparte
+- [x] Está la ventanita de pruebas
 
 ### 👀 Prueba que usted hace al final de la Fase 2
 
@@ -405,21 +405,23 @@ para que ningún usuario se asuste, sino simplemente para que la vista no quede
 en blanco mientras se trabaja. Con reutilizar la vista "En construcción" que ya
 existe, queda hecho en un minuto.
 
+### Resueltas el 2 de septiembre de 2026
+
+Las cuatro que quedaban antes de arrancar la Fase 2:
+
+| Duda | Respuesta |
+|---|---|
+| **(Fase 2)** ¿El clic derecho abre la extensión o saca una tarjeta sobre la página de la tienda? | **Las dos, en ese orden.** Ahora sigue abriendo la extensión (que es lo que ya funciona); la tarjeta flotante queda anotada para cuando el recibo esté probado. |
+| **(Fase 3)** ¿Cómo se mete algo en un grupo? | **Escoger de la lista o escribir uno nuevo ahí mismo.** Salen los grupos que ya tiene como botones gordos y, al final, uno de "grupo nuevo". Sirve igual la primera vez, cuando no hay ninguno. |
+| **(Fase 3)** ¿Cuánto es "se demora muchísimo"? | **Más de 18 meses.** Franco temprano, en vez de dejar a alguien guardando meses para algo que no va a llegar. |
+| **(Fase 3)** ¿Con qué porcentajes llega el prellenado? | **Con ninguno: llega en cero.** La app no se inventa los gastos de nadie. Ver el punto 3.2 del README, que explica el aviso que hay que poner cuando está vacío y el camino corto del renglón de Ahorros. |
+
+Las dos de la Fase 4 se cerraron al hacer la Fase 1: los cuatro atajos **se
+quedan**, y el botón de la calculadora sigue **dentro del panel de Ahorro**,
+donde la gente ya está acostumbrada a verlo.
+
 ### Todavía abiertas
 
-Ninguna traba la Fase 1. Se pueden responder cuando lleguemos a su fase.
-
-1. **(Fase 2) El clic derecho, ¿sigue abriendo la ventanita de la extensión?**
-   O el recibo aparece **sobre la misma página** de la tienda, sin cambiar de
-   ventana. Lo segundo es más cómodo y ya estaba anotado como idea futura en la
-   visión del proyecto, pero es más trabajo. Para la Fase 2 me sirve saber a
-   dónde apuntamos.
-2. **(Fase 3) ¿Cómo se mete algo en un grupo?** Al final del cálculo sale el
-   botón "guardar ítem grupal", y ahí no sé qué pasa: ¿escoge un grupo de una
-   lista de los que ya tiene, escribe un nombre nuevo, o las dos cosas?
-3. **(Fase 4) Los cuatro atajos de la calculadora** — *÷ 12 al mes*, *÷ 30 al
-   día*, *× 12 al año* y *10 % de esto* — son cuentas puras, no tienen nada que
-   ver con los sobres ni con el guardado. ¿Se quedan? A mí me parece que sí: son
-   justamente el tipo de cuenta que su público hace a mano.
-4. **(Fase 4) ¿Dónde va a vivir el botón de la calculadora** ahora que la vista
-   de Ahorro se rehace? ¿Arriba, como está hoy, o en otra parte?
+Ninguna. Las frases exactas del veredicto y de "cuánto le afecta" se escriben en
+la Fase 3 y se corrigen viéndolas en pantalla, que es la única forma sensata de
+afinar un texto.

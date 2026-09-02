@@ -135,6 +135,51 @@
         <span class="en-construccion-firma">&#8212; Su arriero de confianza</span>
       </div>
 
+      <!-- ============ VENTANITA DE PRUEBAS (Fase 2) ============
+           SE BOTA EN LA FASE 4. Fea a proposito: no es una pantalla para
+           nadie, es el tablero para revisar que la plomeria de la Fase 2
+           sirve. Sin esto, la unica forma de supervisar esta fase seria
+           abrirle las tripas al navegador.
+           Toda su logica esta en src/pruebas.js -->
+      <div id="pruebas" class="pruebas">
+        <div class="pruebas-tit">
+          Ventanita de pruebas
+          <span class="pruebas-etiqueta">Fase 2 &#183; se bota despues</span>
+        </div>
+
+        <!-- Lo de la persona: se guarda APARTE, en storage.sync, porque es
+             poquita cosa y viaja entre sus computadores. -->
+        <div class="pruebas-bloque">
+          <div class="pruebas-bloque-tit">Lo que usted gana</div>
+          <div class="pruebas-renglon">
+            <input type="text" inputmode="numeric" id="pruebas-ingreso"
+                   class="pruebas-campo" placeholder="1200000">
+            <select id="pruebas-frecuencia" class="pruebas-campo">
+              <option value="dia">cada d&#237;a</option>
+              <option value="semana">cada semana</option>
+              <option value="quincena">cada quincena</option>
+              <option value="mes">cada mes</option>
+            </select>
+          </div>
+          <p id="pruebas-eco" class="pruebas-eco"></p>
+        </div>
+
+        <!-- La libreta: lo que hay guardado en IndexedDB -->
+        <div class="pruebas-bloque">
+          <div class="pruebas-bloque-tit">
+            La libreta
+            <span id="pruebas-cuenta" class="pruebas-cuenta"></span>
+          </div>
+          <div id="pruebas-lista" class="pruebas-lista"></div>
+        </div>
+
+        <div class="pruebas-botones">
+          <button type="button" id="pruebas-inventar" class="pruebas-btn">apuntar algo de mentiras</button>
+          <button type="button" id="pruebas-refrescar" class="pruebas-btn">refrescar</button>
+          <button type="button" id="pruebas-borrar" class="pruebas-btn pruebas-btn-malo">botar todo</button>
+        </div>
+      </div>
+
     </div><!-- /#panel-metas -->
   </div>
 
@@ -508,9 +553,16 @@
   <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
        cambiarVista, pintarJornal...) que reutiliza el resto de la app. -->
   <script src="src/logic_quotation.js"></script>
+  <!-- La libreta (IndexedDB) y lo que la app sabe de la persona. Ninguno de
+       los dos toca la pantalla: db.js lo usa tambien el service worker del
+       menu contextual, con importScripts. -->
+  <script src="src/db.js"></script>
+  <script src="src/ajustes.js"></script>
   <!-- La calculadora quedo suelta: no le pide nada a nadie ni nadie le pide
        nada a ella (ver el encabezado de src/calculadora.js). -->
   <script src="src/calculadora.js"></script>
+  <!-- La ventanita de pruebas de la Fase 2. SE BOTA EN LA FASE 4. -->
+  <script src="src/pruebas.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>

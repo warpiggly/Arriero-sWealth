@@ -84,22 +84,42 @@ La respuesta cambia de forma, no desaparece.
 
 ### 3.2 Lo opcional — el prellenado
 
-Los gastos normales de una persona. **Nada de esto es obligatorio.** La app llega
-con los valores ya puestos, sacados de lo que la persona gana, y ella corrige
-solo lo que quiera corregir. Nunca hay un formulario que haya que completar antes
-de recibir una respuesta.
+Los gastos normales de una persona. **Nada de esto es obligatorio.** Nunca hay un
+formulario que haya que completar antes de recibir una respuesta.
 
 ```
-Gastos de la casa
-Movilidad / transporte
-Ocio
-Responsabilidades
-Ahorros
-Colchón
+Gastos de la casa          ┐
+Movilidad / transporte     │  esto se RESTA: son gastos
+Ocio                       │
+Responsabilidades          ┘
+Ahorros                    ← lo que ya aparta para guardar (no es un gasto)
+Colchón                    ← la reserva que no se toca (punto 3.3)
 ```
 
-Este prellenado es lo que le permite a la app responder **cuánto le va a afectar
-en su economía** (punto 8). Sin él la app responde igual, solo con menos detalle.
+**Llegan todos EN CERO** — decidido el 2 de septiembre de 2026. La app no se
+inventa cuánto gasta la gente. Se pensó en llenarlos con porcentajes sacados de
+lo que gana (casa tanto, movilidad tanto…), y se descartó: serían números
+inventados con cara de verdad, y este público merece que la app no le adivine
+la vida.
+
+**La consecuencia hay que atenderla de frente.** Con todo en cero, la cuenta de
+la app es que se puede guardar TODO lo que gana — y eso casi nunca es cierto.
+Así que cuando los gastos están vacíos, la app **lo dice** en vez de fingir que
+sabe:
+
+```
+   "Estoy contando con que todo lo que gana lo puede guardar.
+    Dígame en qué se le va la plata y le hago la cuenta de verdad."
+```
+
+Nunca es un formulario obligatorio y nunca es un callejón: la respuesta sale
+igual, con el aviso puesto. Es el mismo trato que el punto 8 le da al prellenado
+vacío — "con lo que tenga" — solo que ahora se dice en voz alta.
+
+**Y hay un camino corto.** Quien no quiera desglosar nada pero sepa cuánto
+guarda ("yo aparto 200 mil al mes"), lo escribe en el renglón de **Ahorros** y
+ya: ese número manda sobre la cuenta, porque la persona sabe de su vida más que
+la app. Un solo dato y la app responde bien.
 
 ### 3.3 El colchón es una reserva, no un gasto
 
@@ -113,9 +133,19 @@ El colchón es **un segundo ahorro que no se toca**, guardado para una emergenci
 ### 3.4 La cuenta base
 
 ```
-capacidad de ahorro  =  lo que gana  −  los gastos
-                        (el colchón queda aparte, protegido)
+capacidad de ahorro  =  lo que gana  −  los gastos  −  lo del colchón
 ```
+
+Con nombre propio, para que no haya dudas al programarlo:
+
+| Renglón | Qué le hace a la cuenta |
+|---|---|
+| Casa, movilidad, ocio, responsabilidades | **se restan** — son gastos |
+| Colchón | **se aparta** — sale de lo disponible, pero no se gasta: se guarda y se protege (punto 3.3) |
+| Ahorros | **no se resta.** Es lo que la persona ya aparta para guardar. Si lo llena, ese número **manda** sobre toda la cuenta de arriba |
+
+Y si no hay nada puesto, capacidad de ahorro = todo lo que gana, con el aviso
+del punto 3.2 al lado.
 
 ---
 
@@ -309,12 +339,15 @@ Queda escrito para que no se cuele de vuelta sin que nadie lo decida:
 
 Cosas que van a aparecer el día de implementar y que conviene resolver antes:
 
-1. **¿Cuánto es "se demora muchísimo"?** El veredicto necesita un número.
-   Propuesta: más de **24 meses**.
-2. **Los porcentajes del prellenado.** Si los gastos llegan ya puestos a partir
-   de lo que gana, hay que decidir con qué proporciones (casa tanto, movilidad
-   tanto…). Hoy no están definidas.
+1. ~~¿Cuánto es "se demora muchísimo"?~~ **Más de 18 meses** (año y medio).
+   Decidido el 2 de septiembre de 2026. Se escogió sobre los 24 meses de la
+   propuesta: que la app sea franca temprano y diga "eso está muy lejos" antes
+   de dejar a alguien meses guardando para algo que no va a llegar.
+2. ~~Los porcentajes del prellenado.~~ **No hay porcentajes: llega en cero.**
+   Ver el punto 3.2, que explica la decisión y el aviso que la acompaña.
 3. **Las frases exactas** del veredicto y de "cuánto le afecta", caso por caso.
+   Se escriben en la Fase 3 y se corrigen viéndolas en pantalla: son de escribir,
+   no de decidir a ciegas.
 4. **La moneda:** hoy es una sola para toda la app y no se convierte. ¿Se queda
    así, o cada ítem puede traer la suya (útil para compras por internet)?
 
@@ -361,3 +394,7 @@ Y lo que se decidió al hacer la Fase 1, el 2 de septiembre de 2026:
 | Los cuatro atajos de la calculadora | Se quedan: son cuentas puras |
 | El letrero temporal | Va DENTRO de `#panel-metas`, que es la bisagra de la mula |
 | La cabecera en la vista de Ahorro | Dice "Su ahorro: —" hasta que llegue el recibo |
+| El prellenado | Llega **en cero**: la app no adivina los gastos de nadie |
+| "Se demora muchísimo" | Más de **18 meses** |
+| El clic derecho | Sigue abriendo la extensión; la tarjeta flotante queda para después |
+| Meter algo en un grupo | Se escoge de los que ya tiene, o se escribe uno nuevo ahí mismo |
