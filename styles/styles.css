@@ -1724,6 +1724,19 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   color: var(--marron);
 }
 
+/* Cursor de tecleo: el consejo se escribe letra por letra, como el refrán de
+   la portada, y el cursor solo se ve mientras está escribiendo. */
+.rec-consejo.escribiendo .rec-consejo-txt::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--naranja);
+  animation: refran-cursor 0.7s step-end infinite;
+}
+
 /* --- Los tres botones del final del cálculo --- */
 /* Los tres en UNA fila (David, 2 de septiembre): antes "dejelo asi" se
    llevaba una fila entera para el solo. La letra baja un poco, pero el alto

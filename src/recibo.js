@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!document.getElementById('ah-recibo')) return;   // no es esta vista
 
   recArmarGastos();
+  recCargarConsejos();
 
   // --- Lo que gana ---
   recAtar('ah-ingreso', 'input', function (el) {
@@ -491,7 +492,7 @@ function recPintarRecibo() {
   recPintarPlazos(c);
 
   // --- El consejo ---
-  recTexto('rec-consejo-txt', recConsejo(c.veredicto.caso));
+  recPintarConsejo(c.veredicto.caso);
 
   // --- Los botones de guardar: solo si esto todavía no está apuntado ---
   const guardar = document.getElementById('rec-guardar');
@@ -686,30 +687,129 @@ function recPintarPlazos(c) {
   });
 }
 
-// El Consejo Arriero. Va con el veredicto: no es un refrán al azar, es lo que
-// le diría alguien que acabó de ver su cuenta.
-const REC_CONSEJOS = {
-  alcanza: [
-    'El que guarda siempre tiene, mijo. Pero el que guarda con fecha, llega.',
-    'Vaya parejo, que el camino corto no siempre es el más rápido.'
-  ],
-  colchon: [
-    'La reserva es para la tormenta, no para el antojo. Piénselo dos veces.',
-    'Mula sin descanso no llega al puerto. Deje algo guardado para el susto.'
-  ],
-  'no-alcanza': [
-    'Antes de cargar la mula hay que darle de comer. Primero cuadre el mes.',
-    'De a poquito se llena el costal, mijo. Empiece por lo que sí puede.'
-  ],
-  lento: [
-    'No cargue la mula con todo de una. De a bulto se llega igual, y sin lastimarla.',
-    'Camino largo se hace corto si se sale temprano.'
-  ]
+// ----------------------------------------------------------------
+// El Consejo Arriero
+// ----------------------------------------------------------------
+//
+// Las frases NO viven aquí: viven en data/consejos.json y en
+// data/consejos_masivos.json, que se pueden ampliar sin tocar código. Los dos
+// archivos se juntan en una sola bolsa por color y de ahí se saca una al azar.
+//
+// EL COLOR NUNCA SE MEZCLA: solo se sortea entre las frases de ESE color.
+//   verde     le alcanza y sin apretarse
+//   amarillo  le alcanza, pero se come la reserva
+//   rojo      se pasa de lo que tiene: mejor no
+//   negro     no puede juntar nada, lo más extremo
+const REC_COLOR_DEL_CASO = {
+  alcanza: 'verde',
+  colchon: 'amarillo',
+  lento: 'rojo',
+  'no-alcanza': 'negro'
 };
 
-function recConsejo(caso) {
-  const lista = REC_CONSEJOS[caso] || REC_CONSEJOS.alcanza;
-  return '“' + lista[Math.floor(Math.random() * lista.length)] + '”';
+const REC_ARCHIVOS_CONSEJOS = ['data/consejos.json', 'data/consejos_masivos.json'];
+
+// La bolsa cargada: { verde: [...], amarillo: [...], rojo: [...], negro: [...] }
+let recConsejos = null;
+let recConsejoClave = null;    // qué recibo + color tiene la frase que está puesta
+let recConsejoTimer = null;    // el tecleo en curso
+const REC_MS_POR_LETRA = 18;   // el consejo es largo, va más rápido que el refrán
+
+// Red de seguridad: si los JSON no cargan, el recibo no se queda mudo.
+const REC_CONSEJO_DE_EMERGENCIA = {
+  verde: 'El que guarda siempre tiene, mijo. Pero el que guarda con fecha, llega.',
+  amarillo: 'La reserva es para la tormenta, no para el antojo. Piénselo dos veces.',
+  rojo: 'No cargue la mula con todo de una. De a bulto se llega igual, y sin lastimarla.',
+  negro: 'Antes de cargar la mula hay que darle de comer. Primero cuadre el mes.'
+};
+
+function recCargarConsejos() {
+  const ruta = function (r) {
+    return (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+      ? chrome.runtime.getURL(r) : r;
+  };
+  Promise.all(REC_ARCHIVOS_CONSEJOS.map(function (r) {
+    return fetch(ruta(r)).then(function (res) { return res.json(); })
+                         .catch(function () { return null; });
+  })).then(function (archivos) {
+    const bolsa = { verde: [], amarillo: [], rojo: [], negro: [] };
+    archivos.forEach(function (data) {
+      const grupo = recColoresDe(data);
+      if (!grupo) return;
+      Object.keys(bolsa).forEach(function (color) {
+        if (Array.isArray(grupo[color])) bolsa[color] = bolsa[color].concat(grupo[color]);
+      });
+    });
+    recConsejos = bolsa;
+    // Si el recibo ya estaba pintado con la frase de emergencia, se cambia por
+    // una de verdad ahora que sí hay de dónde escoger.
+    if (recAhora && recAhora.veredicto) {
+      recConsejoClave = null;
+      recPintarConsejo(recAhora.veredicto.caso);
+    }
+  });
+}
+
+// Saca el objeto de colores del JSON sin depender de cómo se llame la llave de
+// arriba ("frases_calidad_refinadas", "frases_version_mijo_completa"...): así
+// se pueden pegar más archivos sin venir a cambiar nombres aquí.
+function recColoresDe(data) {
+  if (!data || typeof data !== 'object') return null;
+  if (Array.isArray(data.verde)) return data;
+  const llaves = Object.keys(data);
+  for (let i = 0; i < llaves.length; i++) {
+    const v = data[llaves[i]];
+    if (v && typeof v === 'object' && Array.isArray(v.verde)) return v;
+  }
+  return null;
+}
+
+function recPintarConsejo(caso) {
+  const p = document.getElementById('rec-consejo-txt');
+  if (!p) return;
+  const color = REC_COLOR_DEL_CASO[caso] || 'verde';
+
+  // La frase se queda QUIETA mientras la persona escribe en los campos: el
+  // recibo se repinta con cada tecla y no se puede estar reescribiendo el
+  // consejo debajo de sus manos. Solo cambia si cambia el color o el recibo.
+  const clave = color + '|' + recConsejoDeQuien();
+  if (clave === recConsejoClave) return;
+  recConsejoClave = clave;
+
+  recEscribirConsejo(p, '“' + recConsejoDe(color) + '”');
+}
+
+function recConsejoDeQuien() {
+  if (!recViendo) return 'nada';
+  return recViendo.tipo + ':' + (recViendo.id || recViendo.grupo ||
+    (recAhora && (recAhora.nombre || recAhora.grupo)) || '');
+}
+
+function recConsejoDe(color) {
+  const lista = (recConsejos && recConsejos[color]) || [];
+  if (lista.length === 0) return REC_CONSEJO_DE_EMERGENCIA[color];
+  return lista[Math.floor(Math.random() * lista.length)];
+}
+
+// Se escribe letra por letra, como el refrán de la portada (src/refranes.js):
+// la app CONTESTA, no despliega un cartel.
+function recEscribirConsejo(p, frase) {
+  if (recConsejoTimer) clearInterval(recConsejoTimer);   // corta un tecleo previo
+
+  const caja = p.closest('.rec-consejo');
+  if (caja) caja.classList.add('escribiendo');           // muestra el cursor
+
+  p.textContent = '';
+  let i = 0;
+  recConsejoTimer = setInterval(function () {
+    p.textContent += frase.charAt(i);
+    i++;
+    if (i >= frase.length) {
+      clearInterval(recConsejoTimer);
+      recConsejoTimer = null;
+      if (caja) caja.classList.remove('escribiendo');
+    }
+  }, REC_MS_POR_LETRA);
 }
 
 // ----------------------------------------------------------------
