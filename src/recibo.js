@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', function () {
     ajustesGuardar({ usaColchon: el.checked }).then(recTrasGuardar);
   });
 
+  // Los campos de dinero, con el mismo comportamiento del resto de la app
+  ['ah-ingreso', 'ah-precio', 'ah-juntado', 'ah-colchon-juntado']
+    .forEach(function (id) { recAtarMoneda(document.getElementById(id)); });
+
   // --- Abrir y cerrar los pliegues ---
   recAtar('ah-yo-resumen', 'click', function () { recAbrirYo(true); });
   recAtar('ah-gastos-tit', 'click', recPlegarGastos);
@@ -128,6 +132,22 @@ function recPlata(n) {
   return '$' + Math.round(Number(n) || 0).toLocaleString('es-CO');
 }
 
+// Los campos de dinero se comportan como en TODA la app: al enfocarlos se ven
+// solo los dígitos (para poder editar sin pelear con los puntos) y al salir se
+// les ponen los puntos de miles, para leerlos como en una factura.
+//
+// El patrón y las funciones son de src/logic_quotation.js, que ya lo hacía con
+// los campos de Cobrar. Se reutiliza en vez de inventar otro: así la app se
+// siente igual en todas sus pantallas, que con este público es lo que más
+// pesa. Se atan a mano (y no con la clase .input-money) porque varios de estos
+// campos se crean después de que logic_quotation.js ya pasó por el DOM.
+function recAtarMoneda(el) {
+  if (!el) return;
+  if (typeof soloDigitos !== 'function' || typeof formatearInputMoneda !== 'function') return;
+  el.addEventListener('focus', function () { el.value = soloDigitos(el.value); });
+  el.addEventListener('blur', function () { formatearInputMoneda(el); });
+}
+
 // ----------------------------------------------------------------
 // 1. Lo que usted gana
 // ----------------------------------------------------------------
@@ -157,6 +177,7 @@ function recArmarGastos() {
       cambio.gastos[r.clave] = recNumero(campo.value);
       ajustesGuardar(cambio).then(recTrasGuardar);
     });
+    recAtarMoneda(campo);
     fila.appendChild(campo);
 
     cont.appendChild(fila);
@@ -697,7 +718,9 @@ function recPintarHoja(c, esGrupo) {
 
 function recCelda(fila, campo, modo) {
   const td = document.createElement('td');
-  td.className = 'rec-hoja-cel' + (campo === 'precio' ? ' rec-hoja-plata' : '');
+  // El estilo de la celda lo dan `.rec-hoja td` y `.rec-hoja-input`; aqui solo
+  // hace falta marcar la del precio, que va alineada a la derecha.
+  td.className = (campo === 'precio' ? 'rec-hoja-plata' : '');
 
   const input = document.createElement('input');
   input.type = 'text';
@@ -707,6 +730,7 @@ function recCelda(fila, campo, modo) {
     ? Math.round(fila.precio).toLocaleString('es-CO')
     : (fila.nombre || '');
   input.setAttribute('aria-label', campo === 'precio' ? 'Cuánto cuesta' : 'Qué es');
+  if (campo === 'precio') recAtarMoneda(input);
 
   input.addEventListener('change', function () {
     const valor = campo === 'precio' ? recNumero(input.value) : input.value.trim();
