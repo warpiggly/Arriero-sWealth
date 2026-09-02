@@ -436,6 +436,8 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
       id: i.id,
       nombre: i.nombre || '',
       precio: precio,
+      // De dónde salió el precio: la hoja del reverso lo muestra por fila.
+      link: i.link || '',
       meses: c.meses,
       mesesEnPalabras: ahorroPlazoEnPalabras(c.meses),
       // Cuánto pesa dentro del grupo, dicho en palabras y no en porcentaje

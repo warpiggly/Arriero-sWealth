@@ -61,6 +61,13 @@
   --sombra:       0 2px 8px rgba(43, 33, 24, 0.25);
 }
 
+/* La ventana se ensancha SOLO mientras el recibo está volteado: la hoja de
+   correcciones necesita sitio para el nombre, el precio y la tienda. Lo pone y
+   lo quita recPonerVolteado() (src/recibo.js). Al volver al recibo, la app
+   queda en su ancho de siempre. El paisaje de body::before mide 512px reales,
+   así que alcanza a cubrir también el ancho grande. */
+body.rec-hoja-abierta { width: 700px; }
+
 body {
   position: relative;
   width: 480px;
@@ -1354,27 +1361,78 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .rec-caja.volteado .rec-giro { transform: rotateY(180deg); }
 
+/* --- El papel, arrancado por abajo ---
+   El recibo de la tienda viene de un rollo: la cajera lo ARRANCA. Esa orilla
+   rota es la señal de que esto es un papel y no una tarjeta de app, y con
+   este público eso vale más que cualquier explicación.
+
+   Cómo está hecho: una máscara de dos capas. Arriba, el papel completo menos
+   la orilla; abajo, una tira SVG con la rasgadura, repetida a lo ancho (así
+   sirve con cualquier ancho y no se estira ni se deforma).
+
+   OJO: la máscara recorta TODO lo que pinta el elemento, la sombra de afuera
+   incluida. Por eso la sombra de abajo se cambió por un degradado propio,
+   dentro del papel: simula la fibra del corte y sí sobrevive al recorte. */
 .rec-cara {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  background: #FDFBF3;
   color: var(--texto);
-  border-radius: 5px;
+  border-radius: 5px 5px 0 0;
+
+  /* alto de la orilla rota */
+  --rec-desgarro: 10px;
+
+  /* papel + la fibra sombreada justo encima del arrancón */
+  background:
+    linear-gradient(to top,
+      rgba(122, 74, 34, 0.16) 0,
+      rgba(122, 74, 34, 0.05) 7px,
+      rgba(122, 74, 34, 0) 19px),
+    #FDFBF3;
+
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 14px 30px -10px rgba(0, 0, 0, 0.5),
-    0 3px 9px rgba(0, 0, 0, 0.3);
+    0 10px 26px -12px rgba(0, 0, 0, 0.45),
+    0 2px 7px rgba(0, 0, 0, 0.26);
+
+  -webkit-mask-image: linear-gradient(#000, #000), var(--rec-orilla);
+          mask-image: linear-gradient(#000, #000), var(--rec-orilla);
+  -webkit-mask-size: 100% calc(100% - var(--rec-desgarro)), auto var(--rec-desgarro);
+          mask-size: 100% calc(100% - var(--rec-desgarro)), auto var(--rec-desgarro);
+  -webkit-mask-position: top left, bottom left;
+          mask-position: top left, bottom left;
+  -webkit-mask-repeat: no-repeat, repeat-x;
+          mask-repeat: no-repeat, repeat-x;
 }
-/* La cara de atrás va encima, girada: así las dos ocupan el mismo sitio y el
-   papel no "crece" al voltear. */
+
+/* La tira de la rasgadura. Dientes irregulares a propósito: un zigzag parejo
+   se ve a máquina, y el papel se rompe torcido. */
+.rec-caja {
+  --rec-orilla: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='10'%20viewBox='0%200%20120%2010'%3E%3Cpath%20fill='%23000'%20d='M0%200H120V4.6L114%206.6L110%205.2L104%208L99%206.9L94.5%209.3L88.5%206.7L83%208.6L78.8%206.4L73%209.5L68%207.9L63.4%209.1L58.2%206.7L52.2%209.6L47.4%208.3L41.9%2010L37.5%207.4L31.3%209.7L26.3%207.8L22%2010L16.4%208.6L11.9%209.7L6%206.8L0%204.6Z'/%3E%3C/svg%3E");
+}
+/* Las dos caras ocupan el mismo sitio: la de atrás va encima, girada.
+   EL ALTO LO MANDA LA CARA QUE SE ESTÁ VIENDO: en reposo la de adelante (la
+   de atrás va absoluta encima), y al voltear se cambian los papeles, para que
+   la hoja crezca o se encoja con las filas que tenga en vez de quedar con el
+   alto del recibo (sobraba blanco con una fila, y se cortaba con muchas). */
 .rec-atras {
   position: absolute;
   inset: 0;
   transform: rotateY(180deg);
   overflow-y: auto;
 }
+.rec-caja.volteado .rec-atras {
+  position: relative;
+  inset: auto;
+  overflow: visible;
+}
+.rec-caja.volteado .rec-adelante {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
 
-.rec-cuerpo { padding: 16px 16px 6px; }
+.rec-cuerpo { padding: 16px 16px calc(6px + var(--rec-desgarro)); }
 
 /* --- El encabezado del ticket --- */
 .rec-cab { text-align: center; padding-bottom: 10px; }
@@ -1882,6 +1940,34 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 .rec-hoja td.rec-hoja-num { padding: 6px 3px; }
 .rec-hoja-plata { text-align: right; font-variant-numeric: tabular-nums; }
 
+/* Los anchos: el nombre se queda con TODO lo que sobre, que es la columna que
+   de verdad necesita aire; el precio y la tienda piden lo justo y no más. */
+.rec-hoja { table-layout: fixed; }
+.rec-hoja th.rec-hoja-plata { width: 118px; white-space: nowrap; }
+.rec-hoja th.rec-hoja-donde { width: 146px; white-space: nowrap; }
+
+/* El precio y la tienda quedan pegados de columna a columna: el número termina
+   a la derecha y el dominio empieza a la izquierda, y los dos se leían como una
+   sola cosa. Se separan con aire de los dos lados y con una raya más marcada
+   entre ellos, como la cuadrícula de una hoja de cuentas. */
+.rec-hoja-plata .rec-hoja-input { padding-right: 12px; }
+.rec-hoja td.rec-hoja-donde,
+.rec-hoja th.rec-hoja-donde { border-left: 1px solid rgba(122, 74, 34, 0.5); }
+
+/* "Dónde lo vio": la tienda, tocable. No es cuadrito blanco porque no se
+   escribe. Se recorta con puntos suspensivos: un link largo no puede
+   desbaratar la fila. */
+.rec-hoja-donde { padding: 7px 10px 7px 13px; font-size: 0.82rem; }
+.rec-hoja-donde a {
+  display: block;
+  color: var(--verde-oscuro);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rec-hoja-donde a:hover { text-decoration: underline; }
+.rec-hoja-sin { color: rgba(43, 33, 24, 0.4); font-style: italic; }
+
 /* Las celdas blancas son las que se escriben: la señal de "aquí sí se puede
    tocar" tiene que verse sin leer nada. */
 .rec-hoja-input {
@@ -1893,6 +1979,12 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   background: #fff;
   border: 0;
   box-shadow: inset 0 0 0 1px rgba(46, 125, 64, 0.25);
+
+  /* Un nombre largo no se corta a la mitad de una letra: se corta con puntos
+     suspensivos, y al tocar la celda se puede leer y editar completo. El
+     nombre entero también va en el `title`, para verlo al pasar el mouse. */
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 .rec-hoja-plata .rec-hoja-input {
   text-align: right;
@@ -1908,9 +2000,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   font-weight: bold;
   background: rgba(46, 125, 64, 0.1);
 }
-
-.rec-atras-link { margin: 11px 0 0; font-size: 0.84rem; }
-.rec-atras-link a { color: var(--verde-oscuro); }
 
 @media (prefers-reduced-motion: reduce) {
   .rec-giro,

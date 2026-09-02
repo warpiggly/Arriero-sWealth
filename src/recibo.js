@@ -366,7 +366,24 @@ function recRevisarCapturado() {
     chrome.storage.local.remove(['precioCapturado']);
 
     recCalcularDeLaPregunta();
+
+    // Si vino del clic derecho, el recibo se muestra SOLO: la persona ya
+    // preguntó desde la tienda y no tiene que volver a pedir la respuesta
+    // tocando la mula de Ahorro.
+    recAbrirAhorroDeUna();
   });
+}
+
+// Deja la vista de Ahorro al frente y su panel abierto, con el recibo a la
+// vista. Las dos funciones son de src/logic_quotation.js (que ya cargó antes
+// que este archivo); se llaman sueltas y no activarMula() a propósito, porque
+// esa alterna --- si el panel ya estaba abierto, lo cerraría.
+function recAbrirAhorroDeUna() {
+  if (typeof cambiarVista === 'function') {
+    cambiarVista('metas', document.querySelector('.estrella[data-view="metas"]'));
+  }
+  if (typeof ponerPanel === 'function') ponerPanel('metas', true);
+  recIrAlRecibo();
 }
 
 // ----------------------------------------------------------------
@@ -398,6 +415,7 @@ function recEsconderRecibo() {
   if (caja) {
     caja.classList.add('oculto');
     caja.classList.remove('volteado');
+  document.body.classList.remove('rec-hoja-abierta');
   }
   recAhora = null;
   recViendo = null;
@@ -439,6 +457,7 @@ function recPintarRecibo() {
   caja.classList.remove('oculto');
   // Siempre se muestra por adelante: nadie quiere volver a un recibo volteado.
   caja.classList.remove('volteado');
+  document.body.classList.remove('rec-hoja-abierta');
 
   // --- Cabecera y qué es ---
   recTexto('rec-sub', esGrupo
@@ -823,9 +842,10 @@ function recPintarHoja(c, esGrupo) {
 
   const filas = esGrupo
     ? c.desglose.map(function (d) {
-        return { id: d.id, nombre: d.nombre, precio: d.precio };
+        return { id: d.id, nombre: d.nombre, precio: d.precio, link: d.link || '' };
       })
-    : [{ id: (recViendo && recViendo.id) || null, nombre: c.nombre, precio: c.precio }];
+    : [{ id: (recViendo && recViendo.id) || null, nombre: c.nombre,
+         precio: c.precio, link: c.link || '' }];
 
   recTexto('rec-atras-cuantas', filas.length === 1
     ? 'la fila de este recibo'
@@ -841,6 +861,7 @@ function recPintarHoja(c, esGrupo) {
 
     tr.appendChild(recCelda(f, 'nombre', 'text'));
     tr.appendChild(recCelda(f, 'precio', 'numeric'));
+    tr.appendChild(recCeldaDonde(f));
 
     cuerpo.appendChild(tr);
   });
@@ -858,22 +879,30 @@ function recPintarHoja(c, esGrupo) {
     val.className = 'rec-hoja-plata';
     val.textContent = recPlata(c.total);
     tr.appendChild(val);
+    tr.appendChild(document.createElement('td'));
     cuerpo.appendChild(tr);
   }
+}
 
-  // El link, abajo: es de dónde salió el precio, y sirve para volver a mirar.
-  const link = document.getElementById('rec-atras-link');
-  if (link) {
-    link.innerHTML = '';
-    if (!esGrupo && c.link) {
-      const a = document.createElement('a');
-      a.href = c.link;
-      a.target = '_blank';
-      a.rel = 'noreferrer';
-      a.textContent = 'Volver a ver el precio en ' + recDominio(c.link);
-      link.appendChild(a);
-    }
+// La celda de "dónde lo vio": la tienda, y se puede tocar para volver al
+// precio. No es un cuadrito blanco porque no se escribe: el link no se
+// corrige a mano, viene de donde se capturó.
+function recCeldaDonde(fila) {
+  const td = document.createElement('td');
+  td.className = 'rec-hoja-donde';
+  if (fila.link) {
+    const a = document.createElement('a');
+    a.href = fila.link;
+    a.target = '_blank';
+    a.rel = 'noreferrer';
+    a.title = fila.link;
+    a.textContent = recDominio(fila.link);
+    td.appendChild(a);
+  } else {
+    td.className += ' rec-hoja-sin';
+    td.textContent = 'a mano';
   }
+  return td;
 }
 
 function recCelda(fila, campo, modo) {
@@ -890,10 +919,13 @@ function recCelda(fila, campo, modo) {
     ? Math.round(fila.precio).toLocaleString('es-CO')
     : (fila.nombre || '');
   input.setAttribute('aria-label', campo === 'precio' ? 'Cuánto cuesta' : 'Qué es');
+  // El nombre completo, para el que no cabe en la columna.
+  if (campo === 'nombre' && input.value) input.title = input.value;
   if (campo === 'precio') recAtarMoneda(input);
 
   input.addEventListener('change', function () {
     const valor = campo === 'precio' ? recNumero(input.value) : input.value.trim();
+    if (campo === 'nombre') input.title = valor;
     recCorregir(fila.id, campo, valor);
   });
 
@@ -948,7 +980,18 @@ function recMarcarPlegable(id, abierto) {
 
 function recVoltear() {
   const caja = document.getElementById('ah-recibo');
-  if (caja) caja.classList.toggle('volteado');
+  if (!caja) return;
+  recPonerVolteado(caja, !caja.classList.contains('volteado'));
+}
+
+// Voltear no es solo girar el papel: la hoja de correcciones necesita ancho
+// (nombre, precio y de dónde salió no caben en el ancho de un recibo), así
+// que mientras está volteado la VENTANA ENTERA se ensancha -- lo hace el CSS
+// al ver la clase en el <body>. Al volver, el recibo queda exactamente como
+// era: un recibo normal, que es lo que la persona espera ver.
+function recPonerVolteado(caja, volteado) {
+  caja.classList.toggle('volteado', volteado);
+  document.body.classList.toggle('rec-hoja-abierta', volteado);
 }
 
 // ----------------------------------------------------------------
