@@ -11,9 +11,14 @@ estamos sin preguntar.
 **La regla de oro:** nada se borra ni se cambia sin que usted lo haya visto
 escrito antes. Este documento es ese "antes".
 
-> **Estado al 1 de septiembre de 2026: ninguna fase ha empezado.** El plan está
-> aprobado y quieto, esperando la orden de arrancar. No se ha borrado ni una
-> línea de código.
+> **Estado al 2 de septiembre de 2026: la FASE 1 está hecha.** El terreno quedó
+> limpio: la vista de Ahorro, los sobres y la cinta de la calculadora se
+> borraron, y en su lugar hay un letrero temporal. La calculadora quedó suelta y
+> haciendo cuentas. Falta que usted haga la prueba de la Fase 1 (está más
+> abajo); si pasa, sigue la Fase 2.
+>
+> Todo el trabajo va en la rama `rediseno-ahorro`. Lo de antes está intacto en
+> `main` y en el tag `antes-del-rediseno`.
 
 **Una condición del proyecto que aligera todo:** David es el único que usa la
 app y todavía no está publicada en ninguna parte. No hay datos de nadie que
@@ -35,7 +40,7 @@ git switch -c rediseno-ahorro     ← se trabaja aparte, sin tocar lo bueno
 Con eso, en cualquier momento se puede volver a como estaba hoy con un solo
 comando, y lo que está funcionando hoy sigue intacto en su rama.
 
-- [ ] Foto tomada y rama de trabajo creada
+- [x] Foto tomada y rama de trabajo creada
 
 ---
 
@@ -85,12 +90,51 @@ construcción" ya existe en la app y sirve tal cual, así que sale en un minuto.
 estén en la app se van con el borrado y no se trasladan a nada. Está decidido:
 David es el único que usa la app.
 
-- [ ] Se borró la vista de Ahorro
-- [ ] Se borraron los sobres
-- [ ] Se borró la cinta y el guardado de la calculadora
-- [ ] La ventana de la calculadora abre y hace cuentas
-- [ ] Está el letrero temporal
-- [ ] Cobrar, Mi Despensa y En construcción siguen funcionando igual
+- [x] Se borró la vista de Ahorro
+- [x] Se borraron los sobres
+- [x] Se borró la cinta y el guardado de la calculadora
+- [x] La ventana de la calculadora abre y hace cuentas
+- [x] Está el letrero temporal
+- [x] Cobrar, Mi Despensa y En construcción siguen funcionando igual
+      (revisado en el código; falta que usted lo vea con la app en la mano)
+
+### Lo que apareció al hacerla — 2 de septiembre de 2026
+
+Cuatro cosas que no estaban previstas y que conviene tener escritas:
+
+1. **`#panel-metas` era la bisagra de la mula de Ahorro.** No es un nombre
+   decorativo: `panelDeVista()` y `activarMula()` (en `src/logic_quotation.js`)
+   lo buscan por ese id para abrir y cerrar la sección. Si se hubiera borrado
+   junto con la vista, la mula de Ahorro habría dejado de responder. Por eso el
+   letrero temporal quedó **dentro** de ese panel, no en su lugar.
+
+2. **`.oculto` era una utilidad global mal guardada.** La regla
+   `.oculto { display: none !important; }` — la que mantiene escondidas la
+   ventana de la calculadora y su fondo — estaba enterrada al final de los
+   estilos de la vista de Ahorro. Se fue con el borrado y la calculadora quedaba
+   **abierta al arrancar**. Se devolvió, y ahora vive arriba con las otras
+   utilidades, donde se puede encontrar.
+
+3. **La cabecera decía "Deberías cobrar" en la vista de Ahorro.** El número
+   grande de arriba lo pintaba `metasPintarJornal()`, que vivía en el
+   `metas.js` que se borró. Sin él, la vista de Ahorro caía en el rótulo del
+   cotizador. Mientras el módulo se reconstruye dice **"Su ahorro: —"**, que es
+   la verdad. El número vuelve a tener dueño en la Fase 4.
+
+4. **El CSS tenía 4 reglas que ya estaban muertas antes del rediseño**
+   (`.master-toggle-wrap`, `.master-btn`, `.master-btn:hover` y
+   `.vista-placeholder`: sobras de los botones "maestros" de antes de las
+   mulas). **No se tocaron**, porque no son de esta fase. Quedan anotadas para
+   que usted decida si se botan algún día.
+
+Y dos de las cinco decisiones pendientes quedaron resueltas por el camino,
+porque la Fase 1 no podía avanzar sin ellas:
+
+- **La calculadora sí hace cuentas** (duda 5 del README): suma, resta,
+  multiplica, divide, coma decimal, % y cambio de signo.
+- **Los cuatro atajos se quedan** (duda 3 del PLAN): `÷ 12 al mes`,
+  `÷ 30 al día`, `× 12 al año` y `10 % de esto` son cuentas puras, no tocaban
+  los sobres ni el guardado. Comprobados con números de verdad.
 
 ### 👀 Prueba que usted hace al final de la Fase 1
 

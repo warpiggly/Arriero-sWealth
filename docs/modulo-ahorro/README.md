@@ -1,15 +1,17 @@
 # Módulo de Ahorro — rediseño
 
-**Estado:** especificación acordada, **sin implementar**.
-**Fecha:** 1 de septiembre de 2026.
+**Estado:** especificación acordada. **Fase 1 hecha** (el terreno quedó
+limpio); las fases 2, 3 y 4 sin empezar.
+**Fecha:** 1 de septiembre de 2026. Última actualización: 2 de septiembre.
 **Autor del diseño:** David Salazar (diagrama hecho a mano, aquí abajo).
 
 Este documento reemplaza lo que hoy hace la vista de Ahorro. Cuando el código y
 este documento no coincidan, **manda este documento**.
 
 El orden en que se va a construir está en **[PLAN.md](PLAN.md)**: cuatro fases,
-cada una con la prueba que hay que hacer al final. **Ninguna fase ha empezado
-todavía.**
+cada una con la prueba que hay que hacer al final. **La Fase 1 (borrar) está
+hecha**, y ahí quedó anotado lo que apareció al hacerla. La siguiente es la
+Fase 2: el menú contextual y la base de datos.
 
 **Condición del proyecto:** David es el único que usa la app y todavía no está
 publicada en ninguna parte. Por eso no hay que trasladar datos viejos, ni
@@ -315,8 +317,16 @@ Cosas que van a aparecer el día de implementar y que conviene resolver antes:
 3. **Las frases exactas** del veredicto y de "cuánto le afecta", caso por caso.
 4. **La moneda:** hoy es una sola para toda la app y no se convierte. ¿Se queda
    así, o cada ítem puede traer la suya (útil para compras por internet)?
-5. **La calculadora:** confirmar que sí hace cuentas (suma y resta) y no es
-   solamente un botón apagado.
+
+Y dos que se resolvieron al hacer la Fase 1, porque sin ellas no se podía
+avanzar:
+
+5. ~~**La calculadora:** confirmar que sí hace cuentas.~~ **Sí hace cuentas.**
+   Suma, resta, multiplica, divide, coma decimal, % y cambio de signo — y sigue
+   desconectada de todo, como pide el punto 2. Comprobado tecla por tecla.
+6. ~~**Los cuatro atajos**~~ (`÷ 12 al mes`, `÷ 30 al día`, `× 12 al año`,
+   `10 % de esto`). **Se quedan.** Son cuentas puras: no tocaban los sobres ni
+   el guardado, y son justo el tipo de cuenta que este público hace a mano.
 
 Ya resuelto: **lo que hay guardado hoy se bota** (`economia`, `metasLista`,
 `sobresCiclo`). No hay que trasladar nada — ver la condición del proyecto arriba.
@@ -342,3 +352,12 @@ Todo lo de aquí sale del diagrama `diagrama.png` y de las decisiones tomadas el
 | Prioridad en los grupos | No, todavía no |
 | Los datos guardados hoy | Se botan; no se traslada nada |
 | Las otras vistas | Intactas: solo se toca Ahorro |
+
+Y lo que se decidió al hacer la Fase 1, el 2 de septiembre de 2026:
+
+| Decisión | Cómo quedó |
+|---|---|
+| La calculadora | Sí hace cuentas, y desconectada de todo |
+| Los cuatro atajos de la calculadora | Se quedan: son cuentas puras |
+| El letrero temporal | Va DENTRO de `#panel-metas`, que es la bisagra de la mula |
+| La cabecera en la vista de Ahorro | Dice "Su ahorro: —" hasta que llegue el recibo |
