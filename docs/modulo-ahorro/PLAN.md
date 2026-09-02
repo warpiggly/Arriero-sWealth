@@ -11,11 +11,15 @@ estamos sin preguntar.
 **La regla de oro:** nada se borra ni se cambia sin que usted lo haya visto
 escrito antes. Este documento es ese "antes".
 
-> **Estado al 2 de septiembre de 2026: FASES 1 y 2 hechas.** El terreno quedó
-> limpio (Fase 1) y la app ya guarda y recuerda (Fase 2): la libreta nueva es
-> IndexedDB, el clic derecho se queda con el link y el título, y lo que usted
-> gana se guarda aparte. Hay una ventanita de pruebas, fea a propósito, para
-> que pueda revisarlo con los ojos. Siguen las cuentas (Fase 3).
+> **Estado al 2 de septiembre de 2026: FASES 1, 2 y 3 hechas.** El terreno
+> quedó limpio (1), la app guarda y recuerda (2) y ya sabe responder (3): la
+> cuenta base, los cuatro veredictos, los tres plazos, "lo que le pesa" en
+> palabras, y las cuentas del grupo. Todavía **sin cara**: los números salen
+> pelados en la ventanita de pruebas, que es justo lo que el plan pide para no
+> juntar "hacer las cuentas" con "ponerle la cara". Falta la Fase 4: el recibo.
+>
+> **El recibo de mentiras ya está** (recomendación 5), esperando su
+> "así sí" o "así no" antes de construirlo de verdad.
 >
 > Todo el trabajo va en la rama `rediseno-ahorro`. Lo de antes está intacto en
 > `main` y en el tag `antes-del-rediseno`.
@@ -233,15 +237,16 @@ calculadora hace cuentas.
 Si se arranca la fase sin decidirlas, se van a inventar solas y después toca
 rehacerlas.
 
-- [ ] Las cinco decisiones tomadas
-- [ ] La cuenta base
-- [ ] El prellenado que se llena solo
-- [ ] Cuándo lo consigue (y el caso de ingreso 0)
-- [ ] El veredicto, los cuatro casos
-- [ ] Los botones de plazo
-- [ ] "Cuánto le afecta"
-- [ ] Guardar suelto / en grupo / dejarlo así
-- [ ] Las cuentas del grupo
+- [x] Las cinco decisiones tomadas
+- [x] La cuenta base
+- [x] El prellenado ~~que se llena solo~~ **que llega en cero** (usted lo decidió
+      así el 2 de septiembre: la app no adivina los gastos de nadie)
+- [x] Cuándo lo consigue (y el caso de ingreso 0)
+- [x] El veredicto, los cuatro casos
+- [x] Los botones de plazo
+- [x] "Cuánto le afecta"
+- [x] Guardar suelto / en grupo / dejarlo así
+- [x] Las cuentas del grupo
 
 ### 👀 Prueba que usted hace al final de la Fase 3
 

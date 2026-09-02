@@ -11,21 +11,22 @@
 //      TÍTULO (tab.title), que sirve de nombre sugerido del producto. Sale
 //      casi gratis: la pestaña ya llega aquí, en el parámetro `tab`. Antes se
 //      tiraban los dos a la basura, y el diagrama los pide.
-//   4. Lo apuntamos en la libreta del arriero (IndexedDB, src/db.js).
-//   5. Abrimos el popup.
+//   4. Abrimos el popup, que recoge todo eso y le hace la cuenta de una.
 //
-// POR QUÉ EL PASO 4 EXISTE HOY, Y HASTA CUÁNDO
-//   Estamos en la Fase 2: la app tiene que poder GUARDAR y RECORDAR aunque
-//   todavía no sepa hacer cuentas. Por eso el clic derecho apunta de una, y
-//   así se puede revisar en la ventanita de pruebas que la plomería sirve
-//   (esa es la prueba escrita de la Fase 2: tres tiendas distintas, cerrar el
-//   navegador, y las tres cosas siguen ahí).
+// AQUÍ NO SE GUARDA NADA EN LA LIBRETA, Y ES A PROPÓSITO
+//   En la Fase 2 este archivo apuntaba de una en IndexedDB, como escalón para
+//   poder revisar que la plomería servía. Ya no: desde la Fase 3, el cálculo
+//   termina en tres botones ("guardar suelto", "guardar en un grupo",
+//   "dejarlo así") y GUARDAR ES UNA DECISIÓN DE LA PERSONA.
 //
-//   EN LA FASE 3 ESTO CAMBIA: cuando el cálculo tenga sus tres botones del
-//   final ("guardar suelto", "guardar en un grupo", "dejarlo así"), guardar
-//   deja de ser automático y pasa a ser una decisión de la persona — porque
-//   quien solo quería el número tiene que poder irse sin guardar nada
-//   (README, punto 4). Cuando llegue ese día, este paso 4 se quita de aquí.
+//   Quien solo quería el número tiene que poder irse sin guardar nada y sin
+//   haber tenido que decidir nada de antemano (README, punto 4). Si el menú
+//   contextual siguiera apuntando solo, la libreta se llenaría de cosas que
+//   nadie pidió guardar.
+//
+//   Lo que sí queda es `precioCapturado` en chrome.storage.local: es "lo que
+//   se está mirando ahora", no un archivo. El popup lo recoge, calcula, y lo
+//   borra en cuanto lo usa.
 //
 // LA TARJETA FLOTANTE, PARA DESPUÉS
 //   Decidido el 2 de septiembre de 2026: por ahora el clic derecho sigue
@@ -35,10 +36,10 @@
 //   recibo ya esté probado.
 // =================================================================
 
-// La libreta del arriero. Un service worker no tiene <script>, así que se
-// carga con importScripts. db.js no toca la pantalla justamente para poder
-// usarse desde aquí igual que desde el popup.
-importScripts('/src/db.js');
+// (Aquí estaba un importScripts('/src/db.js'). Se quitó al llegar la Fase 3:
+// este archivo ya no guarda en la libreta, así que no la necesita. Si algún
+// día el menú contextual vuelve a escribir directo — por ejemplo para la
+// tarjeta flotante sobre la página de la tienda —, se vuelve a cargar así.)
 
 // Lo que se guardaba de la vista de Ahorro vieja y de los sobres. El código
 // que lo leía ya no existe (Fase 1 del rediseño), así que estas claves solo
@@ -155,22 +156,5 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (chrome.action && chrome.action.openPopup) {
       chrome.action.openPopup().catch(() => {});
     }
-  });
-
-  // Y apuntarlo en la libreta. Ojo con el orden: esto va DESPUÉS de guardar el
-  // precio capturado y de abrir el popup, porque es lo que puede demorarse; si
-  // la libreta fallara, la persona igual ve su cuenta.
-  //
-  // (Paso temporal de la Fase 2 — ver la nota del encabezado.)
-  dbGuardarItem({
-    nombre: '',          // sin nombre: db.js usa el título de la página
-    titulo: titulo,
-    precio: precio,
-    link: link,
-    grupo: ''            // una cosa suelta
-  }).catch((e) => {
-    // Que no se caiga el service worker por esto. Si la libreta no quiso
-    // guardar, el precio capturado ya está a salvo en storage.local.
-    console.warn('Arriero: no pude apuntar en la libreta —', e);
   });
 });

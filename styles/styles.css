@@ -1249,6 +1249,79 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .pruebas-btn-malo:hover { background: var(--terracota, #A2543A); }
 
+/* El prellenado y los campos con rotulo al lado */
+.pruebas-renglon + .pruebas-renglon { margin-top: 4px; }
+.pruebas-rot {
+  flex: 0 0 42%;
+  align-self: center;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  opacity: 0.85;
+}
+.pruebas-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  opacity: 0.85;
+  cursor: pointer;
+}
+.pruebas-check input { margin: 0; }
+
+/* La salida de la cuenta: renglon de rotulo + valor */
+.pruebas-salida { margin-top: 7px; }
+.pruebas-dato {
+  display: flex;
+  gap: 7px;
+  padding: 3px 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.15);
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+.pruebas-dato:last-child { border-bottom: 0; }
+.pruebas-dato-rot {
+  flex: 0 0 34%;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.62;
+}
+.pruebas-dato-val { flex: 1; min-width: 0; word-break: break-word; }
+
+.pruebas-porque {
+  margin: 3px 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  opacity: 0.8;
+  word-break: break-word;
+}
+
+.pruebas-aviso {
+  margin: 7px 0 0;
+  padding: 7px 9px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(242, 178, 51, 0.22);
+  border-left: 3px solid var(--dorado, #F2B233);
+  border-radius: 4px;
+}
+
+/* Un grupo, con su cuenta grupal */
+.pruebas-grupo {
+  margin-bottom: 8px;
+  padding: 7px 8px;
+  background: rgba(46, 125, 64, 0.16);
+  border: 1px solid rgba(46, 125, 64, 0.4);
+  border-radius: 6px;
+}
+.pruebas-grupo-tit {
+  font-size: 0.76rem;
+  font-weight: bold;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
 /* Pulso del precio cuando una pieza de la despensa cambia el total */
 .jornal-num.pulso { animation: precio-pulso 0.5s ease; }
 @keyframes precio-pulso {

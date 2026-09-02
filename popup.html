@@ -150,7 +150,7 @@
         <!-- Lo de la persona: se guarda APARTE, en storage.sync, porque es
              poquita cosa y viaja entre sus computadores. -->
         <div class="pruebas-bloque">
-          <div class="pruebas-bloque-tit">Lo que usted gana</div>
+          <div class="pruebas-bloque-tit">Lo que usted gana <span class="pruebas-cuenta">lo &#250;nico obligatorio</span></div>
           <div class="pruebas-renglon">
             <input type="text" inputmode="numeric" id="pruebas-ingreso"
                    class="pruebas-campo" placeholder="1200000">
@@ -162,6 +162,67 @@
             </select>
           </div>
           <p id="pruebas-eco" class="pruebas-eco"></p>
+        </div>
+
+        <!-- El prellenado. LLEGA EN CERO: la app no adivina los gastos de
+             nadie (decision del 2 de septiembre). Los campos los arma
+             pruebas.js desde la lista RENGLONES de src/ajustes.js, y cada
+             uno dice si resta o no. -->
+        <div class="pruebas-bloque">
+          <div class="pruebas-bloque-tit">
+            Sus gastos
+            <span class="pruebas-cuenta">todo opcional &#183; llega en cero</span>
+          </div>
+          <div id="pruebas-prellenado"></div>
+        </div>
+
+        <!-- Lo que ya tiene juntado y su reserva -->
+        <div class="pruebas-bloque">
+          <div class="pruebas-bloque-tit">Lo que ya tiene</div>
+          <div class="pruebas-renglon">
+            <label class="pruebas-rot" for="pruebas-juntado">Guardado</label>
+            <input type="text" inputmode="numeric" id="pruebas-juntado"
+                   class="pruebas-campo" placeholder="0">
+          </div>
+          <div class="pruebas-renglon">
+            <label class="pruebas-rot" for="pruebas-colchon-juntado">En el colch&#243;n</label>
+            <input type="text" inputmode="numeric" id="pruebas-colchon-juntado"
+                   class="pruebas-campo" placeholder="0">
+          </div>
+          <label class="pruebas-check">
+            <input type="checkbox" id="pruebas-usa-colchon" checked>
+            Usar colch&#243;n (hay gente que no lo maneja as&#237;)
+          </label>
+        </div>
+
+        <!-- ============ LA CUENTA (Fase 3) ============
+             Numeros pelados, sin recibo y sin colores: el plan dice que no se
+             junta "hacer las cuentas" con "ponerle la cara". El recibo de
+             verdad es la Fase 4. -->
+        <div class="pruebas-bloque">
+          <div class="pruebas-bloque-tit">
+            La cuenta
+            <span class="pruebas-cuenta">Fase 3</span>
+          </div>
+          <div class="pruebas-renglon">
+            <input type="text" id="pruebas-nombre" class="pruebas-campo"
+                   placeholder="&#191;qu&#233; quiere?">
+            <input type="text" inputmode="numeric" id="pruebas-precio"
+                   class="pruebas-campo" placeholder="&#191;cu&#225;nto cuesta?">
+          </div>
+          <p id="pruebas-capturado" class="pruebas-eco oculto"></p>
+          <div id="pruebas-cuenta-salida" class="pruebas-salida"></div>
+
+          <!-- Los tres botones del final del calculo. Guardar no es un camino
+               aparte: es el final del primero. Y "dejarlo asi" existe porque
+               quien solo queria el numero tiene que poder irse sin guardar
+               nada (README, punto 4). -->
+          <div id="pruebas-guardar-zona" class="pruebas-botones oculto">
+            <button type="button" id="pruebas-guardar-suelto" class="pruebas-btn">guardar suelto</button>
+            <button type="button" id="pruebas-guardar-grupo" class="pruebas-btn">guardar en un grupo</button>
+            <button type="button" id="pruebas-dejarlo" class="pruebas-btn">dejarlo as&#237;</button>
+          </div>
+          <p id="pruebas-aviso-zona" class="pruebas-aviso oculto"></p>
         </div>
 
         <!-- La libreta: lo que hay guardado en IndexedDB -->
@@ -558,6 +619,9 @@
        menu contextual, con importScripts. -->
   <script src="src/db.js"></script>
   <script src="src/ajustes.js"></script>
+  <!-- Las cuentas. Tampoco toca la pantalla: funciones puras que reciben los
+       datos y devuelven la respuesta con su frase. -->
+  <script src="src/ahorro.js"></script>
   <!-- La calculadora quedo suelta: no le pide nada a nadie ni nadie le pide
        nada a ella (ver el encabezado de src/calculadora.js). -->
   <script src="src/calculadora.js"></script>
