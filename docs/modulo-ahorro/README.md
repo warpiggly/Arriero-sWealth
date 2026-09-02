@@ -209,21 +209,52 @@ pero trae de más lo que ninguna tienda le dice.
 │      $ 850.000                  │
 │  ·····························  │
 │  Usted ahorra   $ 200.000/mes   │
-│  Lo tendrá      en ~4 meses     │
+│  Lo tendrá      en 5 meses      │
+│  o sea, para    febrero de 2027 │
 │  ·····························  │
-│  ✔ Sí le alcanza, mijo          │
-│  ·····························  │
-│  "Consejo del arriero…"         │
+│ ┃ LO QUE LE PESA                │
+│ ┃ Son cuatro meses y medio de   │
+│ ┃ todo lo que usted guarda      │
+│  · · · · · · · · · · · · · · ·  │
+│  🎒 "El que guarda siempre       │
+│      tiene, mijo…"              │
+│  ┃ ✓ Sí le alcanza, mijo        │
+│                                 │
+│  ▸ Ojo con esta cuenta, mijo    │
+│  ▸ ¿Y si lo quiero en…?         │
+│                                 │
+│  [Guárdemelo][grupo][Déjelo]    │
+│  ↻ Voltear para corregir        │
 └─────────────────────────────────┘
 ```
 
-Cinco cosas, en este orden:
+**EL ORDEN CAMBIÓ el 2 de septiembre de 2026**, y la razón vale la pena
+escribirla: lo que la persona quiere saber no es si un semáforo está verde,
+sino **qué le implica** la compra. Así que "lo que le pesa" subió a ser lo
+primero de la respuesta, y el veredicto pasó a confirmar en vez de anunciar.
 
-1. **Qué es y cuánto cuesta** — como en cualquier factura.
+Primero la factura, como en cualquier tienda:
+
+1. **Qué es y cuánto cuesta**.
 2. **Cuánto ahorra** — su capacidad real, para que el número no salga de la nada.
 3. **Cuándo lo puede comprar**.
-4. **Si es válido para él** — el veredicto (punto 7).
-5. **El Consejo Arriero**.
+
+Y después la respuesta, que es lo que ninguna tienda le dice:
+
+4. **Lo que le pesa** (punto 8) — lo primero que se lee de la respuesta.
+5. **El Consejo Arriero**, acompañando esa consecuencia.
+6. **El veredicto** (punto 7) — corto. Ya no repite el plazo, que quedó dicho
+   en el renglón 3; cuando no hay nada que agregar, la frase va sola.
+
+Lo demás se **pliega**, para que el recibo quepa de un golpe de vista:
+
+7. **"Ojo con esta cuenta, mijo"** — el aviso de cuando no sabemos sus gastos.
+   Cerrado se sigue viendo el título: es una advertencia y no se puede
+   esconder del todo. El detalle sale al tocarlo.
+8. **"¿Y si lo quiero en…?"** — los botones de plazo, al final: son la
+   pregunta de quien ya leyó su respuesta y quiere estirarla.
+9. Los tres botones de guardar, en **una sola fila**.
+10. Y de último, **voltear**.
 
 ### Cara de atrás — el Excel
 
@@ -409,3 +440,6 @@ Y lo que se decidió al hacer la Fase 1, el 2 de septiembre de 2026:
 | "Se demora muchísimo" | Más de **18 meses** |
 | El clic derecho | Sigue abriendo la extensión; la tarjeta flotante queda para después |
 | Meter algo en un grupo | Se escoge de los que ya tiene, o se escribe uno nuevo ahí mismo |
+| El orden del recibo | "Lo que le pesa" primero, el veredicto después: la app dice qué implica, no si un semáforo está verde |
+| El veredicto | Corto. No repite el plazo que ya está arriba |
+| El aviso y los plazos | Plegados, con el título siempre visible |

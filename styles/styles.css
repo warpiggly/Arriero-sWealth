@@ -1468,38 +1468,48 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
    trae SIEMPRE su texto y su señal (✓ ! × ⏳), nunca solo el color. */
 .rec-veredicto {
   display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  margin: 11px 0 0;
-  padding: 12px 13px;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 8px 11px;
   border-radius: 9px;
   border-left: 5px solid;
 }
 .rec-v-ico {
   flex-shrink: 0;
-  width: 24px; height: 24px;
+  width: 19px; height: 19px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 0.9rem;
+  font-size: 0.76rem;
   font-weight: bold;
   color: #fff;
 }
 .rec-v-dice { flex: 1; min-width: 0; }
+
+/* CORTO Y NO TAN GRANDE, a peticion de David (2 de septiembre).
+   Antes esto era el titular del recibo: letra de 1.24rem y dos renglones de
+   explicacion. Ya no hace falta que grite, por dos razones:
+     · ahora "lo que le pesa" va encima, y ESO es lo que la persona vino a
+       saber -- el veredicto confirma, no anuncia;
+     · el plazo ("lo tendra en 5 meses") queda dicho mas arriba, asi que el
+       veredicto repetia lo que ya se sabia.
+   El porque se quedo solo cuando agrega algo de verdad, y en letra chica. */
 .rec-v-frase {
   display: block;
-  font-family: 'ScothBrace', serif;
-  font-size: 1.24rem;
-  line-height: 1.2;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.98rem;
+  font-weight: bold;
+  line-height: 1.25;
   text-wrap: balance;
 }
 .rec-v-porque {
   display: block;
-  margin-top: 3px;
-  font-size: 0.88rem;
-  line-height: 1.4;
-  color: rgba(43, 33, 24, 0.78);
+  margin-top: 1px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: rgba(43, 33, 24, 0.72);
 }
 
 .rec-v-bien  { border-left-color: var(--verde); background: rgba(46, 125, 64, 0.1); }
@@ -1518,26 +1528,87 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 .rec-v-lento .rec-v-ico { background: var(--dorado-osc); }
 .rec-v-lento .rec-v-frase { color: #7A5B04; }
 
+/* --- LOS DESPLEGABLES DEL RECIBO ---
+   Dos cosas se pliegan: el aviso de "ojo con esta cuenta" y los plazos de "y
+   si lo quiero en...". Las dos arrancan CERRADAS, para que el recibo quepa de
+   un golpe de vista.
+
+   Lo importante: cerrado, el TITULO se sigue viendo. El aviso no se puede
+   esconder del todo -- es una advertencia -- pero su detalle si puede esperar
+   a que la persona lo toque. */
+.rec-plegable {
+  margin: 10px 0 0;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.rec-plegable-tit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.94rem;
+  font-weight: bold;
+  text-align: left;
+  color: var(--texto);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.rec-plegable-txt { flex: 1; min-width: 0; }
+.rec-plegable-tit:focus-visible { outline: 3px solid var(--dorado); outline-offset: -3px; }
+
+/* La flecha: apunta abajo cuando esta cerrado, arriba cuando esta abierto */
+.rec-plegable-flecha {
+  flex-shrink: 0;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid currentColor;
+  opacity: 0.65;
+  transition: transform 0.22s ease;
+}
+.rec-plegable:not(.cerrado) .rec-plegable-flecha { transform: rotate(180deg); }
+
+.rec-plegable-cuerpo {
+  overflow: hidden;
+  max-height: 400px;
+  padding: 0 12px 11px;
+  transition: max-height 0.26s ease, padding-bottom 0.26s ease, opacity 0.18s ease;
+}
+.rec-plegable.cerrado .rec-plegable-cuerpo {
+  max-height: 0;
+  padding-bottom: 0;
+  opacity: 0;
+}
+
 /* --- El aviso de cuando no sabemos sus gastos --- */
 .rec-aviso {
-  margin: 11px 0 0;
-  padding: 11px 13px;
-  font-size: 0.9rem;
-  line-height: 1.42;
   background: rgba(242, 178, 51, 0.18);
   border-left: 5px solid var(--dorado-osc);
-  border-radius: 9px;
 }
-.rec-aviso b { display: block; margin-bottom: 2px; color: #7A5B04; }
+.rec-aviso .rec-plegable-tit { color: #7A5B04; }
+.rec-aviso-txt {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
 .rec-aviso .rec-btn-g { margin-top: 8px; width: 100%; }
 
 /* --- Cuánto le va a afectar en su economía ---
-   La regla: decirlo en algo que la persona vive, no en un porcentaje. */
+   La regla: decirlo en algo que la persona vive, no en un porcentaje.
+
+   VA DE PRIMERO en la respuesta (David, 2 de septiembre), y por eso se ve
+   como el bloque principal y no como una nota al margen: lo que la persona
+   quiere saber es que le implica la compra. El veredicto viene despues, a
+   confirmar. */
 .rec-afecta {
-  margin: 11px 0 0;
-  padding: 11px 12px;
-  background: rgba(122, 74, 34, 0.07);
-  border: 1px dashed rgba(122, 74, 34, 0.34);
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  background: rgba(122, 74, 34, 0.09);
+  border-left: 5px solid var(--marron);
   border-radius: 9px;
 }
 .rec-rot-chico {
@@ -1548,7 +1619,7 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   text-transform: uppercase;
   color: var(--marron);
 }
-.rec-afecta p { margin: 0; font-size: 0.98rem; line-height: 1.4; }
+.rec-afecta p { margin: 0; font-size: 1.02rem; line-height: 1.38; }
 
 /* --- El desglose del recibo grupal --- */
 .rec-desglose { padding: 12px 0 0; }
@@ -1587,8 +1658,13 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .rec-desglose-total .rec-d-plata { color: var(--verde-oscuro); }
 
-/* --- Los plazos: botones gordos, sin calendario --- */
-.rec-plazos { margin: 13px 0 0; }
+/* --- Los plazos: botones gordos, sin calendario ---
+   Van en un desplegable al final del recibo: son la pregunta de quien ya leyo
+   su respuesta y quiere estirarla. */
+.rec-plazos {
+  background: rgba(122, 74, 34, 0.06);
+  border: 1px dashed rgba(122, 74, 34, 0.3);
+}
 .rec-plazos-preg {
   margin: 0 0 7px;
   font-size: 0.94rem;
@@ -1619,21 +1695,23 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 .rec-plazo-btn:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
 .rec-plazo-dice {
-  margin: 9px 0 0;
-  padding: 11px 12px;
-  font-size: 0.94rem;
-  line-height: 1.42;
+  margin: 8px 0 0;
+  padding: 10px 11px;
+  font-size: 0.9rem;
+  line-height: 1.4;
   background: var(--crema);
   border-radius: 9px;
 }
 .rec-plazo-malo { color: #8E2018; }
 
 /* --- 5. El consejo del arriero --- */
+/* Va entre "lo que le pesa" y el veredicto (David, 2 de septiembre): el
+   consejo del arriero acompana la consecuencia, no cierra el recibo. */
 .rec-consejo {
   display: flex;
   gap: 9px;
-  margin: 14px 0 0;
-  padding-top: 12px;
+  margin: 11px 0 0;
+  padding-top: 10px;
   border-top: 1px dashed rgba(122, 74, 34, 0.3);
 }
 .rec-carriel { flex-shrink: 0; width: 26px; }
@@ -1647,18 +1725,22 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 
 /* --- Los tres botones del final del cálculo --- */
+/* Los tres en UNA fila (David, 2 de septiembre): antes "dejelo asi" se
+   llevaba una fila entera para el solo. La letra baja un poco, pero el alto
+   del boton se mantiene para que se le pueda apuntar sin cuidado. */
 .rec-guardar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 14px 0 0;
+  gap: 5px;
+  margin: 12px 0 0;
 }
 .rec-btn-g {
-  flex: 1 1 46%;
-  padding: 12px 8px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px 4px;
   font-family: 'LiberationSans', sans-serif;
-  font-size: 0.94rem;
+  font-size: 0.84rem;
   font-weight: bold;
+  line-height: 1.2;
   color: #fff;
   background: var(--verde);
   border: 0;
@@ -1673,7 +1755,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 /* "Déjelo así" no es un botón de castigo, pero tampoco compite con guardar:
    quien solo quería el número se va por aquí sin sentir que hizo algo mal. */
 .rec-btn-g-suave {
-  flex-basis: 100%;
   color: var(--marron);
   background: transparent;
   border: 1px solid rgba(122, 74, 34, 0.4);

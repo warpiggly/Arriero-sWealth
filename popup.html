@@ -244,28 +244,23 @@
               <!-- El desglose (solo en el recibo de un grupo) -->
               <div id="rec-desglose" class="rec-desglose oculto"></div>
 
-              <!-- 2 y 3. Cuanto ahorra y cuando lo tiene -->
+              <!-- Cuanto ahorra y cuando lo tiene. Va pegado al precio: son
+                   las dos cifras que la persona vino a buscar. -->
               <div id="rec-renglones" class="rec-renglones"></div>
               <hr class="rec-puntos">
 
-              <!-- 4. El veredicto -->
-              <div id="rec-veredicto" class="rec-veredicto"></div>
+              <!-- ============ LA RESPUESTA ============
+                   El orden de aqui abajo lo pidio David el 2 de septiembre, y
+                   tiene su razon: lo que la persona quiere saber es QUE LE
+                   IMPLICA la compra, no si un semaforo esta verde. Asi que
+                   "lo que le pesa" va de primero, la frase del arriero le
+                   sigue, y el veredicto cierra -- corto, porque el plazo ya
+                   quedo dicho arriba y no hay que repetirlo. -->
 
-              <!-- El aviso de cuando no sabemos sus gastos -->
-              <div id="rec-aviso" class="rec-aviso oculto"></div>
-
-              <!-- Cuanto le va a afectar en su economia -->
+              <!-- 1. Cuanto le va a afectar en su economia -->
               <div id="rec-afecta" class="rec-afecta"></div>
 
-              <!-- Los plazos: botones gordos, sin calendario -->
-              <div class="rec-plazos">
-                <p class="rec-plazos-preg">&#191;Y si lo quiero en&hellip;?</p>
-                <div id="rec-plazos-fila" class="rec-plazos-fila" role="group"
-                     aria-label="Plazos"></div>
-                <p id="rec-plazo-dice" class="rec-plazo-dice"></p>
-              </div>
-
-              <!-- 5. El consejo del arriero -->
+              <!-- 2. El consejo del arriero -->
               <div class="rec-consejo">
                 <span class="rec-carriel" aria-hidden="true">
                   <img src="assets/images/Cirrel Arriero.png" alt="">
@@ -273,16 +268,54 @@
                 <p id="rec-consejo-txt" class="rec-consejo-txt"></p>
               </div>
 
-              <!-- Los tres botones del final. Guardar no es un camino aparte:
-                   es el final del calculo. Y "dejarlo asi" existe porque quien
-                   solo queria el numero tiene que poder irse sin guardar nada
-                   ni haber decidido nada de antemano (README, punto 4). -->
+              <!-- 3. El veredicto -->
+              <div id="rec-veredicto" class="rec-veredicto"></div>
+
+              <!-- 4. El aviso de cuando no sabemos sus gastos. DESPLEGABLE:
+                   cerrado se sigue viendo la advertencia ("ojo con esta
+                   cuenta"), que es lo que no se puede perder; el detalle sale
+                   al tocarlo. -->
+              <div id="rec-aviso" class="rec-plegable rec-aviso oculto cerrado">
+                <button type="button" id="rec-aviso-tit" class="rec-plegable-tit"
+                        aria-expanded="false">
+                  <span class="rec-plegable-txt">Ojo con esta cuenta, mijo</span>
+                  <span class="rec-plegable-flecha" aria-hidden="true"></span>
+                </button>
+                <div class="rec-plegable-cuerpo">
+                  <p id="rec-aviso-txt" class="rec-aviso-txt"></p>
+                  <button type="button" id="rec-aviso-btn" class="rec-btn-g">
+                    D&#237;game mis gastos
+                  </button>
+                </div>
+              </div>
+
+              <!-- 5. Los plazos, al final y DESPLEGABLES: son la pregunta de
+                   quien ya leyo su respuesta y quiere estirarla. Botones
+                   gordos, sin calendario. -->
+              <div id="rec-plazos" class="rec-plegable rec-plazos cerrado">
+                <button type="button" id="rec-plazos-tit" class="rec-plegable-tit"
+                        aria-expanded="false">
+                  <span class="rec-plegable-txt">&#191;Y si lo quiero en&hellip;?</span>
+                  <span class="rec-plegable-flecha" aria-hidden="true"></span>
+                </button>
+                <div class="rec-plegable-cuerpo">
+                  <div id="rec-plazos-fila" class="rec-plazos-fila" role="group"
+                       aria-label="Plazos"></div>
+                  <p id="rec-plazo-dice" class="rec-plazo-dice"></p>
+                </div>
+              </div>
+
+              <!-- 6. Los tres botones del final, en UNA sola fila. Guardar no
+                   es un camino aparte: es el final del calculo. Y "dejelo
+                   asi" existe porque quien solo queria el numero tiene que
+                   poder irse sin guardar nada ni haber decidido nada de
+                   antemano (README, punto 4). -->
               <div id="rec-guardar" class="rec-guardar">
                 <button type="button" id="rec-g-suelto" class="rec-btn-g">
                   Gu&#225;rdemelo
                 </button>
                 <button type="button" id="rec-g-grupo" class="rec-btn-g">
-                  Gu&#225;rdelo en un grupo
+                  En un grupo
                 </button>
                 <button type="button" id="rec-g-dejar" class="rec-btn-g rec-btn-g-suave">
                   D&#233;jelo as&#237;
@@ -290,7 +323,7 @@
               </div>
 
               <!-- Escoger el grupo: los que ya tiene, o uno nuevo. Sale al
-                   tocar "guardelo en un grupo". -->
+                   tocar "en un grupo". -->
               <div id="rec-grupos" class="rec-grupos oculto">
                 <p class="rec-plazos-preg">&#191;En qu&#233; grupo?</p>
                 <div id="rec-grupos-lista" class="rec-grupos-lista"></div>
@@ -301,6 +334,7 @@
                 </div>
               </div>
 
+              <!-- 7. Y de ultimo, voltear -->
               <button type="button" class="rec-voltear" data-voltear="1">
                 <span class="rec-flecha" aria-hidden="true">&#8634;</span>
                 <span id="rec-voltear-txt">Voltear para corregir el precio</span>

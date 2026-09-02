@@ -68,6 +68,20 @@ document.addEventListener('DOMContentLoaded', function () {
   recAtar('ah-nombre', 'input', recCalcularDeLaPregunta);
   recAtar('ah-precio', 'input', recCalcularDeLaPregunta);
 
+  // --- Los dos desplegables del recibo ---
+  recAtar('rec-aviso-tit', 'click', function () { recPlegar('rec-aviso'); });
+  recAtar('rec-plazos-tit', 'click', function () { recPlegar('rec-plazos'); });
+
+  // El boton del aviso lleva a llenar los gastos. Se ata UNA vez, aqui, y no
+  // cada vez que se pinta el recibo: si no, se le irian amontonando oyentes.
+  recAtar('rec-aviso-btn', 'click', function () {
+    recAbrirYo(true);
+    const g = document.getElementById('ah-gastos');
+    if (g) g.classList.remove('cerrado');
+    const primero = document.getElementById('ah-g-casa');
+    if (primero) primero.focus();
+  });
+
   // --- El giro ---
   document.querySelectorAll('[data-voltear]').forEach(function (b) {
     b.addEventListener('click', recVoltear);
@@ -408,6 +422,19 @@ function recPintarRecibo() {
 
   const esGrupo = !!c.desglose;
 
+  // Los desplegables se cierran cuando el recibo APARECE, no en cada
+  // repintado: si la persona abrio los plazos y despues corrigio un gasto, el
+  // recibo se rehace y seria muy molesto que se le cerraran en la cara.
+  const apareceAhora = caja.classList.contains('oculto');
+  if (apareceAhora) {
+    ['rec-aviso', 'rec-plazos'].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('cerrado');
+      recMarcarPlegable(id, false);
+    });
+  }
+
   caja.classList.remove('oculto');
   // Siempre se muestra por adelante: nadie quiere volver a un recibo volteado.
   caja.classList.remove('volteado');
@@ -443,28 +470,8 @@ function recPintarRecibo() {
   // --- El aviso de los gastos sin llenar ---
   const aviso = document.getElementById('rec-aviso');
   if (aviso) {
-    if (c.avisoPrellenado) {
-      aviso.innerHTML = '';
-      const b = document.createElement('b');
-      b.textContent = 'Ojo con esta cuenta, mijo';
-      aviso.appendChild(b);
-      aviso.appendChild(document.createTextNode(c.avisoPrellenado));
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'rec-btn-g';
-      btn.textContent = 'Dígame mis gastos';
-      btn.addEventListener('click', function () {
-        recAbrirYo(true);
-        const g = document.getElementById('ah-gastos');
-        if (g) g.classList.remove('cerrado');
-        const primero = document.getElementById('ah-g-casa');
-        if (primero) primero.focus();
-      });
-      aviso.appendChild(btn);
-      aviso.classList.remove('oculto');
-    } else {
-      aviso.classList.add('oculto');
-    }
+    recTexto('rec-aviso-txt', c.avisoPrellenado);
+    aviso.classList.toggle('oculto', !c.avisoPrellenado);
   }
 
   // --- Lo que le pesa ---
@@ -591,10 +598,15 @@ function recPintarVeredicto(v) {
   frase.textContent = v.frase;
   dice.appendChild(frase);
 
-  const porque = document.createElement('span');
-  porque.className = 'rec-v-porque';
-  porque.textContent = v.porque;
-  dice.appendChild(porque);
+  // El porque solo se pinta si hay algo que decir. Cuando la respuesta ya
+  // quedo dicha arriba ("lo tendra en 5 meses"), repetirla aqui solo alarga el
+  // recibo.
+  if (v.porque) {
+    const porque = document.createElement('span');
+    porque.className = 'rec-v-porque';
+    porque.textContent = v.porque;
+    dice.appendChild(porque);
+  }
 
   cont.appendChild(dice);
 }
@@ -813,6 +825,25 @@ function recCorregir(id, campo, valor) {
       : valor;
   }
   recCalcularDeLaPregunta();
+}
+
+// Abre y cierra un desplegable del recibo. Los dos ("ojo con esta cuenta" y
+// "y si lo quiero en...") arrancan cerrados para que el recibo quepa de un
+// golpe de vista; el titulo se queda visible, que es lo que no se puede
+// perder.
+// Convencion: el titulo de un desplegable lleva el id de la caja mas "-tit"
+// (rec-aviso / rec-aviso-tit). Se busca por id y no por clase porque asi no
+// depende de como este armado el HTML por dentro.
+function recPlegar(id) {
+  const caja = document.getElementById(id);
+  if (!caja) return;
+  const cerrado = caja.classList.toggle('cerrado');
+  recMarcarPlegable(id, !cerrado);
+}
+
+function recMarcarPlegable(id, abierto) {
+  const btn = document.getElementById(id + '-tit');
+  if (btn) btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
 }
 
 function recVoltear() {

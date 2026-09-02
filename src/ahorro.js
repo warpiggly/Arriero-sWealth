@@ -190,7 +190,7 @@ function ahorroVeredicto(datos) {
       caso: 'alcanza',
       tono: 'bien',
       frase: 'Sí le alcanza, mijo',
-      porque: 'Con lo que ya tiene guardado le da, y sin tocar su colchón.'
+      porque: 'Con lo que ya tiene guardado.'
     };
   }
 
@@ -202,8 +202,8 @@ function ahorroVeredicto(datos) {
       caso: 'no-alcanza',
       tono: 'no',
       frase: 'Todavía no le alcanza',
-      porque: 'Hoy no le queda nada para guardar. Para tenerlo en un año ' +
-              'necesitaría juntar ' + ahorroPlata(porMes) + ' al mes, o ' +
+      porque: 'Para tenerlo en un año le tocaría juntar ' +
+              ahorroPlata(porMes) + ' al mes, o ' +
               ahorroPlata(Math.ceil(porMes / 30)) + ' al día.',
       necesitaAlMes: porMes
     };
@@ -218,10 +218,10 @@ function ahorroVeredicto(datos) {
       caso: 'colchon',
       tono: 'ojo',
       frase: 'Le alcanza, pero se gasta la reserva',
-      porque: 'Tendría que sacar ' + ahorroPlata(delColchon) + ' del colchón y ' +
-              'le quedarían ' + ahorroPlata(queda) + '. Si espera ' +
+      porque: 'Saca ' + ahorroPlata(delColchon) + ' y le quedan ' +
+              ahorroPlata(queda) + '. Esperando ' +
               ahorroPlazoEnPalabras(cuando.meses).replace(/^en /, '') +
-              ' lo compra sin tocarlo.',
+              ' no lo toca.',
       delColchon: delColchon,
       quedaDeColchon: queda
     };
@@ -235,8 +235,7 @@ function ahorroVeredicto(datos) {
       caso: 'lento',
       tono: 'lento',
       frase: 'Le alcanza, pero se va a demorar',
-      porque: 'Son ' + ahorroPlazoEnPalabras(cuando.meses).replace(/^en /, '') +
-              ' guardando sin fallar. Guardando ' + ahorroPlata(paraElTope) +
+      porque: 'Con ' + ahorroPlata(paraElTope) +
               ' al mes lo tendría en año y medio.',
       meses: cuando.meses,
       paraNoDemorarse: paraElTope
@@ -244,14 +243,15 @@ function ahorroVeredicto(datos) {
   }
 
   // Le alcanza y en un plazo sensato.
-  const conColchon = colchon > 0
-    ? ', sin tocar su colchón de ' + ahorroPlata(colchon) + '.'
-    : '.';
+  //
+  // Aquí el porqué va CORTO, y si no hay nada que agregar va VACÍO: el plazo
+  // ya quedó dicho arriba, en el renglón de "lo tendrá". Repetirlo debajo del
+  // veredicto solo alargaba el recibo sin decir nada nuevo.
   return {
     caso: 'alcanza',
     tono: 'bien',
     frase: 'Sí le alcanza, mijo',
-    porque: 'Con lo que le sobra cada mes' + conColchon,
+    porque: colchon > 0 ? 'Sin tocar su colchón.' : '',
     meses: cuando.meses
   };
 }
