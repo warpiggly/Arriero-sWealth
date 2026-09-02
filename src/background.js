@@ -7,14 +7,56 @@
 // elige "Arriero: ¿cuándo puedo comprarlo?". Aquí:
 //   1. Leemos el texto seleccionado y le sacamos el número (el precio).
 //   2. Lo guardamos en chrome.storage.local (precioCapturado).
-//   3. Abrimos el popup: la vista de Metas lo detecta, lo pone en el campo
-//      "precio" y calcula al instante cuánto le falta / cuánto tardaría.
+//   3. Abrimos el popup.
 //
-// TODO (futuro, ver docs/NUEVA_VISION.md — Fase 2):
-//   En vez de abrir el popup, mostrar una TARJETA FLOTANTE sobre la misma
-//   página (vía contentScript) con el resultado al instante, sin cambiar de
-//   ventana. Sería más rápido para el usuario. Por ahora abrimos el popup.
+// OJO — ESTADO EN LA FASE 1 DEL REDISEÑO: el paso 3 quedó a medias a
+// propósito. El precio se sigue capturando y guardando bien, pero YA NO HAY
+// QUIÉN LO RECOJA: quien lo hacía era la vista de Metas (src/metas.js), que se
+// borró. Así que hoy el clic derecho abre el popup y ahí está el letrero de
+// "estamos arreglando esto". Es lo esperado.
+//
+// LO QUE SIGUE (Fase 2, ver docs/modulo-ahorro/PLAN.md): rehacer el menú
+// contextual para que además del precio se guarde `tab.url` y `tab.title` —
+// el LINK del lugar donde se vio el precio y un nombre sugerido para el
+// producto. Hoy los dos se tiran a la basura, y el diagrama los pide. Sale
+// casi gratis: la pestaña ya llega aquí, en el parámetro `tab`.
+//
+// Y una duda abierta de la Fase 2: si el clic derecho sigue abriendo el popup
+// o si el recibo aparece sobre la misma página de la tienda (vía
+// contentScript), sin cambiar de ventana. Lo segundo es más cómodo y es más
+// trabajo.
 // =================================================================
+
+// Lo que se guardaba de la vista de Ahorro vieja y de los sobres. El código
+// que lo leía ya no existe (Fase 1 del rediseño), así que estas claves solo
+// estarían ocupando el almacén. Se botan: está decidido en PLAN.md y en
+// README.md ("se puede romper con confianza" — David es el único que usa la
+// app y no está publicada, así que no hay datos de nadie que proteger).
+//
+// Esta limpieza es de una sola vez. Se puede borrar de aquí cuando la Fase 2
+// esté hecha y la base de datos nueva (IndexedDB) sea la que manda.
+const CLAVES_VIEJAS = [
+  'economia',            // lo que ganaba / lo que ya tenía guardado
+  'ahorroMensual',       // los dos datos tecleados a mano
+  'ahorrosActuales',
+  'metasLista',          // la lista de productos apuntados
+  'metasPasosAbiertos',  // qué pasos había dejado abiertos
+  'sobresCiclo',         // los sobres del ciclo en curso
+  'sobresHistorial',     // los ciclos anteriores
+  'calcCinta',           // los renglones de la cinta de la calculadora
+  'calcCintaAbierta'     // si la cinta había quedado abierta
+];
+
+function botarLoViejo() {
+  try {
+    if (chrome.storage && chrome.storage.sync) {
+      chrome.storage.sync.remove(CLAVES_VIEJAS);
+    }
+    if (chrome.storage && chrome.storage.local) {
+      chrome.storage.local.remove(['precioCapturado']);
+    }
+  } catch (e) { /* si no hay almacén, no hay nada que botar */ }
+}
 
 // Crear la opción en el menú contextual (solo cuando hay texto seleccionado)
 chrome.runtime.onInstalled.addListener(() => {
@@ -23,6 +65,8 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "Arriero: ¿cuándo puedo comprarlo?",
     contexts: ["selection"]
   });
+
+  botarLoViejo();
 });
 
 // Extrae un precio (número) de un texto como "$1.999.900", "1,999.900 COP",
@@ -75,8 +119,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     return;
   }
 
-  // Guardar el precio capturado. La vista de Metas (metas.js) lo recoge al
-  // abrir el popup, lo pone en el formulario y calcula de una.
+  // Guardar el precio capturado. En la Fase 2 esto se rehace para guardar
+  // también el link (tab.url) y el título de la página (tab.title).
   chrome.storage.local.set({
     precioCapturado: {
       precio: precio,

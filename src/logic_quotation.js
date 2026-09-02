@@ -147,9 +147,6 @@ function cambiarVista(idVista, estrella) {
 
   // El número grande de la cabecera cambia de significado según la vista.
   actualizarCabecera();
-
-  // Ajustar el ancho de la app: solo se ensancha en Metas + hoja de cálculo.
-  if (typeof actualizarAnchoApp === 'function') actualizarAnchoApp();
 }
 
 // Panel colapsable que le corresponde a cada mula.
@@ -159,14 +156,12 @@ function panelDeVista(idVista) {
   return null;
 }
 
-// Abre o cierra el panel de una vista y refresca los efectos de layout
-// (el ancho de la app solo se ensancha con la hoja de cálculo abierta en Metas).
+// Abre o cierra el panel de una vista.
 function ponerPanel(idVista, abierto) {
   const panel = panelDeVista(idVista);
   if (panel) panel.classList.toggle('cerrado', !abierto);
   const bolita = document.querySelector(`.bolita-mula[data-view="${idVista}"]`);
   if (bolita) bolita.classList.toggle('abierta', abierto);
-  if (typeof actualizarAnchoApp === 'function') actualizarAnchoApp();
 }
 
 // Clic en una mula (el control de abajo). Un solo toque:
@@ -214,12 +209,21 @@ function pintarJornal(etiqueta, valorTexto) {
   if (num) num.textContent = valorTexto;
 }
 
-// Repinta la cabecera con lo que corresponde a la vista activa. En Metas
-// muestra "Te falta ahorrar"; en Cotizar/Despensa, "Deberías cobrar".
+// Repinta la cabecera con lo que corresponde a la vista activa.
+//
+// En Cotizar y Mi Despensa muestra "Deberías cobrar". En AHORRO, mientras el
+// módulo se reconstruye (Fase 1 del rediseño), no hay ninguna cuenta que
+// mostrar: quien pintaba ese número era metasPintarJornal(), que vivía en el
+// metas.js que se borró. Así que la cabecera dice la verdad — un guion — en
+// vez de pisar la vista con el "Deberías cobrar" del cotizador, que ahí no
+// significa nada.
+//
+// Cuando llegue el recibo (Fase 4), este es el lugar donde el número grande de
+// la vista de Ahorro vuelve a tener dueño.
 function actualizarCabecera() {
   const vista = vistaActiva();
-  if (vista === 'metas' && typeof metasPintarJornal === 'function') {
-    metasPintarJornal();
+  if (vista === 'metas') {
+    pintarJornal('Su ahorro:', '—');
   } else {
     pintarJornal('Deberías cobrar:', formatearDinero(window.__precioVentaActual || 0));
   }
@@ -328,10 +332,9 @@ function refrescarTodo() {
   renderHerramientas();
   renderPresupuestos();
   recalcularCotizacion();
-  // Las metas también muestran dinero: que se repinten con la nueva moneda.
-  if (typeof metasRefrescar === 'function') metasRefrescar();
-  // Y los sobres de la calculadora, que son casi puro dinero.
-  if (typeof sobresPintar === 'function') sobresPintar();
+  // La vista de Ahorro no entra aquí por ahora: está en obra y no muestra
+  // ningún dinero (Fase 1 del rediseño). Cuando el recibo exista, este es el
+  // lugar donde hay que volver a repintarlo al cambiar de moneda.
 }
 
 // ----------------------------------------------------------------

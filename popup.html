@@ -88,28 +88,32 @@
   <p id="mulas-hint" class="mulas-hint">Toque una mula para abrir su cuenta.</p>
 
 
-  <!-- ===================== VISTA PRINCIPAL: METAS ===================== -->
-  <!-- El corazón de la app: el usuario dice qué quiere comprar y la app le
-       calcula cuánto le falta, cuánto ahorrar por día y cuándo lo logra. -->
+  <!-- ===================== VISTA PRINCIPAL: AHORRO ===================== -->
+  <!-- EN REDISENO -- Fase 1 del plan (docs/modulo-ahorro/PLAN.md).
+       Aqui vivia la vista de Ahorro completa: la vista sencilla por pasos, la
+       hoja tipo Excel y los dos datos tecleados a mano (ahorroMensual y
+       ahorrosActuales). Todo eso se borro para dejar el terreno limpio y
+       construir de nuevo desde el diagrama.
+
+       Lo que viene a ocupar este lugar (docs/modulo-ahorro/README.md): el
+       recibo de dos caras, los botones de plazo, el veredicto y la casilla
+       nueva de "cuanto le va a afectar en su economia".
+
+       OJO CON EL id="panel-metas": no es decorativo. panelDeVista() y
+       activarMula(), en src/logic_quotation.js, lo buscan por ese id para que
+       la mula de AHORRO de abajo abra y cierre su contenido. Si se le cambia
+       el nombre o se quita, la mula deja de responder. -->
   <div id="metas" class="vista activa">
 
-    <!-- Toda la cuenta vive aquí dentro. Arranca CERRADO: se abre tocando la
-         mula de AHORRO de arriba (ya no hay botón propio de desplegar). -->
     <div id="panel-metas" class="master-contenido cerrado">
 
-      <!-- Interruptor horizontal (encendido/apagado) para cambiar entre la
-           vista SENCILLA (por pasos) y la HOJA DE CÁLCULO tipo Excel. -->
-      <div class="vista-switch">
-        <span class="vs-label vs-izq activa" id="vs-lbl-sencilla">Sencilla</span>
-        <button id="switchVista" class="switch" role="switch" aria-checked="false" title="Cambiar entre vista sencilla y hoja de cálculo">
-          <span class="switch-perilla"></span>
-        </button>
-        <span class="vs-label vs-der" id="vs-lbl-hoja">Hoja de cálculo</span>
-      </div>
-
-      <!-- Botón que saca la calculadora. Va aquí arriba para que sirva tanto en
-           la vista Sencilla como en la Hoja de cálculo. La ventana flotante y
-           toda su lógica viven en src/calculadora.js -->
+      <!-- El boton de la calculadora SE QUEDA (README.md, punto 2: "La
+           calculadora es el caso especial"). Su ventana funciona como una
+           calculadora de siempre y no esta conectada a nada: no apunta, no
+           guarda, no reparte. Sigue aqui, en su lugar de siempre, para que la
+           gente ya este acostumbrada a verlo el dia que se le de su uso
+           creativo. Donde va a vivir de aqui en adelante es una duda abierta
+           de la Fase 4. -->
       <button type="button" id="abrir-calculadora" class="btn-calculadora"
               title="Sacar la calculadora">
         <svg class="ico-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -121,141 +125,15 @@
         <span class="btn-calc-txt">Saque la calculadora</span>
       </button>
 
-      <!-- ============ VISTA A: SENCILLA (por pasos) ============ -->
-      <div id="metas-sencilla">
-
-           <h3>¿Cuándo puedo comprarlo?</h3>
-
-    <!-- Guía siempre visible, en palabras del campo: el usuario no suma nada. -->
-    <p class="metas-instruccion">
-      Llene los cuadritos y yo le saco la cuenta, mijo.<br>
-      Usted no tiene que sumar ni restar nada.
-    </p>
-
-        <!-- Los tres pasos se PLIEGAN para ahorrar espacio: el título es un
-             botón que abre y cierra su cuerpo. Arrancan cerrados y la app
-             recuerda cuáles dejó abiertos el usuario (ver initPasos() en
-             metas.js). Cuando está cerrado, .paso-resumen muestra un
-             resumencito para no tener que abrirlo solo por mirar. -->
-
-        <!-- PASO 1: sus ahorros -->
-        <section class="metas-paso cerrado" data-paso="ahorros">
-          <button type="button" class="metas-paso-tit" aria-expanded="false">
-            <span class="paso-num">1</span>
-            <span class="paso-txt">Mis ahorros</span>
-            <span class="paso-resumen"></span>
-            <span class="paso-flecha" aria-hidden="true"></span>
-          </button>
-          <div class="metas-paso-cuerpo">
-            <div class="metas-paso-dentro">
-              <div class="excel">
-                <div class="excel-fila">
-                  <div class="excel-celda etiqueta"><label for="ahorroMensual">Puedo guardar al mes</label></div>
-                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorroMensual" placeholder="200.000"></div>
-                </div>
-                <div class="excel-fila">
-                  <div class="excel-celda etiqueta"><label for="ahorrosActuales">Lo que ya tengo guardado</label></div>
-                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="ahorrosActuales" placeholder="0"></div>
-                </div>
-              </div>
-              <p class="metas-hint">Con estos dos datitos ya le hago la cuenta.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- PASO 2: qué quiere comprar -->
-        <section class="metas-paso cerrado" data-paso="comprar">
-          <button type="button" class="metas-paso-tit" aria-expanded="false">
-            <span class="paso-num">2</span>
-            <span class="paso-txt">¿Qué quiere comprar?</span>
-            <span class="paso-resumen"></span>
-            <span class="paso-flecha" aria-hidden="true"></span>
-          </button>
-          <div class="metas-paso-cuerpo">
-            <div class="metas-paso-dentro">
-              <div class="excel">
-                <div class="excel-fila">
-                  <div class="excel-celda etiqueta"><label for="meta-nombre">¿Qué quiere?</label></div>
-                  <div class="excel-celda"><input type="text" id="meta-nombre" placeholder="Ej: Bicicleta"></div>
-                </div>
-                <div class="excel-fila">
-                  <div class="excel-celda etiqueta"><label for="meta-precio">¿Cuánto cuesta?</label></div>
-                  <div class="excel-celda"><input type="text" inputmode="numeric" class="input-num input-money" id="meta-precio" placeholder="0"></div>
-                </div>
-                <div class="excel-fila">
-                  <div class="excel-celda etiqueta"><label for="meta-fecha">¿Para cuándo? (si quiere)</label></div>
-                  <div class="excel-celda"><input type="date" id="meta-fecha"></div>
-                </div>
-              </div>
-              <button id="agregar-meta">✚ Apuntar en mi lista</button>
-              <p class="metas-hint">O en cualquier página, señale el precio con el clic derecho.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- PASO 3: la cuenta hecha -->
-        <section class="metas-paso cerrado" data-paso="cuenta">
-          <button type="button" class="metas-paso-tit" aria-expanded="false">
-            <span class="paso-num">3</span>
-            <span class="paso-txt">Mi cuenta</span>
-            <span class="paso-resumen"></span>
-            <span class="paso-flecha" aria-hidden="true"></span>
-          </button>
-          <div class="metas-paso-cuerpo">
-            <div class="metas-paso-dentro">
-              <!-- Resumen del total: barra de progreso + cuánto falta + cuándo llegas -->
-              <div id="meta-resumen" class="meta-resumen" style="display:none;"></div>
-
-              <!-- La lista tipo Excel (celdas). La llena metas.js -->
-              <div id="metas-container"></div>
-              <p id="sin-metas" class="frase-arriero">Todavía no ha apuntado nada, mijo. Escriba un producto arriba, o señale un precio en cualquier página con el clic derecho.</p>
-            </div>
-          </div>
-        </section>
-
-      </div><!-- /#metas-sencilla -->
-
-      <!-- ============ VISTA B: HOJA DE CÁLCULO (tipo Excel) ============ -->
-      <div id="metas-hoja" class="oculto">
-        <div class="hoja-tit">Mi hoja de cuentas</div>
-
-        <!-- Dos datos base, en celdas -->
-        <table class="hoja hoja-datos">
-          <tr>
-            <td class="hoja-rot">Guardo cada mes</td>
-            <td class="hoja-cel"><input type="text" inputmode="numeric" class="input-num celda-input" id="ahorroMensualHoja" placeholder="200.000"></td>
-          </tr>
-          <tr>
-            <td class="hoja-rot">Ya tengo guardado</td>
-            <td class="hoja-cel"><input type="text" inputmode="numeric" class="input-num celda-input" id="ahorrosActualesHoja" placeholder="0"></td>
-          </tr>
-        </table>
-
-        <p class="metas-hint">Escriba en los cuadritos blancos. Yo lleno solito las columnas de la cuenta.</p>
-
-        <!-- La hoja grande, con letras de columna y números de fila como en Excel -->
-        <div class="hoja-scroll">
-          <table class="hoja hoja-grande">
-            <thead>
-              <tr class="hoja-abc">
-                <th class="esq"></th>
-                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th class="esq borrar-col"></th>
-              </tr>
-              <tr class="hoja-encab">
-                <th class="esq">№</th>
-                <th>Lo que quiero</th>
-                <th>Precio</th>
-                <th>Me falta</th>
-                <th>¿Cuándo lo tengo?</th>
-                <th>Si es para una fecha</th>
-                <th class="esq borrar-col"></th>
-              </tr>
-            </thead>
-            <tbody id="hoja-cuerpo"></tbody>
-            <tfoot id="hoja-pie"></tfoot>
-          </table>
-        </div>
-      </div><!-- /#metas-hoja -->
+      <!-- LETRERO TEMPORAL de la Fase 1: solo esta aqui para que la vista no
+           quede en blanco mientras se trabaja. Reusa el estilo de la vista "En
+           construccion", que ya existia. Se quita al final de la Fase 4. -->
+      <div class="en-construccion">
+        <div class="en-construccion-ico" aria-hidden="true">&#128679;</div>
+        <h3>Estamos arreglando esto, mijo.</h3>
+        <p>Vuelva pronto.</p>
+        <span class="en-construccion-firma">&#8212; Su arriero de confianza</span>
+      </div>
 
     </div><!-- /#panel-metas -->
   </div>
@@ -580,60 +458,6 @@
       <button type="button" id="calc-cerrar" class="calc-cerrar" title="Cerrar (Esc)">✕</button>
     </div>
 
-    <!-- ============ MI PLATA: el marcador de los sobres ============
-         Va ARRIBA de la pantalla a propósito: primero la respuesta que la
-         persona vino a buscar ("¿cuánto me queda?"), después las teclas.
-         Toda la lógica está en src/sobres.js -->
-    <div class="sob-marcador">
-      <div class="sob-marcador-cab">
-        <span class="sob-rot" id="sob-rot">Me queda</span>
-        <button type="button" id="sob-editar" class="sob-editar" aria-expanded="false"
-                title="Cambiar cuánto recibo y cada cuánto me pagan">✎ mi plata</button>
-      </div>
-
-      <div id="sob-queda" class="sob-queda">$0</div>
-
-      <!-- La barra se vacía como el tanque de gasolina: llena = tiene toda su plata -->
-      <div id="sob-barra" class="sob-barra oculto">
-        <div id="sob-barra-relleno" class="sob-barra-relleno nivel-alto"></div>
-      </div>
-
-      <div class="sob-renglon">
-        <span id="sob-dias" class="sob-dias"></span>
-        <span id="sob-pordia" class="sob-pordia"></span>
-      </div>
-
-      <p id="sob-frase" class="sob-frase tono-neutro"></p>
-      <p id="sob-lider" class="sob-lider-txt oculto"></p>
-
-      <button type="button" id="sob-btn-pago-ya" class="sob-btn-pago oculto">💰 Recibí mi pago</button>
-
-      <!-- El cuadrito de los dos datos. Plegado: se abre con el ✎ y se guarda
-           solito mientras escribe (no hay botón de "guardar" que se olvide). -->
-      <div id="sob-config" class="sob-config oculto">
-        <div class="sob-config-fila">
-          <label for="sob-ingreso">Recibí</label>
-          <input type="text" inputmode="numeric" class="input-num input-money"
-                 id="sob-ingreso" placeholder="1.200.000">
-        </div>
-        <div class="sob-config-fila">
-          <label for="sob-frecuencia">Me pagan</label>
-          <select id="sob-frecuencia">
-            <option value="semanal">Cada semana</option>
-            <option value="quincenal">Cada quincena</option>
-            <option value="mensual">Cada mes</option>
-          </select>
-        </div>
-        <!-- Cómo le fue la vez pasada. Va aquí y no en el marcador: es un
-             "bueno saber", no la respuesta que la persona vino a buscar. -->
-        <p id="sob-antes" class="sob-antes oculto"></p>
-
-        <button type="button" id="sob-btn-pago" class="sob-btn-pago">💰 Recibí mi pago</button>
-        <p class="sob-config-hint">Tóquelo cuando le llegue la plata: los sobres
-          vuelven a cero y le guardo la cuenta del ciclo que terminó.</p>
-      </div>
-    </div>
-
     <!-- Pantalla: arriba la operación que va haciendo, abajo el número grande -->
     <div class="calc-pantalla">
       <div id="calc-operacion" class="calc-operacion"></div>
@@ -676,63 +500,17 @@
       <button type="button" class="calc-tecla t-igual" data-accion="igual">=</button>
     </div>
 
-    <!-- ============ LOS SOBRES ============
-         Van DEBAJO del teclado, como una última fila de teclas: así el orden es
-         el de una calculadora de verdad (pantalla · teclas · sobres) y, sobre
-         todo, TODO lo esencial cabe en una pantalla sin tener que rodar la
-         ventana — que con este público es lo que más pesa.
 
-         El gesto completo son dos toques: escribo el número y toco el sobre.
-         Los cuadritos los arma sobres.js desde la lista SOBRES. -->
-    <div class="sob-zona">
-      <div class="sob-zona-cab">
-        <span class="sob-zona-tit">¿En qué fue?</span>
-        <!-- El instructivo se queda SIEMPRE: es el único gesto que hay que
-             aprender en toda la vista y no cuesta ni un renglón. -->
-        <span class="sob-zona-hint">toque el sobre y queda guardado</span>
-      </div>
-      <!-- Seis gastos + el Ahorro, que ocupa dos casillas y va en verde porque
-           no es un gasto sino plata que se guarda. Los arma sobres.js. -->
-      <div id="sob-rejilla" class="sob-rejilla"></div>
-      <div id="sob-aviso" class="sob-aviso oculto" role="status" aria-live="polite"></div>
-    </div>
 
-    <!-- Guardar la cuenta en la cinta -->
-    <div class="calc-guardar">
-      <input type="text" id="calc-nombre" class="calc-nombre" maxlength="42"
-             placeholder="¿De qué es esta cuenta?">
-      <button type="button" id="calc-guardar-btn" class="calc-btn-guardar">Guardar en la cinta</button>
-    </div>
-
-    <!-- La cinta: las cuentas guardadas y los gastos de los sobres, como el
-         rollo de papel de una calculadora de escritorio. Toque un renglón para
-         volver a usar su resultado; la ✕ le devuelve la plata a su sobre.
-         Arranca PLEGADA para que la ventana no quede tan larga. -->
-    <div id="calc-cinta-caja" class="calc-cinta-caja">
-      <div class="calc-cinta-cab">
-        <button type="button" id="calc-cinta-toggle" class="calc-cinta-toggle" aria-expanded="false">
-          <span class="calc-cinta-tit">Mi cinta de cuentas</span>
-          <span id="calc-cinta-cuenta" class="calc-cinta-cuenta"></span>
-          <span class="calc-cinta-flecha" aria-hidden="true"></span>
-        </button>
-        <button type="button" id="calc-cinta-limpiar" class="calc-cinta-limpiar">Borrar todo</button>
-      </div>
-      <div class="calc-cinta-cuerpo">
-        <div id="calc-cinta" class="calc-cinta"></div>
-        <p id="calc-cinta-vacia" class="calc-cinta-vacia">Todavía no ha guardado ninguna cuenta, mijo.</p>
-      </div>
-    </div>
 
   </div><!-- /#calc-ventana -->
 
   <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
-       cambiarVista, pintarJornal…) que metas.js reutiliza. -->
+       cambiarVista, pintarJornal...) que reutiliza el resto de la app. -->
   <script src="src/logic_quotation.js"></script>
-  <script src="src/metas.js"></script>
+  <!-- La calculadora quedo suelta: no le pide nada a nadie ni nadie le pide
+       nada a ella (ver el encabezado de src/calculadora.js). -->
   <script src="src/calculadora.js"></script>
-  <!-- sobres.js va DESPUÉS de calculadora.js: le pide prestados el almacén y los
-       puentes (calcValorPantalla, calcCintaAgregar…). -->
-  <script src="src/sobres.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>

@@ -7,19 +7,20 @@
 //   · ATAJOS DE ARRIERO: las cuentas que uno hace siempre para ahorrar
 //       ÷ 12 · al mes   ÷ 30 · al día   × 12 · al año   10 % de esto
 //     Cada atajo trabaja sobre lo que está en la pantalla y cancela la
-//     operación que estuviera a medias (así no hay sorpresas).
+//     operación que estuviera a medias (así no hay sorpresas). Son cuentas
+//     puras: no guardan nada ni tocan el ahorro.
 //
-//   · LA CINTA: como el rollo de papel de una calculadora de escritorio. Cada
-//     cuenta que el usuario guarda queda apuntada con su operación, su
-//     resultado y un nombre opcional. Se guarda en chrome.storage.sync, así que
-//     sigue ahí cuando vuelva a abrir el popup. Tocar una cuenta de la cinta
-//     devuelve su resultado a la pantalla.
+// ESTÁ A PROPÓSITO DESCONECTADA DE TODO. No apunta, no guarda, no reparte en
+// sobres, no alimenta el ahorro. Existe y no afecta nada. El botón se queda en
+// su lugar para que la gente ya esté acostumbrada a verlo el día que se le dé
+// su uso creativo dentro del módulo de Ahorro.
+//   Ver docs/modulo-ahorro/README.md, punto 2 ("La calculadora es el caso
+//   especial") y punto 10.
 //
-//   · LOS SOBRES (src/sobres.js): la cinta es además el extracto de los sobres.
-//     Cuando un renglón viene de un sobre carga su clave y su monto, y así la ✕
-//     puede devolverle esa plata al sobre. Los puentes entre los dos mundos son
-//     calcResolverPendiente(), calcValorPantalla(), calcOperacionTexto() y
-//     calcCintaAgregar().
+// Lo que se le quitó en la Fase 1 del rediseño: la CINTA (el rollo de cuentas
+// guardadas en chrome.storage.sync) y LOS SOBRES (el reparto del ingreso por
+// categorías, que vivía dentro de esta misma ventana). Con eso afuera, lo que
+// queda es un teclado limpio.
 //
 // NOTA SOBRE LOS NÚMEROS: se trabaja con coma decimal y punto de miles (es-CO),
 // igual que el resto de la app. La entrada se guarda como TEXTO (calcEntrada)
@@ -27,32 +28,16 @@
 // número al operar.
 // =================================================================
 
-const CALC_CINTA_KEY = 'calcCinta';
-const CALC_CINTA_ABIERTA_KEY = 'calcCintaAbierta';
-// Tope de la cinta. Ojo: chrome.storage.sync solo admite 8 KB por dato, y ahora
-// cada renglón carga también su sobre y su fecha. 40 renglones caben de sobra;
-// si algún día no cupieran, calcPersistirCinta() recorta y vuelve a intentar.
-const CALC_CINTA_MAX = 40;
 const CALC_MAX_DIGITOS = 15;        // más allá de esto los números pierden precisión
 
 // --- Estado de la calculadora -------------------------------------
+// Vive solo en memoria: al cerrar el popup se olvida, como una calculadora de
+// bolsillo a la que se le acabó la pila. Es lo que se busca.
 let calcEntrada = '0';       // lo que se ve en la pantalla, como texto
 let calcAcumulado = null;    // el número que quedó a la izquierda del operador
 let calcOperador = null;     // '+', '−', '×', '÷'
 let calcReiniciar = false;   // true = el próximo dígito arranca un número nuevo
 let calcExpresion = '';      // la última cuenta hecha, en texto ("1.200 ÷ 12")
-let calcCinta = [];          // [{ id, operacion, resultado, nombre }]
-
-// Acceso a chrome.storage a prueba de balas: si la app se abre como archivo
-// suelto (sin ser extensión) no existe `chrome` y no queremos que truene.
-function calcAlmacen() {
-  try {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      return chrome.storage.sync;
-    }
-  } catch (e) { /* sin almacenamiento: la calculadora igual funciona */ }
-  return null;
-}
 
 // ----------------------------------------------------------------
 // Arranque
@@ -88,35 +73,9 @@ document.addEventListener('DOMContentLoaded', function () {
     a.addEventListener('click', function () { calcAtajo(a.dataset.atajo); });
   });
 
-  // Guardar en la cinta
-  const guardar = document.getElementById('calc-guardar-btn');
-  if (guardar) guardar.addEventListener('click', calcGuardarEnCinta);
-
-  const nombre = document.getElementById('calc-nombre');
-  if (nombre) {
-    nombre.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); calcGuardarEnCinta(); }
-    });
-  }
-
-  const limpiarCinta = document.getElementById('calc-cinta-limpiar');
-  if (limpiarCinta) limpiarCinta.addEventListener('click', calcVaciarCinta);
-
-  // La cinta se pliega: el título es el botón que la abre y la cierra
-  const toggleCinta = document.getElementById('calc-cinta-toggle');
-  if (toggleCinta) toggleCinta.addEventListener('click', calcToggleCinta);
-
-  const almacen = calcAlmacen();
-  if (almacen) {
-    almacen.get([CALC_CINTA_ABIERTA_KEY], function (data) {
-      calcPintarCintaPlegada(!!(data && data[CALC_CINTA_ABIERTA_KEY]));
-    });
-  }
-
   // Teclado físico (solo mientras la ventana está abierta)
   document.addEventListener('keydown', calcTeclaFisica);
 
-  calcCargarCinta();
   calcPintar();
 });
 
@@ -142,9 +101,6 @@ function abrirCalculadora() {
   fondo.classList.remove('oculto');
   vent.classList.remove('oculto');
   calcPintar();
-  // Los sobres pueden traer cuentas de otro día (o de otro equipo, por el sync):
-  // que el marcador salga siempre con el número al día.
-  if (typeof sobresPintar === 'function') sobresPintar();
 }
 
 function cerrarCalculadora() {
@@ -325,31 +281,6 @@ function calcIgual() {
 }
 
 // ----------------------------------------------------------------
-// Puentes hacia LOS SOBRES (src/sobres.js)
-//
-// Los sobres necesitan tres cosas de aquí: resolver la cuenta a medias, leer el
-// número de la pantalla y saber qué cuenta lo produjo. Se exponen como
-// funciones sueltas (no tocan el estado) para que sobres.js no ande metiendo
-// mano en las variables de la calculadora.
-// ----------------------------------------------------------------
-// Resuelve la operación que estuviera a medias, como si tocara "=". Así, quien
-// escribe 20.000 + 5.000 y toca un sobre, apunta 25.000 sin acordarse del "=".
-function calcResolverPendiente() {
-  if (calcOperador !== null && calcAcumulado !== null) calcIgual();
-}
-
-// El número que se está viendo en la pantalla, como número.
-function calcValorPantalla() {
-  return calcANumero(calcEntrada);
-}
-
-// La cuenta que llevó a ese número ("1.200.000 ÷ 12"), o el número solo si no
-// hubo cuenta de por medio.
-function calcOperacionTexto() {
-  return calcExpresion || calcFormatear(calcEntrada);
-}
-
-// ----------------------------------------------------------------
 // Atajos de arriero
 // ----------------------------------------------------------------
 function calcAtajo(tipo) {
@@ -382,11 +313,7 @@ function calcAtajo(tipo) {
 function calcTeclaFisica(e) {
   if (!calcAbierta()) return;
 
-  // Escape cierra siempre, incluso escribiendo el nombre de la cuenta
   if (e.key === 'Escape') { e.preventDefault(); cerrarCalculadora(); return; }
-
-  // Si está escribiendo el nombre de la cuenta, el teclado es para el texto
-  if (document.activeElement && document.activeElement.id === 'calc-nombre') return;
 
   if (e.key >= '0' && e.key <= '9') { e.preventDefault(); calcMeterCaracter(e.key); return; }
 
@@ -401,212 +328,4 @@ function calcTeclaFisica(e) {
     case 'Delete':           e.preventDefault(); calcLimpiar(); break;
     case '%':                e.preventDefault(); calcPorcentaje(); break;
   }
-}
-
-// ----------------------------------------------------------------
-// LA CINTA (cuentas guardadas)
-// ----------------------------------------------------------------
-function calcCargarCinta() {
-  const almacen = calcAlmacen();
-  if (!almacen) { calcRenderCinta(); return; }
-  almacen.get([CALC_CINTA_KEY], function (data) {
-    calcCinta = (data && data[CALC_CINTA_KEY]) || [];
-    calcRenderCinta();
-  });
-}
-
-function calcPersistirCinta() {
-  const almacen = calcAlmacen();
-  if (!almacen) return;
-  const datos = {};
-  datos[CALC_CINTA_KEY] = calcCinta;
-  almacen.set(datos, function () {
-    // Si la cinta no cupo en el almacén (8 KB por dato en storage.sync), la
-    // recortamos a la mitad y volvemos a intentar. Los TOTALES de los sobres
-    // viven aparte, así que ningún peso se pierde por esto: solo se van los
-    // renglones más viejos del detalle.
-    const err = (typeof chrome !== 'undefined' && chrome.runtime) ? chrome.runtime.lastError : null;
-    if (!err) return;
-    if (calcCinta.length <= 10) return;
-    calcCinta = calcCinta.slice(0, Math.floor(calcCinta.length / 2));
-    const reintento = {};
-    reintento[CALC_CINTA_KEY] = calcCinta;
-    almacen.set(reintento);
-    calcRenderCinta();
-  });
-}
-
-// Mete un renglón nuevo en la cinta y devuelve su id (los sobres lo guardan
-// para poder deshacer). `datos` = { operacion, resultado, nombre, sobre?,
-// monto?, fecha? }: los tres últimos solo vienen cuando el renglón es un gasto
-// apuntado en un sobre.
-function calcCintaAgregar(datos) {
-  const id = 'cta_' + Date.now();
-  calcCinta.unshift(Object.assign({ id: id }, datos));
-
-  // Tope: nos quedamos con las más recientes
-  if (calcCinta.length > CALC_CINTA_MAX) calcCinta = calcCinta.slice(0, CALC_CINTA_MAX);
-
-  calcPersistirCinta();
-  calcRenderCinta();
-  calcGuinoCinta();
-  return id;
-}
-
-function calcGuardarEnCinta() {
-  const campoNombre = document.getElementById('calc-nombre');
-  const nombre = campoNombre ? campoNombre.value.trim() : '';
-
-  // Si no hizo ninguna cuenta, guardamos el número tal cual (también sirve
-  // para apuntar una cifra que no quiere olvidar).
-  calcCintaAgregar({
-    operacion: calcExpresion || calcFormatear(calcEntrada),
-    resultado: calcFormatear(calcEntrada),
-    nombre: nombre
-  });
-
-  if (campoNombre) campoNombre.value = '';
-}
-
-// Un guiño verde en el renglón que acaba de entrar.
-function calcGuinoCinta() {
-  const caja = document.getElementById('calc-cinta');
-  if (!(caja && caja.firstChild)) return;
-  caja.firstChild.classList.add('recien');
-  setTimeout(function () {
-    if (caja.firstChild) caja.firstChild.classList.remove('recien');
-  }, 900);
-}
-
-// Quitar un renglón. Si era un gasto de un sobre, la plata vuelve al sobre: es
-// el "me equivoqué" que hace que uno se atreva a apuntar rápido.
-// Devuelve true si de verdad había algo que quitar (el "deshacer" de los sobres
-// lo usa para no cantar victoria dos veces sobre el mismo renglón).
-function calcBorrarDeCinta(id) {
-  const fila = calcCinta.find(function (c) { return c.id === id; });
-  if (!fila) return false;
-
-  calcCinta = calcCinta.filter(function (c) { return c.id !== id; });
-  calcPersistirCinta();
-  calcRenderCinta();
-
-  if (fila.sobre && typeof sobresDevolver === 'function') {
-    sobresDevolver(fila.sobre, fila.monto);
-  }
-  return true;
-}
-
-// "Borrar todo" limpia el PAPEL, no los sobres: los totales de cada sobre son
-// otra cosa y no se tocan (si no, borrar el detalle le "devolvería" al usuario
-// una plata que ya se gastó).
-function calcVaciarCinta() {
-  if (!calcCinta.length) return;
-  if (!confirm('¿Borro todos los renglones de la cinta, mijo?\n\nLos totales de sus sobres NO se tocan.')) return;
-  calcCinta = [];
-  calcPersistirCinta();
-  calcRenderCinta();
-}
-
-// ----------------------------------------------------------------
-// La cinta se pliega (arranca cerrada)
-// Con los sobres arriba, la ventana quedó larga: el detalle solo se abre cuando
-// la persona quiere revisar. Se recuerda cómo la dejó.
-// ----------------------------------------------------------------
-function calcToggleCinta() {
-  const caja = document.getElementById('calc-cinta-caja');
-  if (!caja) return;
-  const abierta = caja.classList.toggle('abierta');
-  calcPintarCintaPlegada(abierta);
-
-  const almacen = calcAlmacen();
-  if (almacen) {
-    const datos = {};
-    datos[CALC_CINTA_ABIERTA_KEY] = abierta;
-    almacen.set(datos);
-  }
-}
-
-function calcPintarCintaPlegada(abierta) {
-  const caja = document.getElementById('calc-cinta-caja');
-  const btn = document.getElementById('calc-cinta-toggle');
-  if (caja) caja.classList.toggle('abierta', abierta);
-  if (btn) btn.setAttribute('aria-expanded', abierta ? 'true' : 'false');
-}
-
-// Tocar una cuenta guardada devuelve su resultado a la pantalla.
-function calcUsarDeCinta(c) {
-  calcEntrada = String(c.resultado).replace(/\./g, '');
-  calcAcumulado = null;
-  calcOperador = null;
-  calcExpresion = c.nombre || c.operacion;
-  calcReiniciar = true;
-  calcPintar();
-}
-
-function calcRenderCinta() {
-  const cont = document.getElementById('calc-cinta');
-  const vacia = document.getElementById('calc-cinta-vacia');
-  if (!cont) return;
-
-  cont.innerHTML = '';
-  if (vacia) vacia.style.display = calcCinta.length ? 'none' : 'block';
-
-  const limpiar = document.getElementById('calc-cinta-limpiar');
-  if (limpiar) limpiar.style.visibility = calcCinta.length ? 'visible' : 'hidden';
-
-  // El contador va en el título, así se sabe cuánto hay sin abrir la cinta.
-  const cuenta = document.getElementById('calc-cinta-cuenta');
-  if (cuenta) cuenta.textContent = calcCinta.length ? '(' + calcCinta.length + ')' : '';
-
-  calcCinta.forEach(function (c) {
-    const fila = document.createElement('div');
-    fila.className = 'calc-cinta-fila';
-
-    // Zona que se toca para reutilizar el resultado
-    const usar = document.createElement('button');
-    usar.type = 'button';
-    usar.className = 'calc-cinta-usar';
-    usar.title = 'Traer este resultado a la pantalla';
-
-    // Si el renglón salió de un sobre, se marca con su dibujito y su color: la
-    // cinta es el extracto de los sobres, no una lista de números sueltos.
-    const sobre = (c.sobre && typeof sobresInfo === 'function') ? sobresInfo(c.sobre) : null;
-    if (sobre) {
-      const chip = document.createElement('span');
-      chip.className = 'calc-cinta-sobre';
-      chip.style.setProperty('--sob-color', sobre.color);
-      chip.textContent = sobre.ico + ' ' + sobre.nombre;
-      usar.appendChild(chip);
-    }
-
-    if (c.nombre) {
-      const nom = document.createElement('span');
-      nom.className = 'calc-cinta-nombre';
-      nom.textContent = c.nombre;        // textContent = a prueba de HTML
-      usar.appendChild(nom);
-    }
-
-    const oper = document.createElement('span');
-    oper.className = 'calc-cinta-oper';
-    oper.textContent = c.operacion;
-    usar.appendChild(oper);
-
-    const res = document.createElement('span');
-    res.className = 'calc-cinta-res';
-    res.textContent = c.resultado;
-    usar.appendChild(res);
-
-    usar.addEventListener('click', function () { calcUsarDeCinta(c); });
-    fila.appendChild(usar);
-
-    const x = document.createElement('button');
-    x.type = 'button';
-    x.className = 'calc-cinta-x';
-    x.textContent = '✕';
-    x.title = 'Quitar de la cinta';
-    x.addEventListener('click', function () { calcBorrarDeCinta(c.id); });
-    fila.appendChild(x);
-
-    cont.appendChild(fila);
-  });
 }
