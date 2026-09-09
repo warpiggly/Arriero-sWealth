@@ -1462,12 +1462,22 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 
 /* --- 1. Qué es y cuánto cuesta --- */
 .rec-que-es { padding: 15px 0 13px; text-align: center; }
+/* El nombre NO va en la manuscrita (ScothBrace). Es el dato que la persona
+   vino a leer -- que es la cosa -- y con letra de adorno se lee con esfuerzo,
+   justo lo que no se le puede pedir a quien mira esto de lejos. Va en la letra
+   de la app, en negrita y grande: seria, de la casa, y se entiende de un golpe.
+
+   Se probo LemonMilk (la letra del logo) y se descarto: sus minusculas estan
+   dibujadas como MAYUSCULAS, y "MOTOBOMBA DE RIEGO PARA LA FINCA" en caja alta
+   se lee peor que en caja baja. Si algun dia se quiere ese aire de recibo de
+   tienda, hay que registrar la fuente primero -- no basta con nombrarla. */
 .rec-nombre {
-  margin: 0 0 4px;
-  font-family: 'ScothBrace', serif;
-  font-size: 1.78rem;
-  font-weight: normal;
-  line-height: 1.1;
+  margin: 0 0 6px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 1.52rem;
+  font-weight: bold;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
   color: var(--texto);
   text-wrap: balance;
   overflow-wrap: break-word;
@@ -1863,6 +1873,37 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 .rec-grupo-btn:hover { background: var(--verde-oscuro); }
 .rec-grupo-btn-cuantos { font-size: 0.78rem; font-weight: normal; opacity: 0.85; }
 .rec-grupos .ah-campo { background: #fff; }
+
+/* --- Bajar el recibo como imagen ---
+   Va perfilado (borde, sin relleno) y no verde como "Guardemelo": guardar en
+   la libreta es LA accion del recibo y no puede tener un gemelo que compita.
+   Esto es lo de despues -- ya tengo mi cuenta, ahora me la llevo. */
+.rec-descargar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 12px 0 0;
+  padding: 11px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: bold;
+  color: var(--marron);
+  background: transparent;
+  border: 1px solid rgba(122, 74, 34, 0.4);
+  border-bottom-width: 3px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.rec-descargar:hover { color: var(--texto); background: rgba(122, 74, 34, 0.08); }
+.rec-descargar:active { transform: translateY(1px); border-bottom-width: 2px; }
+.rec-descargar:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+/* Mientras se dibuja la imagen. Dura un parpadeo, pero si alguien le da dos
+   veces seguidas se bajarian dos archivos iguales. */
+.rec-descargar:disabled { opacity: 0.55; cursor: default; }
+.rec-descargar-ico { font-size: 1.05rem; line-height: 1; }
 
 /* --- El asa para voltear ---
    Dice QUÉ VA A PASAR, no es una flechita muda: si hay que explicarle a

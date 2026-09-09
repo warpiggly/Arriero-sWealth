@@ -334,6 +334,18 @@
                 </div>
               </div>
 
+              <!-- Bajar el recibo como imagen. Va SIEMPRE visible, no solo
+                   cuando la cuenta es nueva: lo primero que hace alguien con
+                   un recibo que le importa es mostrarselo a otro, y eso vale
+                   igual para uno que ya estaba apuntado en la libreta.
+                   NO dice "guardar" a proposito: en esta app "Guardemelo" ya
+                   significa apuntarlo en la libreta, y dos guardados
+                   distintos con el mismo nombre confunden a cualquiera. -->
+              <button type="button" id="rec-descargar" class="rec-descargar">
+                <span class="rec-descargar-ico" aria-hidden="true">&#8595;</span>
+                <span>Desc&#225;rguemelo como imagen</span>
+              </button>
+
               <!-- 7. Y de ultimo, voltear -->
               <button type="button" class="rec-voltear" data-voltear="1">
                 <span class="rec-flecha" aria-hidden="true">&#8634;</span>
@@ -784,6 +796,7 @@
   <script src="src/calculadora.js"></script>
   <!-- El recibo: lo unico de la vista de Ahorro que toca la pantalla. -->
   <script src="src/recibo.js"></script>
+  <script src="src/recibo-descargar.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
