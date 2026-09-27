@@ -1,8 +1,8 @@
 // =================================================================
 // ajustes.js — Lo que la app sabe de la persona
 //
-// UN SOLO DATO ES OBLIGATORIO: cuánto gana, con su frecuencia. Todo lo demás
-// es opcional (docs/modulo-ahorro/README.md, punto 3).
+// UN SOLO DATO ES OBLIGATORIO: cuánto gana al mes. Todo lo demás es opcional
+// (docs/modulo-ahorro/README.md, punto 3).
 //
 // POR QUÉ ESTO NO VA EN INDEXEDDB: es poquita cosa (unos números) y va mejor en
 // chrome.storage.sync, que además lo lleva de un computador a otro de la misma
@@ -24,54 +24,65 @@
 
 const AJUSTES_KEY = 'ajustesArriero';
 
-// Cada cuánto le entra la plata, y cuántos de esos periodos caben en un mes.
-// Sirve para llevar todo a "por mes" y poder comparar.
-const FRECUENCIAS = {
-  dia:      { rotulo: 'cada día',      alMes: 30 },
-  semana:   { rotulo: 'cada semana',   alMes: 52 / 12 },
-  quincena: { rotulo: 'cada quincena', alMes: 2 },
-  mes:      { rotulo: 'cada mes',      alMes: 1 }
-};
+// TODO VA POR MES — decidido el 24 de septiembre de 2026. Antes se escogía
+// día / semana / quincena / mes, y eso obligaba a la persona a pensar en
+// periodos. Ahora escribe lo que gana al mes, como lo anotaría en el cuaderno.
 
-// Los renglones del prellenado, en el orden en que se muestran.
+// LO NECESARIO: los renglones fijos de la hoja, en el orden en que se ven.
+// `ayuda` es lo que sale al pasar el mouse o tocar el dibujito: quien no sepa
+// qué va en "Servicios" no tiene por qué adivinarlo.
 //
-// `resta` dice qué le hace cada uno a la cuenta (README, punto 3.4):
-//   true  -> es un gasto: se resta
-//   false -> NO es un gasto
-// El colchón se resta de lo disponible (se aparta) pero no se gasta: se guarda
-// y se protege. El renglón de "ahorros" es el camino corto: si la persona lo
-// llena, ese número manda sobre toda la cuenta.
-const RENGLONES = [
-  { clave: 'casa',             rotulo: 'Gastos de la casa',     resta: true },
-  { clave: 'movilidad',        rotulo: 'Movilidad / transporte', resta: true },
-  { clave: 'ocio',             rotulo: 'Ocio',                   resta: true },
-  { clave: 'responsabilidades', rotulo: 'Responsabilidades',     resta: true },
-  { clave: 'ahorros',          rotulo: 'Lo que ya aparta',       resta: false },
-  { clave: 'colchon',          rotulo: 'Colchón (la reserva)',   resta: false }
+// "ahorro" va en la lista pero NO es un gasto: no suma al total de lo
+// necesario ni al porcentaje gastado (se guarda, no se gasta). Se compara
+// contra el 10 % de la regla.
+const NECESARIOS = [
+  { clave: 'mercado',    rotulo: 'Mercado',     ayuda: 'La comida y las cosas de la casa: arroz, carne, jabón, papel…' },
+  { clave: 'casa',       rotulo: 'Casa',        ayuda: 'El arriendo o la cuota de la casa.' },
+  { clave: 'servicios',  rotulo: 'Servicios',   ayuda: 'Luz, agua, gas, internet y teléfono fijo.' },
+  { clave: 'transporte', rotulo: 'Transporte',  ayuda: 'Bus, taxi, gasolina o pasajes para moverse.' },
+  { clave: 'deudas',     rotulo: 'Deudas',      ayuda: 'Cuotas de préstamos, tarjetas o lo que le debe a alguien.' },
+  { clave: 'ahorro',     rotulo: 'Ahorro',      ayuda: 'Lo que aparta cada mes para guardar. No es un gasto: se guarda.', guarda: true }
+];
+
+// LOS OTROS GASTOS: lo que se tiene en una casa pero no es vital. Cuentan como
+// los "gustos" de la regla 70 / 30. La persona escoge de esta lista con el +;
+// "otra" deja escribir el nombre y se puede poner varias veces.
+const OTROS_CATALOGO = [
+  { clave: 'gym',       rotulo: 'Gimnasio',                 ayuda: 'La mensualidad del gimnasio o de algún deporte.' },
+  { clave: 'mascotas',  rotulo: 'Mascotas',                 ayuda: 'Comida, veterinario y cositas del perro o el gato.' },
+  { clave: 'celular',   rotulo: 'Plan de celular',          ayuda: 'Lo que paga cada mes por el celular.' },
+  { clave: 'tele',      rotulo: 'Televisión y plataformas', ayuda: 'Cable, Netflix, música y parecidos.' },
+  { clave: 'salidas',   rotulo: 'Salidas y comer afuera',   ayuda: 'Restaurantes, paseos, cine, rumba.' },
+  { clave: 'ropa',      rotulo: 'Ropa y zapatos',           ayuda: 'Lo que se va en ropa y zapatos.' },
+  { clave: 'cuidado',   rotulo: 'Peluquería y cuidado',     ayuda: 'Peluquería, barbería, uñas, cremas.' },
+  { clave: 'regalos',   rotulo: 'Regalos',                  ayuda: 'Cumpleaños, navidad y detalles.' },
+  { clave: 'estudio',   rotulo: 'Cursos y estudio',         ayuda: 'Cursos, útiles y matrículas.' },
+  { clave: 'familia',   rotulo: 'Ayuda a la familia',       ayuda: 'Lo que le manda a los papás, a los hijos o a quien ayude.' },
+  { clave: 'chance',    rotulo: 'Chance y lotería',         ayuda: 'Lo que juega en chance, lotería o rifas.' },
+  { clave: 'otra',      rotulo: 'Otra cosa',                ayuda: 'Algo que no está en la lista: usted le pone el nombre.' }
 ];
 
 function ajustesVacios() {
+  const gastos = {};
+  NECESARIOS.forEach(function (r) { gastos[r.clave] = 0; });
   return {
     ingreso: 0,
-    frecuencia: 'mes',
     // Todos en cero: la app no adivina.
-    gastos: {
-      casa: 0,
-      movilidad: 0,
-      ocio: 0,
-      responsabilidades: 0,
-      ahorros: 0,
-      colchon: 0
-    },
-    // El colchón es opcional: hay gente que lo maneja así y gente que no
-    // (README, punto 3.3). Se puede apagar.
-    usaColchon: true,
+    gastos: gastos,
+    // [{ clave, nombre, monto }]
+    otros: [],
+    // Las dos reglas son opcionales y solo MUESTRAN topes: no cambian ningún
+    // número que la persona escribió.
+    regla7030: false,
+    regla10: false,
+    // false -> el ahorro del mes es un colchón: no se toca.
+    // true  -> ese ahorro cuenta como plata para comprar cosas.
+    ahorroDisponible: false,
     // Lo que ya tiene juntado PARA COMPRAR. Es lo que hace que el veredicto
     // pueda decir "ya le alcanza" en vez de mandarla a esperar meses.
     ahorroJuntado: 0,
-    // Y lo que tiene juntado en el colchón, si lo sabe. Esta es la reserva:
-    // no se toca, y si para comprar algo hubiera que meterle mano, la app
-    // avisa (README, punto 3.3 y el veredicto del punto 7).
+    // Y lo que tiene juntado en el colchón. Esta es la reserva: no se toca, y
+    // si para comprar algo hubiera que meterle mano, la app avisa.
     colchonJuntado: 0
   };
 }
@@ -98,8 +109,9 @@ function ajustesNormalizar(crudo) {
   if (!crudo || typeof crudo !== 'object') return a;
 
   a.ingreso = ajustesNumero(crudo.ingreso);
-  a.frecuencia = FRECUENCIAS[crudo.frecuencia] ? crudo.frecuencia : 'mes';
-  a.usaColchon = crudo.usaColchon !== false;
+  a.regla7030 = crudo.regla7030 === true;
+  a.regla10 = crudo.regla10 === true;
+  a.ahorroDisponible = crudo.ahorroDisponible === true;
   a.ahorroJuntado = ajustesNumero(crudo.ahorroJuntado);
   a.colchonJuntado = ajustesNumero(crudo.colchonJuntado);
 
@@ -110,9 +122,19 @@ function ajustesNormalizar(crudo) {
   // meses por algo que ya podía comprar.
 
   const g = crudo.gastos || {};
-  RENGLONES.forEach(function (r) {
+  NECESARIOS.forEach(function (r) {
     a.gastos[r.clave] = ajustesNumero(g[r.clave]);
   });
+
+  a.otros = (Array.isArray(crudo.otros) ? crudo.otros : [])
+    .filter(function (o) { return o && typeof o.clave === 'string'; })
+    .map(function (o) {
+      return {
+        clave: o.clave.slice(0, 40),
+        nombre: String(o.nombre || '').slice(0, 40),
+        monto: ajustesNumero(o.monto)
+      };
+    });
 
   return a;
 }
@@ -247,21 +269,15 @@ function ajustesTieneIngreso(a) {
   return !!a && a.ingreso > 0;
 }
 
-// ¿Está todo el prellenado en cero? Si sí, la pantalla tiene que avisar que la
-// cuenta está asumiendo que no gasta nada (README, punto 3.2).
+// ¿Está todo en cero? Si sí, la pantalla tiene que avisar que la cuenta está
+// asumiendo que no gasta nada (README, punto 3.2).
 function ajustesFaltaElPrellenado(a) {
   if (!a) return true;
-  return RENGLONES.every(function (r) { return !a.gastos[r.clave]; });
+  const nada = NECESARIOS.every(function (r) { return !a.gastos[r.clave]; });
+  return nada && !(a.otros || []).some(function (o) { return o.monto > 0; });
 }
 
-// Lo que gana, llevado a "por mes", para poder comparar peras con peras.
-function ajustesIngresoMensual(a) {
-  if (!a) return 0;
-  const f = FRECUENCIAS[a.frecuencia] || FRECUENCIAS.mes;
-  return a.ingreso * f.alMes;
-}
-
-function ajustesRotuloFrecuencia(a) {
-  const f = FRECUENCIAS[(a && a.frecuencia) || 'mes'] || FRECUENCIAS.mes;
-  return f.rotulo;
+function ajustesDelCatalogo(clave) {
+  const base = String(clave || '').split('-')[0];
+  return OTROS_CATALOGO.find(function (c) { return c.clave === base; }) || null;
 }

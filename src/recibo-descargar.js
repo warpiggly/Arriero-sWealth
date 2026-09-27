@@ -351,7 +351,8 @@ function recdContenido(ctx, c, carriel, pinta) {
 // Un renglón de los del recibo: rótulo a la izquierda, línea de puntos que
 // estira, y la cifra pegada a la derecha. Es el gesto que hace que esto se lea
 // como una factura y no como una tabla.
-function recdRenglon(ctx, pinta, rot, valor, chiquito, fuerte, izq, der, y) {
+// `colorValor` es opcional: la hoja del mes lo usa para la tinta y los tonos.
+function recdRenglon(ctx, pinta, rot, valor, chiquito, fuerte, izq, der, y, colorValor) {
   const tamValor = fuerte ? 19 : 16;
   const base = y + tamValor;
 
@@ -376,7 +377,7 @@ function recdRenglon(ctx, pinta, rot, valor, chiquito, fuerte, izq, der, y) {
     recdPuntosCortos(ctx, finRot + 8, inicioValor - 8, base - 4);
 
     ctx.font = 'bold ' + tamValor + 'px LiberationSans';
-    ctx.fillStyle = fuerte ? RECD_COLOR.verdeOscuro : RECD_COLOR.texto;
+    ctx.fillStyle = colorValor || (fuerte ? RECD_COLOR.verdeOscuro : RECD_COLOR.texto);
     ctx.fillText(valor, inicioValor, base);
     if (chiquito) {
       ctx.font = '13px LiberationSans';

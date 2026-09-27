@@ -362,6 +362,9 @@ body::after {
 
 /* Reposo -> hover: la mula se yergue y la sombra se abre debajo (como si
    levantara el vuelo un poquito). Sin rebotes ni saltos. */
+/* button:hover (más específico) pintaba el botón entero de naranja: ese era el cuadro. */
+.bolita-mula:hover,
+.bolita-mula:active { background: none; transform: none; }
 .bolita-mula:hover { opacity: 0.95; }
 .bolita-mula:hover .bolita-medalla {
   transform: translateY(-3px) scale(1.05);
@@ -1182,51 +1185,305 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   text-decoration: underline;
 }
 
-.ah-yo-cuerpo {
-  padding: 12px 12px 13px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 12px;
+/* ---------- La hoja del mes (src/cuaderno.js) ----------
+   Una hoja de cuaderno escrita a lapicero y cortada como un recibo: el mismo
+   papel y la misma orilla arrancada del recibo de abajo (.rec-cara), con
+   renglones azules y las cifras en tinta. Nada de cajitas de formulario: la
+   persona "escribe sobre la línea", como lo haría en papel.
+
+   OJO: button:hover (arriba, en "Botones") pinta de naranja cualquier botón.
+   Por eso cada botón de aquí trae su propio :hover. */
+.ah-yo-cuerpo { padding: 0; }
+
+.cua-hoja { --cua-tinta: #1F3C88; }
+.cua-cuerpo { padding: 16px 16px calc(10px + var(--rec-desgarro)); }
+.cua-hoja .rec-cab {
+  padding-bottom: 8px;
+  border-bottom: 4px double rgba(192, 57, 43, 0.35);   /* el margen rojo del cuaderno */
 }
 
-/* Los gastos: plegados, porque nadie tiene que llenar un formulario antes de
-   recibir una respuesta. */
-.ah-gastos { margin-top: 12px; }
-.ah-gastos-tit {
+/* Lo de escribir: tinta azul, sin caja, sobre la línea */
+.cua-tinta {
+  font-family: 'LiberationSans', sans-serif;
+  font-weight: bold;
+  color: var(--cua-tinta);
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  border-radius: 0;
+  font-variant-numeric: tabular-nums;
+}
+.cua-tinta::placeholder { color: rgba(31, 60, 136, 0.3); font-weight: normal; }
+.cua-tinta:focus {
+  outline: none;
+  border-bottom-color: var(--dorado);
+  background: rgba(242, 178, 51, 0.13);
+}
+
+.cua-ingreso-rot {
+  display: block;
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 0.86rem;
+  color: rgba(43, 33, 24, 0.62);
+}
+.cua-ingreso {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px 0 6px;
+  text-align: center;
+  font-size: 1.95rem;
+  border-bottom: 2px solid rgba(31, 60, 136, 0.35);
+}
+
+/* Las dos reglas: interruptores con su casilla, como marcar con una X */
+.cua-reglas { display: flex; gap: 8px; margin: 13px 0 4px; }
+.cua-regla {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 6px;
+  font-size: 0.86rem;
+  color: var(--texto);
+  background: transparent;
+  border: 1.5px dashed rgba(43, 33, 24, 0.4);
+  border-radius: 8px;
+}
+.cua-regla:hover { background: rgba(43, 33, 24, 0.05); }
+.cua-regla.prendida {
+  color: var(--verde-oscuro);
+  background: rgba(46, 125, 64, 0.1);
+  border: 1.5px solid var(--verde);
+}
+.cua-regla:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+.cua-regla-caja {
+  position: relative;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+.cua-regla.prendida .cua-regla-caja::after {
+  content: '\2713';
+  position: absolute;
+  left: 1px;
+  top: -3px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.cua-topes {
+  margin: 6px 0 2px;
+  padding: 8px 10px;
+  background: rgba(46, 125, 64, 0.06);
+  border-left: 3px solid var(--verde);
+  border-radius: 0 6px 6px 0;
+}
+.cua-topes-tit,
+.cua-rotulo {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  font-weight: bold;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(43, 33, 24, 0.5);
+}
+.cua-rotulo { margin: 15px 0 0; }
+.cua-tope {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 8px;
+  padding: 3px 0;
+  font-size: 0.86rem;
+}
+.cua-tope-val { font-weight: bold; text-align: right; font-variant-numeric: tabular-nums; }
+.cua-tope-como { grid-column: 1 / -1; font-size: 0.77rem; font-weight: bold; }
+.cua-tope-como:empty { display: none; }
+
+/* Los renglones del cuaderno */
+.cua-fila {
   display: flex;
   align-items: center;
   gap: 7px;
-  width: 100%;
-  padding: 8px 10px;
-  font-family: 'LiberationSans', sans-serif;
-  font-size: 0.88rem;
+  min-height: 38px;
+  border-bottom: 1px solid rgba(31, 60, 136, 0.17);
+}
+.cua-fila-guarda { background: rgba(242, 178, 51, 0.09); }
+.cua-fila .rec-lin { min-width: 10px; margin: 0; }
+.cua-fila-rot {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.96rem;
+  color: var(--texto);
+}
+.cua-tag { margin-left: 5px; font-size: 0.7rem; font-style: italic; color: var(--marron); }
+.cua-monto {
+  flex-shrink: 0;
+  width: 108px;
+  padding: 5px 2px;
+  text-align: right;
+  font-size: 1.04rem;
+}
+.cua-nombre { flex: 0 1 45%; min-width: 0; padding: 5px 2px; font-size: 0.96rem; }
+
+/* El dibujito que explica: se pasa el mouse o se toca */
+.cua-ico {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--cua-tinta);
+  background: transparent;
+  border: 1.5px solid rgba(31, 60, 136, 0.35);
+  border-radius: 7px;
+  cursor: help;
+}
+.cua-ico:hover,
+.cua-ico[aria-expanded="true"] { background: rgba(31, 60, 136, 0.09); }
+.cua-ico:focus-visible { outline: 3px solid var(--dorado); outline-offset: 1px; }
+.cua-ico svg,
+.cua-opcion svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cua-ayuda {
+  margin: 4px 0 7px 37px;
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.35;
+  color: rgba(43, 33, 24, 0.78);
+}
+.cua-quitar {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: rgba(192, 57, 43, 0.85);
+  background: transparent;
+  border-radius: 50%;
+}
+.cua-quitar:hover { background: rgba(192, 57, 43, 0.1); }
+
+/* El + para anotar otro gasto, y su lista */
+.cua-mas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 9px 0 0;
+  padding: 5px 6px 5px 2px;
+  font-size: 0.92rem;
+  color: var(--cua-tinta);
+  background: transparent;
+}
+.cua-mas:hover { background: rgba(31, 60, 136, 0.07); }
+.cua-mas-signo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1.25rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+.cua-catalogo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 6px 0 2px;
+}
+.cua-opcion {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  font-size: 0.82rem;
+  font-weight: normal;
   text-align: left;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 9px;
+  color: var(--texto);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(31, 60, 136, 0.25);
+  border-radius: 8px;
+}
+.cua-opcion svg { width: 18px; height: 18px; stroke: var(--cua-tinta); }
+.cua-opcion:hover { background: rgba(31, 60, 136, 0.08); }
+
+/* La raya de la cuenta y los totales */
+.cua-raya { height: 0; margin: 14px 0 8px; border: 0; border-top: 2px solid var(--texto); }
+.cua-raya-doble { margin-top: 10px; border-top: 5px double var(--texto); }
+.cua-total { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+.cua-total .rec-lin { min-width: 10px; }
+.cua-total-rot { font-size: 1rem; font-weight: bold; white-space: nowrap; }
+.cua-total-val { font-size: 1.18rem; font-weight: bold; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cua-total-chico .cua-total-rot { font-size: 0.92rem; font-weight: normal; color: rgba(43, 33, 24, 0.72); }
+.cua-total-chico .cua-total-val { font-size: 0.98rem; }
+.cua-total-grande .cua-total-val { font-size: 1.45rem; }
+.cua-sello { margin: 0 0 4px; font-size: 0.8rem; font-weight: bold; line-height: 1.35; }
+.cua-sello:empty { display: none; }
+
+/* ¿Cómo voy? — plegado: solo quien quiera lo abre */
+.cua-como { margin: 8px 0 0; }
+.cua-como-tit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 6px;
+  font-size: 0.92rem;
+  text-align: left;
+  color: var(--marron);
+  background: transparent;
+  border: 1px dashed rgba(122, 74, 34, 0.35);
+  border-radius: 7px;
+}
+.cua-como-tit:hover { background: rgba(122, 74, 34, 0.07); }
+.cua-como-tit span:first-child { flex: 1; }
+.cua-como-tit .ah-flecha { border-top-color: var(--marron); }
+.cua-como:not(.cerrado) .cua-como-tit .ah-flecha { transform: rotate(180deg); }
+.cua-como.cerrado .cua-como-cuerpo { display: none; }
+.cua-como-cuerpo { padding: 6px 4px 2px; }
+.cua-como-renglon { margin: 3px 0; font-size: 0.9rem; line-height: 1.4; }
+
+/* El ahorro: ¿se toca o no? */
+.cua-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0 2px;
+  font-size: 0.92rem;
   cursor: pointer;
 }
-.ah-gastos-tit:hover { background: rgba(255, 255, 255, 0.18); }
-.ah-gastos-tit-txt { flex: 1; min-width: 0; }
-.ah-gastos-resumen {
-  flex-shrink: 0;
-  font-size: 0.76rem;
-  color: var(--dorado);
-}
-.ah-gastos:not(.cerrado) .ah-flecha { transform: rotate(180deg); }
+.cua-check input { flex-shrink: 0; width: 18px; height: 18px; margin: 0; accent-color: var(--verde); }
+.cua-nota { margin: 2px 0 8px 26px; font-size: 0.8rem; line-height: 1.35; color: rgba(43, 33, 24, 0.72); }
 
-.ah-gastos-cuerpo {
-  overflow: hidden;
-  max-height: 620px;
-  padding-top: 10px;
-  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+.cua-cerrar {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 11px;
+  font-size: 0.94rem;
+  background: var(--verde);
+  border-bottom: 3px solid var(--verde-oscuro);
+  border-radius: 10px;
 }
-.ah-gastos.cerrado .ah-gastos-cuerpo {
-  max-height: 0;
-  padding-top: 0;
-  opacity: 0;
-}
+.cua-cerrar:hover { background: var(--verde-oscuro); }
 
 /* ---------- 2. La pregunta ---------- */
 .ah-pregunta {
@@ -1238,6 +1495,36 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 /* Cuando el bloque de "lo que gana" está abierto (la primera vez), la
    pregunta se aparta: primero un dato, después la pregunta. */
 .ah-pregunta-lejos { opacity: 0.55; }
+
+/* El título es el botón que la pliega; el título se queda siempre a la vista. */
+.ah-pregunta-tit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border-radius: 8px;
+}
+.ah-pregunta-tit:hover,
+.ah-pregunta-tit:active { background: none; transform: none; }
+.ah-pregunta-tit:focus-visible { outline: 3px solid var(--dorado); outline-offset: 3px; }
+.ah-pregunta-tit .ah-tit { display: block; flex: 1; min-width: 0; margin: 0; }
+.ah-pregunta-tit .ah-flecha { border-top-width: 7px; border-left-width: 6px; border-right-width: 6px; }
+.ah-pregunta:not(.cerrado) .ah-pregunta-tit .ah-flecha { transform: rotate(180deg); }
+
+.ah-pregunta-cuerpo {
+  overflow: hidden;
+  max-height: 300px;
+  padding-top: 9px;
+  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+}
+.ah-pregunta.cerrado .ah-pregunta-cuerpo {
+  max-height: 0;
+  padding-top: 0;
+  opacity: 0;
+}
 
 /* ---------- 4. La libreta ---------- */
 .ah-libreta { margin-top: 13px; }
@@ -1407,7 +1694,8 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 
 /* La tira de la rasgadura. Dientes irregulares a propósito: un zigzag parejo
    se ve a máquina, y el papel se rompe torcido. */
-.rec-caja {
+.rec-caja,
+.cua-hoja {
   --rec-orilla: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='10'%20viewBox='0%200%20120%2010'%3E%3Cpath%20fill='%23000'%20d='M0%200H120V4.6L114%206.6L110%205.2L104%208L99%206.9L94.5%209.3L88.5%206.7L83%208.6L78.8%206.4L73%209.5L68%207.9L63.4%209.1L58.2%206.7L52.2%209.6L47.4%208.3L41.9%2010L37.5%207.4L31.3%209.7L26.3%207.8L22%2010L16.4%208.6L11.9%209.7L6%206.8L0%204.6Z'/%3E%3C/svg%3E");
 }
 /* Las dos caras ocupan el mismo sitio: la de atrás va encima, girada.
@@ -2045,7 +2333,7 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 @media (prefers-reduced-motion: reduce) {
   .rec-giro,
   .rec-flecha,
-  .ah-gastos-cuerpo,
+  .ah-pregunta-cuerpo,
   .ah-libreta-cuerpo,
   .ah-flecha { transition: none; }
 }

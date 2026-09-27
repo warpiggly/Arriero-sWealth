@@ -36,24 +36,17 @@ let recAvisoTimer = null;
 document.addEventListener('DOMContentLoaded', function () {
   if (!document.getElementById('ah-recibo')) return;   // no es esta vista
 
-  recArmarGastos();
   recCargarConsejos();
 
   // --- Lo que gana ---
   recAtar('ah-ingreso', 'input', function (el) {
     ajustesGuardar({ ingreso: recNumero(el.value) }).then(recTrasGuardar);
   });
-  recAtar('ah-frecuencia', 'change', function (el) {
-    ajustesGuardar({ frecuencia: el.value }).then(recTrasGuardar);
-  });
   recAtar('ah-juntado', 'input', function (el) {
     ajustesGuardar({ ahorroJuntado: recNumero(el.value) }).then(recTrasGuardar);
   });
   recAtar('ah-colchon-juntado', 'input', function (el) {
     ajustesGuardar({ colchonJuntado: recNumero(el.value) }).then(recTrasGuardar);
-  });
-  recAtar('ah-usa-colchon', 'change', function (el) {
-    ajustesGuardar({ usaColchon: el.checked }).then(recTrasGuardar);
   });
 
   // Los campos de dinero, con el mismo comportamiento del resto de la app
@@ -62,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Abrir y cerrar los pliegues ---
   recAtar('ah-yo-resumen', 'click', function () { recAbrirYo(true); });
-  recAtar('ah-gastos-tit', 'click', recPlegarGastos);
+  recAtar('ah-pregunta-tit', 'click', function () { recAbrirPregunta(); });
   recAtar('ah-libreta-tit', 'click', recPlegarLibreta);
 
   // --- La pregunta ---
@@ -77,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // cada vez que se pinta el recibo: si no, se le irian amontonando oyentes.
   recAtar('rec-aviso-btn', 'click', function () {
     recAbrirYo(true);
-    const g = document.getElementById('ah-gastos');
-    if (g) g.classList.remove('cerrado');
-    const primero = document.getElementById('ah-g-casa');
+    const primero = document.getElementById('cua-g-mercado');
     if (primero) primero.focus();
   });
 
@@ -190,39 +181,6 @@ function recAtarMoneda(el) {
 // ----------------------------------------------------------------
 // 1. Lo que usted gana
 // ----------------------------------------------------------------
-function recArmarGastos() {
-  const cont = document.getElementById('ah-gastos-campos');
-  if (!cont) return;
-
-  cont.innerHTML = '';
-  RENGLONES.forEach(function (r) {
-    const fila = document.createElement('div');
-    fila.className = 'ah-par ah-par-chico';
-
-    const rot = document.createElement('label');
-    rot.className = 'ah-rot';
-    rot.setAttribute('for', 'ah-g-' + r.clave);
-    rot.textContent = r.rotulo;
-    fila.appendChild(rot);
-
-    const campo = document.createElement('input');
-    campo.type = 'text';
-    campo.inputMode = 'numeric';
-    campo.className = 'ah-campo';
-    campo.id = 'ah-g-' + r.clave;
-    campo.placeholder = '0';
-    campo.addEventListener('input', function () {
-      const cambio = { gastos: {} };
-      cambio.gastos[r.clave] = recNumero(campo.value);
-      ajustesGuardar(cambio).then(recTrasGuardar);
-    });
-    recAtarMoneda(campo);
-    fila.appendChild(campo);
-
-    cont.appendChild(fila);
-  });
-}
-
 function recTrasGuardar(a) {
   recAjustes = a;
   recPintarYo();
@@ -253,15 +211,8 @@ function recPintarYo() {
   recPonerValor('ah-juntado', a.ahorroJuntado);
   recPonerValor('ah-colchon-juntado', a.colchonJuntado);
 
-  const frec = document.getElementById('ah-frecuencia');
-  if (frec) frec.value = a.frecuencia;
-
-  const usa = document.getElementById('ah-usa-colchon');
-  if (usa) usa.checked = a.usaColchon !== false;
-
-  RENGLONES.forEach(function (r) {
-    recPonerValor('ah-g-' + r.clave, a.gastos[r.clave]);
-  });
+  // La hoja del mes: renglones, reglas y totales (src/cuaderno.js)
+  if (typeof cuaPintar === 'function') cuaPintar(a);
 
   const cap = ahorroCapacidad(a);
 
@@ -271,18 +222,9 @@ function recPintarYo() {
     if (!ajustesTieneIngreso(a)) {
       txt.textContent = 'Todavía no me ha dicho cuánto gana';
     } else {
-      txt.textContent = 'Gana ' + recPlata(a.ingreso) + ' ' +
-                        ajustesRotuloFrecuencia(a) + ' · puede guardar ' +
-                        recPlata(cap.alMes) + ' al mes';
+      txt.textContent = 'Gana ' + recPlata(a.ingreso) + ' al mes · puede guardar ' +
+                        recPlata(Math.max(0, cap.alMes)) + ' al mes';
     }
-  }
-
-  // El resumencito de los gastos, para no tener que abrirlos solo por mirar
-  const gr = document.getElementById('ah-gastos-resumen');
-  if (gr) {
-    gr.textContent = cap.faltaPrellenado
-      ? 'sin llenar'
-      : recPlata(cap.gastosAlMes + cap.colchonAlMes) + ' al mes';
   }
 
   // La cabecera de la app: el número grande de arriba
@@ -323,11 +265,13 @@ function recPonerValor(id, valor) {
   el.value = valor ? Math.round(valor).toLocaleString('es-CO') : '';
 }
 
-function recPlegarGastos() {
-  const caja = document.getElementById('ah-gastos');
-  const btn = document.getElementById('ah-gastos-tit');
+// Sin argumento, alterna. Con true/false, la deja así.
+function recAbrirPregunta(abierta) {
+  const caja = document.getElementById('ah-pregunta');
+  const btn = document.getElementById('ah-pregunta-tit');
   if (!caja) return;
-  const cerrado = caja.classList.toggle('cerrado');
+  const cerrado = caja.classList.toggle('cerrado',
+    abierta === undefined ? undefined : !abierta);
   if (btn) btn.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
 }
 
@@ -352,6 +296,7 @@ function recRevisarCapturado() {
     if (!cap || !cap.precio) return;
 
     recCapturado = cap;
+    recAbrirPregunta(true);
 
     const precio = document.getElementById('ah-precio');
     const nombre = document.getElementById('ah-nombre');

@@ -146,62 +146,122 @@
           <span class="ah-yo-resumen-cambiar">cambiar</span>
         </button>
 
+        <!-- LA HOJA DEL MES (24 sep 2026, cuaderno de David). Se lee como
+             una hoja de cuaderno escrita con lapicero y cortada como un
+             recibo: arriba lo que gana, en renglones lo que gasta, abajo la
+             raya y los totales. Los renglones los arma src/cuaderno.js. -->
         <div id="ah-yo-cuerpo" class="ah-yo-cuerpo">
-          <h3 class="ah-tit">&#191;Cu&#225;nto gana, mijo?</h3>
-          <p class="ah-guia">Con este solo dato ya le hago la cuenta.</p>
+          <div class="cua-hoja rec-cara">
+            <div class="cua-cuerpo">
 
-          <div class="ah-par">
-            <input type="text" inputmode="numeric" id="ah-ingreso"
-                   class="ah-campo ah-campo-grande" placeholder="1.200.000"
-                   aria-label="Cu&#225;nto gana">
-            <select id="ah-frecuencia" class="ah-campo" aria-label="Cada cu&#225;nto">
-              <option value="dia">cada d&#237;a</option>
-              <option value="semana">cada semana</option>
-              <option value="quincena">cada quincena</option>
-              <option value="mes" selected>cada mes</option>
-            </select>
-          </div>
-
-          <!-- Los gastos: TODO OPCIONAL y todo en cero. La app no adivina.
-               Va plegado porque nadie tiene que llenar un formulario antes de
-               recibir una respuesta. -->
-          <div id="ah-gastos" class="ah-gastos cerrado">
-            <button type="button" id="ah-gastos-tit" class="ah-gastos-tit"
-                    aria-expanded="false">
-              <span class="ah-gastos-tit-txt">&#191;En qu&#233; se le va la plata?</span>
-              <span id="ah-gastos-resumen" class="ah-gastos-resumen"></span>
-              <span class="ah-flecha" aria-hidden="true"></span>
-            </button>
-            <div class="ah-gastos-cuerpo">
-              <p class="ah-guia">
-                Nada de esto es obligatorio. Llene solo lo que quiera y la
-                cuenta le sale m&#225;s ajustada a su vida.
-              </p>
-              <!-- Los campos los arma recibo.js desde la lista RENGLONES -->
-              <div id="ah-gastos-campos"></div>
-
-              <div class="ah-par ah-par-chico">
-                <label class="ah-rot" for="ah-juntado">Ya tengo guardado</label>
-                <input type="text" inputmode="numeric" id="ah-juntado"
-                       class="ah-campo" placeholder="0">
+              <div class="rec-cab">
+                <p class="rec-marca">Arriero&rsquo;s Wealth</p>
+                <p class="rec-sub">&#191;cu&#225;nto gana, mijo?</p>
               </div>
-              <div class="ah-par ah-par-chico">
-                <label class="ah-rot" for="ah-colchon-juntado">Tengo de colch&#243;n</label>
-                <input type="text" inputmode="numeric" id="ah-colchon-juntado"
-                       class="ah-campo" placeholder="0">
+
+              <!-- Lo que gana: el unico dato obligatorio -->
+              <label class="cua-ingreso-rot" for="ah-ingreso">Lo que gano al mes</label>
+              <input type="text" inputmode="numeric" id="ah-ingreso"
+                     class="cua-tinta cua-ingreso" placeholder="$ 0" autocomplete="off">
+
+              <!-- Las dos reglas: se prenden y se apagan. Solo muestran topes -->
+              <div class="cua-reglas">
+                <button type="button" id="cua-regla7030" class="cua-regla" aria-pressed="false"
+                        title="Regla 70 / 30: con el 70 % de lo que gana cubre lo necesario (comida, casa, transporte, salud). El otro 30 % es para sus gustos.">
+                  <span class="cua-regla-caja" aria-hidden="true"></span>Regla 70 / 30
+                </button>
+                <button type="button" id="cua-regla10" class="cua-regla" aria-pressed="false"
+                        title="Ahorrar el 10 %: aparte la d&#233;cima parte de lo que gana para emergencias o metas, y no la toque. Con la 70 / 30 prendida, ese 10 % sale de los gustos.">
+                  <span class="cua-regla-caja" aria-hidden="true"></span>Ahorrar el 10 %
+                </button>
               </div>
-              <label class="ah-check">
-                <input type="checkbox" id="ah-usa-colchon" checked>
-                Yo manejo un colch&#243;n para emergencias
+              <div id="cua-topes" class="cua-topes oculto"></div>
+
+              <p class="cua-rotulo">Lo necesario</p>
+              <div id="cua-necesarios"></div>
+
+              <p id="cua-otros-rot" class="cua-rotulo oculto">Otros gastos</p>
+              <div id="cua-otros"></div>
+
+              <button type="button" id="cua-mas" class="cua-mas" aria-expanded="false">
+                <span class="cua-mas-signo" aria-hidden="true">+</span> Anotar otro gasto
+              </button>
+              <div id="cua-catalogo" class="cua-catalogo oculto"></div>
+
+              <!-- La raya de la cuenta -->
+              <hr class="cua-raya">
+
+              <div class="cua-total" id="cua-total-nec">
+                <span class="cua-total-rot">Total lo necesario</span>
+                <span class="rec-lin"></span>
+                <span class="cua-total-val" id="cua-total-nec-val"></span>
+              </div>
+              <p class="cua-sello" id="cua-total-nec-sello"></p>
+              <div class="cua-total cua-total-chico oculto" id="cua-total-otros">
+                <span class="cua-total-rot">Total otros gastos</span>
+                <span class="rec-lin"></span>
+                <span class="cua-total-val" id="cua-total-otros-val"></span>
+              </div>
+
+              <!-- Como voy: el resumen, solo si la persona lo quiere ver -->
+              <div id="cua-como" class="cua-como cerrado">
+                <button type="button" id="cua-como-tit" class="cua-como-tit" aria-expanded="false">
+                  <span>&#191;C&#243;mo voy, mijo?</span>
+                  <span class="ah-flecha" aria-hidden="true"></span>
+                </button>
+                <div class="cua-como-cuerpo" id="cua-como-cuerpo"></div>
+              </div>
+
+              <hr class="cua-raya cua-raya-doble">
+
+              <div class="cua-total cua-total-grande" id="cua-restante">
+                <span class="cua-total-rot">Total restante</span>
+                <span class="rec-lin"></span>
+                <span class="cua-total-val" id="cua-restante-val"></span>
+              </div>
+              <p class="cua-sello" id="cua-restante-sello"></p>
+
+              <label class="cua-check">
+                <input type="checkbox" id="cua-ahorro-disponible">
+                <span>Mi ahorro lo puedo usar para comprar cosas</span>
               </label>
+              <p class="cua-nota" id="cua-ahorro-nota"></p>
+
+              <!-- Lo que ya tiene juntado HOY: con esto el recibo puede decir
+                   "ya le alcanza" -->
+              <div class="cua-fila">
+                <label class="cua-fila-rot" for="ah-juntado">Ya tengo guardado</label>
+                <span class="rec-lin"></span>
+                <input type="text" inputmode="numeric" id="ah-juntado"
+                       class="cua-tinta cua-monto" placeholder="$ 0" autocomplete="off">
+              </div>
+              <div class="cua-fila">
+                <label class="cua-fila-rot" for="ah-colchon-juntado">Tengo de colch&#243;n</label>
+                <span class="rec-lin"></span>
+                <input type="text" inputmode="numeric" id="ah-colchon-juntado"
+                       class="cua-tinta cua-monto" placeholder="$ 0" autocomplete="off">
+              </div>
+
+              <button type="button" id="cua-descargar" class="rec-descargar">
+                <span class="rec-descargar-ico" aria-hidden="true">&#8595;</span>
+                <span>Desc&#225;rgueme la hoja como imagen</span>
+              </button>
+              <button type="button" id="cua-cerrar" class="cua-cerrar">Listo, guardar la hoja</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ============ 2. LA PREGUNTA ============ -->
-      <div id="ah-pregunta" class="ah-pregunta">
-        <h3 class="ah-tit">&#191;Cu&#225;ndo puedo comprarlo?</h3>
+      <!-- ============ 2. LA PREGUNTA ============
+           Plegable, pero el titulo nunca se va: arranca cerrada cada vez que
+           se abre la app. Se abre sola si llega un precio de clic derecho. -->
+      <div id="ah-pregunta" class="ah-pregunta cerrado">
+        <button type="button" id="ah-pregunta-tit" class="ah-pregunta-tit"
+                aria-expanded="false" aria-controls="ah-pregunta-cuerpo">
+          <span class="ah-tit">&#191;Cu&#225;ndo puedo comprarlo?</span>
+          <span class="ah-flecha" aria-hidden="true"></span>
+        </button>
+        <div id="ah-pregunta-cuerpo" class="ah-pregunta-cuerpo">
         <div class="ah-par">
           <input type="text" id="ah-nombre" class="ah-campo"
                  placeholder="&#191;Qu&#233; quiere?" aria-label="Qu&#233; quiere">
@@ -212,6 +272,7 @@
         <p class="ah-guia ah-guia-chica">
           O en cualquier p&#225;gina se&#241;ale el precio y haga clic derecho.
         </p>
+        </div>
       </div>
 
       <!-- ============ 3. EL RECIBO DE DOS CARAS ============
@@ -796,6 +857,7 @@
   <script src="src/calculadora.js"></script>
   <!-- El recibo: lo unico de la vista de Ahorro que toca la pantalla. -->
   <script src="src/recibo.js"></script>
+  <script src="src/cuaderno.js"></script>
   <script src="src/recibo-descargar.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>

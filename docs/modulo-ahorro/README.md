@@ -80,6 +80,32 @@ acostumbrada a verlo cuando llegue ese día.
 
 ## 3. Los datos de la persona
 
+> **Cambió el 24 de septiembre de 2026: "¿Cuánto gana, mijo?" ahora es la
+> hoja del mes** (`src/cuaderno.js`), una hoja de cuaderno escrita a lapicero y
+> cortada como recibo, que también se descarga como imagen. Lo de abajo sigue
+> valiendo en espíritu, pero donde choque, manda esto:
+>
+> | Antes | Ahora |
+> |---|---|
+> | Ingreso con frecuencia (día / semana / quincena / mes) | **Solo al mes** |
+> | Casa, movilidad, ocio, responsabilidades | **Lo necesario:** mercado, casa, servicios, transporte, deudas. Cada renglón trae un dibujito que explica qué va ahí |
+> | — | **Otros gastos** (el +): gimnasio, mascotas, celular… Son los "gustos" |
+> | "Lo que ya aparta" mandaba sobre la cuenta | **Ahorro** es un renglón más, pero **no es gasto**: no suma al total ni al porcentaje gastado |
+> | Colchón como renglón + casilla "manejo colchón" | Casilla **"mi ahorro lo puedo usar para comprar"**. Sin marcar, el ahorro del mes es colchón y no se toca |
+> | — | **Reglas 70 / 30 y 10 %**, opcionales. Solo muestran topes; las dos juntas quedan 70 / 20 / 10 |
+> | — | **Total lo necesario** en verde (< 70 % de lo que gana), naranja (70–80 %) o rojo (80 % o más), siempre con su frase |
+> | — | **"¿Cómo voy?"** plegado: % gastado, % que sobra y un consejo |
+>
+> La cuenta nueva (`ahorroHoja` y `ahorroCapacidad`, en `src/ahorro.js`):
+>
+> ```
+> restante            = lo que gana − lo necesario − otros gastos − ahorro
+> puede juntar al mes = restante + (ahorro, si marcó que lo puede usar)
+> ```
+>
+> "Ya tengo guardado" y "Tengo de colchón" se quedan al final de la hoja: con
+> ellos el recibo puede decir "ya le alcanza".
+
 ### 3.1 Lo obligatorio — cuánto gana
 
 Un solo dato, con su frecuencia:

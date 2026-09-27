@@ -52,49 +52,128 @@ const AHORRO_PERIODOS = {
 };
 
 // ----------------------------------------------------------------
-// 1. La cuenta base: ¿cuánto puede guardar?
+// 1. La hoja del mes: ¿cuánto gasta y cuánto le queda?
 // ----------------------------------------------------------------
 //
-// capacidad = lo que gana − los gastos − lo del colchón
+// Rehecha el 24 de septiembre de 2026 con el cuaderno de David:
 //
-// Con nombre propio (README, punto 3.4):
-//   · casa, movilidad, ocio, responsabilidades  -> se RESTAN, son gastos
-//   · colchón                                   -> se APARTA: sale de lo
-//     disponible, pero no se gasta; se guarda y se protege
-//   · "lo que ya aparta"                        -> NO se resta. Es el camino
-//     corto: si la persona lo llenó, ese número MANDA sobre toda la cuenta,
-//     porque ella sabe de su vida más que la app
+//   restante = lo que gana − lo necesario − los otros gastos − el ahorro
 //
-// Devuelve { alMes, ingresoAlMes, gastosAlMes, colchonAlMes, viene, faltaPrellenado }
-// donde `viene` es 'declarada' (la puso la persona) o 'calculada'.
-function ahorroCapacidad(ajustes) {
+//   · lo necesario (mercado, casa, servicios, transporte, deudas) -> se RESTA
+//   · los otros gastos (gym, mascotas… = los "gustos" del 70/30)   -> se RESTAN
+//   · el ahorro -> se APARTA. No es gasto: no entra al porcentaje gastado.
+//     Si la persona marca "mi ahorro lo puedo usar", esa plata vuelve a contar
+//     para comprar cosas; si no, es un colchón y no se toca.
+//
+// Los porcentajes van sobre lo que gana. Con ingreso 0 no hay porcentaje que
+// dar: van en null y la pantalla pone una raya.
+// En porcentajes enteros: 0,3 − 0,1 en decimales da 0,19999… y el tope salía
+// con centavos de más.
+const AHORRO_REGLA = { necesarios: 70, gustos: 30, ahorro: 10 };
+
+function ahorroHoja(ajustes) {
   const a = ajustes || {};
   const g = a.gastos || {};
-  const porMes = (AHORRO_PERIODOS[a.frecuencia] || AHORRO_PERIODOS.mes).alMes;
+  const ingreso = Math.max(0, a.ingreso || 0);
 
-  const ingresoAlMes = (a.ingreso || 0) * porMes;
+  const necesarios = ['mercado', 'casa', 'servicios', 'transporte', 'deudas']
+    .reduce(function (t, k) { return t + (g[k] || 0); }, 0);
+  const otros = (a.otros || []).reduce(function (t, o) { return t + (o.monto || 0); }, 0);
+  const ahorro = g.ahorro || 0;
+  const gastado = necesarios + otros;
+  const restante = ingreso - gastado - ahorro;
 
-  const gastosAlMes = ((g.casa || 0) + (g.movilidad || 0) +
-                       (g.ocio || 0) + (g.responsabilidades || 0)) * porMes;
-
-  const colchonAlMes = (a.usaColchon === false ? 0 : (g.colchon || 0)) * porMes;
-
-  const declarada = (g.ahorros || 0) * porMes;
-
-  // Todo el prellenado en cero: la cuenta va a asumir que puede guardar TODO
-  // lo que gana. Es verdad aritméticamente y mentira en la vida real, así que
-  // la pantalla tiene que avisarlo (README, punto 3.2). Aquí solo se marca.
-  const faltaPrellenado = !gastosAlMes && !colchonAlMes && !declarada;
-
-  const calculada = ingresoAlMes - gastosAlMes - colchonAlMes;
+  const pct = function (n) { return ingreso > 0 ? n / ingreso * 100 : null; };
+  const pctNecesarios = pct(necesarios);
+  const pctRestante = pct(restante);
 
   return {
-    alMes: declarada > 0 ? declarada : calculada,
-    ingresoAlMes: ingresoAlMes,
-    gastosAlMes: gastosAlMes,
-    colchonAlMes: colchonAlMes,
-    viene: declarada > 0 ? 'declarada' : 'calculada',
-    faltaPrellenado: faltaPrellenado
+    ingreso: ingreso,
+    necesarios: necesarios,
+    otros: otros,
+    ahorro: ahorro,
+    gastado: gastado,
+    restante: restante,
+    pctNecesarios: pctNecesarios,
+    pctOtros: pct(otros),
+    pctAhorro: pct(ahorro),
+    pctGastado: pct(gastado),
+    pctRestante: pctRestante,
+    // El color de lo necesario: < 70 % bien · 70–80 % ojo · 80 % o más, no.
+    tonoNecesarios: pctNecesarios === null ? 'nada'
+      : pctNecesarios < 70 ? 'bien' : pctNecesarios < 80 ? 'ojo' : 'no',
+    tonoRestante: ingreso <= 0 && !gastado ? 'nada'
+      : restante > 0 ? 'bien' : restante === 0 ? 'ojo' : 'no',
+    reglas: ahorroTopes(a, ingreso, necesarios, otros, ahorro),
+    consejo: ahorroConsejoDeLaHoja(ingreso, necesarios, otros, ahorro, restante,
+                                   ajustesFaltaElPrellenado(a))
+  };
+}
+
+// Lo que le toca según las reglas que tenga prendidas. Solo MUESTRA topes: no
+// cambia ningún número de la persona. Con las dos juntas, el 10 % del ahorro
+// sale de los gustos: 70 / 20 / 10.
+function ahorroTopes(a, ingreso, necesarios, otros, ahorro) {
+  const lista = [];
+  const tope = function (pct) { return Math.round(ingreso * pct / 100); };
+  if (a.regla7030) {
+    const pGustos = a.regla10 ? AHORRO_REGLA.gustos - AHORRO_REGLA.ahorro : AHORRO_REGLA.gustos;
+    lista.push({ que: 'necesarios', rotulo: 'Lo necesario', pct: AHORRO_REGLA.necesarios,
+                 tope: tope(AHORRO_REGLA.necesarios), lleva: necesarios, esTecho: true });
+    lista.push({ que: 'gustos', rotulo: 'Sus gustos', pct: pGustos,
+                 tope: tope(pGustos), lleva: otros, esTecho: true });
+  }
+  if (a.regla10) {
+    lista.push({ que: 'ahorro', rotulo: 'Para guardar', pct: AHORRO_REGLA.ahorro,
+                 tope: tope(AHORRO_REGLA.ahorro), lleva: ahorro, esTecho: false });
+  }
+  // esTecho: el tope es "hasta" (no pasarse). El ahorro es "por lo menos".
+  lista.forEach(function (r) {
+    r.diferencia = r.esTecho ? r.tope - r.lleva : r.lleva - r.tope;
+    r.cumple = ingreso > 0 && r.diferencia >= 0;
+  });
+  return lista;
+}
+
+function ahorroConsejoDeLaHoja(ingreso, necesarios, otros, ahorro, restante, vacio) {
+  if (ingreso <= 0) return 'Cuando me diga cuánto gana al mes, le digo cómo va.';
+  if (vacio) return 'Anote en qué se le va la plata y le digo cómo va, mijo.';
+  if (restante < 0) {
+    return otros > 0
+      ? 'Está gastando más de lo que gana. Empiece por los otros gastos: ahí es donde más fácil se recorta.'
+      : 'Está gastando más de lo que gana. Mire las deudas y los servicios: son los que más se pueden bajar.';
+  }
+  const pNec = necesarios / ingreso;
+  if (pNec >= 0.8) return 'Lo necesario se le lleva casi todo. Mire si alguna deuda o servicio se puede bajar.';
+  if (pNec >= 0.7) return 'Va justo, mijo. Un recorte chiquito en los otros gastos le da aire.';
+  if (ahorro < ingreso * AHORRO_REGLA.ahorro / 100) {
+    return 'Va bien. Si puede, aparte el 10 % de lo que gana: poquito a poco se vuelve su colchón.';
+  }
+  return 'Va muy bien, mijo. Siga así y no le meta mano a lo que guarda.';
+}
+
+// ----------------------------------------------------------------
+// 1b. La cuenta base: ¿cuánto puede juntar al mes para comprar?
+// ----------------------------------------------------------------
+//
+// Es lo que le sobra de la hoja, más el ahorro si la persona dijo que lo puede
+// usar. Si no, el ahorro va al colchón y no cuenta.
+//
+// Devuelve { alMes, ingresoAlMes, gastosAlMes, colchonAlMes, faltaPrellenado }
+function ahorroCapacidad(ajustes) {
+  const a = ajustes || {};
+  const h = ahorroHoja(a);
+  const disponible = a.ahorroDisponible === true;
+
+  return {
+    alMes: h.restante + (disponible ? h.ahorro : 0),
+    ingresoAlMes: h.ingreso,
+    gastosAlMes: h.gastado,
+    colchonAlMes: disponible ? 0 : h.ahorro,
+    // Todo en cero: la cuenta va a asumir que puede guardar TODO lo que gana.
+    // Es verdad aritméticamente y mentira en la vida real, así que la pantalla
+    // tiene que avisarlo (README, punto 3.2). Aquí solo se marca.
+    faltaPrellenado: ajustesFaltaElPrellenado(a)
   };
 }
 
@@ -103,7 +182,7 @@ function ahorroJuntado(ajustes) {
   const a = ajustes || {};
   return {
     paraComprar: a.ahorroJuntado || 0,
-    colchon: a.usaColchon === false ? 0 : (a.colchonJuntado || 0)
+    colchon: a.colchonJuntado || 0
   };
 }
 
@@ -400,7 +479,7 @@ function ahorroCuentaUnitaria(item, ajustes) {
     cuandoEnPalabras: ahorroPlazoEnPalabras(cuando.meses),
     fecha: ahorroFechaTexto(cuando.meses),
     veredicto: veredicto,
-    loQuePesa: ahorroLoQuePesa(precio, cap.alMes, ajustes && ajustes.frecuencia),
+    loQuePesa: ahorroLoQuePesa(precio, cap.alMes, 'mes'),
     plazos: ahorroTodosLosPlazos(precio, cap.alMes, jun.paraComprar),
     // La pantalla usa esto para poner el aviso de "estoy contando con que todo
     // lo que gana lo puede guardar".
@@ -442,7 +521,7 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
       mesesEnPalabras: ahorroPlazoEnPalabras(c.meses),
       // Cuánto pesa dentro del grupo, dicho en palabras y no en porcentaje
       pesaEnElGrupo: ahorroParteDelGrupo(precio, total),
-      loQuePesa: ahorroLoQuePesa(precio, cap.alMes, ajustes && ajustes.frecuencia)
+      loQuePesa: ahorroLoQuePesa(precio, cap.alMes, 'mes')
     };
   });
 
@@ -478,7 +557,7 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
     cuandoEnPalabras: ahorroPlazoEnPalabras(cuando.meses),
     fecha: ahorroFechaTexto(cuando.meses),
     veredicto: veredicto,
-    loQuePesa: ahorroLoQuePesa(total, cap.alMes, ajustes && ajustes.frecuencia),
+    loQuePesa: ahorroLoQuePesa(total, cap.alMes, 'mes'),
     plazos: ahorroTodosLosPlazos(total, cap.alMes, jun.paraComprar),
     porDondeArrancar: porDondeArrancar,
     avisoPrellenado: cap.faltaPrellenado
