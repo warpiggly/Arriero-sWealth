@@ -82,9 +82,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const cerrado = caja.classList.toggle('cerrado');
     el.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
   });
-  cuaAtar('cua-cerrar', 'click', function () {
-    ajustesEscribirYa();
-    recAbrirYo(false);
+  ['cua-cerrar', 'cua-x'].forEach(function (id) {
+    cuaAtar(id, 'click', function () {
+      ajustesEscribirYa();
+      recAbrirYo(false);
+    });
   });
   cuaAtar('cua-descargar', 'click', cuaDescargar);
 });

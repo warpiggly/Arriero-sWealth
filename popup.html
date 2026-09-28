@@ -96,9 +96,11 @@
        COMO SE LEE ESTA VISTA, DE ARRIBA ABAJO
          1. lo que usted gana ....... el unico dato obligatorio. Se pliega a un
                                       renglon en cuanto esta puesto
-         2. la pregunta ............. que quiere y cuanto cuesta
+         2. la pregunta ............. que quiere y cuanto cuesta. Siempre
+                                      abierta, con su boton "Hagame la cuenta"
          3. EL RECIBO DE DOS CARAS .. la respuesta. Se voltea para corregir
          4. la libreta .............. lo apuntado; se toca y sale su recibo
+         5. la calculadora .......... al fondo, discreta
 
        LAS DOS COSAS QUE LA APP NO INVENTA
        No hay metaforas nuevas: se apoya en la calculadora (el gesto de
@@ -113,24 +115,6 @@
 
     <div id="panel-metas" class="master-contenido cerrado">
 
-      <!-- El boton de la calculadora SE QUEDA (README.md, punto 2: "La
-           calculadora es el caso especial"). Su ventana funciona como una
-           calculadora de siempre y no esta conectada a nada: no apunta, no
-           guarda, no reparte. Sigue aqui, en su lugar de siempre, para que la
-           gente ya este acostumbrada a verlo el dia que se le de su uso
-           creativo. Donde va a vivir de aqui en adelante es una duda abierta
-           de la Fase 4. -->
-      <button type="button" id="abrir-calculadora" class="btn-calculadora"
-              title="Sacar la calculadora">
-        <svg class="ico-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="4" y="2.5" width="16" height="19" rx="2.5"/>
-          <rect x="7.2" y="5.5" width="9.6" height="4" rx="1"/>
-          <path d="M8.2 13.2h0M12 13.2h0M15.8 13.2h0M8.2 17.4h0M12 17.4h0M15.8 17.4h0"/>
-        </svg>
-        <span class="btn-calc-txt">Saque la calculadora</span>
-      </button>
-
       <!-- ============ 1. LO QUE USTED GANA ============
            El unico dato obligatorio (README, punto 3.1). Arranca ABIERTO la
            primera vez, porque sin esto no hay cuenta que hacer; en cuanto
@@ -143,7 +127,7 @@
         <button type="button" id="ah-yo-resumen" class="ah-yo-resumen oculto"
                 aria-expanded="false">
           <span id="ah-yo-resumen-txt" class="ah-yo-resumen-txt"></span>
-          <span class="ah-yo-resumen-cambiar">cambiar</span>
+          <span class="ah-yo-resumen-cambiar"><span aria-hidden="true">&#9998;</span> Cambiar</span>
         </button>
 
         <!-- LA HOJA DEL MES (24 sep 2026, cuaderno de David). Se lee como
@@ -152,6 +136,10 @@
              raya y los totales. Los renglones los arma src/cuaderno.js. -->
         <div id="ah-yo-cuerpo" class="ah-yo-cuerpo">
           <div class="cua-hoja rec-cara">
+            <!-- La misma equis del recibo: cierra y guarda, igual que el
+                 boton "Listo" de abajo. -->
+            <button type="button" id="cua-x" class="rec-cerrar"
+                    title="Cerrar la hoja" aria-label="Cerrar la hoja">&#10005;</button>
             <div class="cua-cuerpo">
 
               <div class="rec-cab">
@@ -253,26 +241,37 @@
       </div>
 
       <!-- ============ 2. LA PREGUNTA ============
-           Plegable, pero el titulo nunca se va: arranca cerrada cada vez que
-           se abre la app. Se abre sola si llega un precio de clic derecho. -->
-      <div id="ah-pregunta" class="ah-pregunta cerrado">
-        <button type="button" id="ah-pregunta-tit" class="ah-pregunta-tit"
-                aria-expanded="false" aria-controls="ah-pregunta-cuerpo">
-          <span class="ah-tit">&#191;Cu&#225;ndo puedo comprarlo?</span>
-          <span class="ah-flecha" aria-hidden="true"></span>
+           Siempre abierta: una pregunta plegada con una flechita no la abre
+           nadie. Cada campo lleva su etiqueta ENCIMA y no solo el texto de
+           muestra adentro, que se borra al escribir y deja a la persona sin
+           saber que le estaban pidiendo. El recibo sale al tocar "Hagame la
+           cuenta" (o Enter): apretar un boton da la confianza de haber
+           pedido la respuesta. Si llega un precio de clic derecho, sale solo. -->
+      <div id="ah-pregunta" class="ah-pregunta">
+        <h3 class="ah-tit ah-pregunta-tit">&#191;Quiere comprar algo?</h3>
+
+        <label for="ah-nombre" class="ah-etiqueta">&#191;Qu&#233; es?</label>
+        <input type="text" id="ah-nombre" class="ah-campo"
+               placeholder="Por ejemplo: una nevera" autocomplete="off">
+
+        <label for="ah-precio" class="ah-etiqueta">&#191;Cu&#225;nto cuesta?</label>
+        <input type="text" inputmode="numeric" id="ah-precio"
+               class="ah-campo ah-campo-grande" placeholder="$ 0" autocomplete="off">
+
+        <button type="button" id="ah-hacer-cuenta" class="ah-hacer-cuenta">
+          H&#225;game la cuenta
         </button>
-        <div id="ah-pregunta-cuerpo" class="ah-pregunta-cuerpo">
-        <div class="ah-par">
-          <input type="text" id="ah-nombre" class="ah-campo"
-                 placeholder="&#191;Qu&#233; quiere?" aria-label="Qu&#233; quiere">
-          <input type="text" inputmode="numeric" id="ah-precio"
-                 class="ah-campo ah-campo-grande" placeholder="&#191;Cu&#225;nto cuesta?"
-                 aria-label="Cu&#225;nto cuesta">
-        </div>
-        <p class="ah-guia ah-guia-chica">
-          O en cualquier p&#225;gina se&#241;ale el precio y haga clic derecho.
+
+        <p class="ah-pista">
+          <svg class="ah-pista-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <rect x="6" y="2.5" width="12" height="19" rx="6"/>
+            <path d="M12 2.5v7M6 9.5h12"/>
+            <path d="M12 2.5a6 6 0 0 1 6 6v1h-6z" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>&#191;Lo vio en internet? Se&#241;ale el precio con el mouse y
+          haga <strong>clic derecho</strong>.</span>
         </p>
-        </div>
       </div>
 
       <!-- ============ 3. EL RECIBO DE DOS CARAS ============
@@ -282,6 +281,10 @@
            nombres -- solo las filas de ESTE recibo, no la libreta entera.
            Lo pinta src/recibo.js -->
       <div id="ah-recibo" class="rec-caja oculto">
+        <!-- Cerrar. Va FUERA del giro para quedar en la misma esquina por
+             las dos caras. Tambien cierra con la tecla Esc. -->
+        <button type="button" id="rec-cerrar" class="rec-cerrar"
+                title="Cerrar el recibo" aria-label="Cerrar el recibo">&#10005;</button>
         <div class="rec-giro">
 
           <!-- ---------- CARA DE ADELANTE ---------- -->
@@ -407,6 +410,13 @@
                 <span>Desc&#225;rguemelo como imagen</span>
               </button>
 
+              <!-- Borrar vive aqui y no en la libreta: una equis en cada
+                   renglon se tocaba sin querer. Solo sale para cosas sueltas,
+                   y el aviso trae "Deshacer". -->
+              <button type="button" id="rec-quitar" class="rec-quitar oculto">
+                Ya no lo quiero: quitarlo de la libreta
+              </button>
+
               <!-- 7. Y de ultimo, voltear -->
               <button type="button" class="rec-voltear" data-voltear="1">
                 <span class="rec-flecha" aria-hidden="true">&#8634;</span>
@@ -457,8 +467,8 @@
       <div id="ah-libreta" class="ah-libreta">
         <button type="button" id="ah-libreta-tit" class="ah-libreta-tit"
                 aria-expanded="true">
-          <span class="ah-libreta-tit-txt">Lo que tengo apuntado</span>
-          <span id="ah-libreta-cuenta" class="ah-libreta-cuenta"></span>
+          <span class="ah-libreta-tit-txt">Mis cosas apuntadas</span>
+          <span id="ah-libreta-cuenta" class="ah-libreta-cuenta oculto"></span>
           <span class="ah-flecha" aria-hidden="true"></span>
         </button>
         <div class="ah-libreta-cuerpo">
@@ -467,6 +477,23 @@
       </div>
 
       <p id="ah-aviso" class="ah-aviso oculto" role="status" aria-live="polite"></p>
+
+      <!-- El boton de la calculadora SE QUEDA (README.md, punto 2: "La
+           calculadora es el caso especial"): su ventana es una calculadora de
+           siempre y no esta conectada a nada. Vive al fondo y discreta desde
+           el 28 de septiembre de 2026 (decidido por David): de primera se
+           llevaba la primera mirada sin hacer nada de la cuenta. -->
+      <button type="button" id="abrir-calculadora" class="btn-calculadora"
+              title="Sacar la calculadora">
+        <svg class="ico-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="2.5" width="16" height="19" rx="2.5"/>
+          <rect x="7.2" y="5.5" width="9.6" height="4" rx="1"/>
+          <path d="M8.2 13.2h0M12 13.2h0M15.8 13.2h0M8.2 17.4h0M12 17.4h0M15.8 17.4h0"/>
+        </svg>
+        <span class="btn-calc-txt">Saque la calculadora</span>
+      </button>
+
 
     </div><!-- /#panel-metas -->
   </div>

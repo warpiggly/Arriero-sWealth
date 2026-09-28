@@ -55,12 +55,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Abrir y cerrar los pliegues ---
   recAtar('ah-yo-resumen', 'click', function () { recAbrirYo(true); });
-  recAtar('ah-pregunta-tit', 'click', function () { recAbrirPregunta(); });
   recAtar('ah-libreta-tit', 'click', recPlegarLibreta);
 
   // --- La pregunta ---
-  recAtar('ah-nombre', 'input', recCalcularDeLaPregunta);
-  recAtar('ah-precio', 'input', recCalcularDeLaPregunta);
+  // El recibo sale con el botón. Ya afuera, sigue la escritura sin esperar.
+  recAtar('ah-nombre', 'input', recPreguntaCambio);
+  recAtar('ah-precio', 'input', recPreguntaCambio);
+  recAtar('ah-hacer-cuenta', 'click', recHacerLaCuenta);
+  ['ah-nombre', 'ah-precio'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); recHacerLaCuenta(); }
+    });
+  });
 
   // --- Los dos desplegables del recibo ---
   recAtar('rec-aviso-tit', 'click', function () { recPlegar('rec-aviso'); });
@@ -83,6 +90,12 @@ document.addEventListener('DOMContentLoaded', function () {
   recAtar('rec-g-suelto', 'click', recGuardarSuelto);
   recAtar('rec-g-grupo', 'click', recMostrarGrupos);
   recAtar('rec-g-dejar', 'click', recDejarloAsi);
+  recAtar('rec-quitar', 'click', recQuitarDeLaLibreta);
+  recAtar('rec-cerrar', 'click', recEsconderRecibo);
+  document.addEventListener('keydown', function (e) {
+    const caja = document.getElementById('ah-recibo');
+    if (e.key === 'Escape' && caja && !caja.classList.contains('oculto')) recEsconderRecibo();
+  });
   recAtar('rec-grupo-crear', 'click', function () {
     const el = document.getElementById('rec-grupo-nuevo');
     if (el && el.value.trim()) recGuardarEnGrupo(el.value.trim());
@@ -222,8 +235,8 @@ function recPintarYo() {
     if (!ajustesTieneIngreso(a)) {
       txt.textContent = 'Todavía no me ha dicho cuánto gana';
     } else {
-      txt.textContent = 'Gana ' + recPlata(a.ingreso) + ' al mes · puede guardar ' +
-                        recPlata(Math.max(0, cap.alMes)) + ' al mes';
+      // Lo que puede guardar no se repite: ya está grande en la cabecera.
+      txt.textContent = 'Usted gana ' + recPlata(a.ingreso) + ' al mes';
     }
   }
 
@@ -265,16 +278,6 @@ function recPonerValor(id, valor) {
   el.value = valor ? Math.round(valor).toLocaleString('es-CO') : '';
 }
 
-// Sin argumento, alterna. Con true/false, la deja así.
-function recAbrirPregunta(abierta) {
-  const caja = document.getElementById('ah-pregunta');
-  const btn = document.getElementById('ah-pregunta-tit');
-  if (!caja) return;
-  const cerrado = caja.classList.toggle('cerrado',
-    abierta === undefined ? undefined : !abierta);
-  if (btn) btn.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
-}
-
 function recPlegarLibreta() {
   const caja = document.getElementById('ah-libreta');
   const btn = document.getElementById('ah-libreta-tit');
@@ -296,7 +299,6 @@ function recRevisarCapturado() {
     if (!cap || !cap.precio) return;
 
     recCapturado = cap;
-    recAbrirPregunta(true);
 
     const precio = document.getElementById('ah-precio');
     const nombre = document.getElementById('ah-nombre');
@@ -334,6 +336,21 @@ function recAbrirAhorroDeUna() {
 // ----------------------------------------------------------------
 // 3. Calcular y pintar el recibo
 // ----------------------------------------------------------------
+function recHacerLaCuenta() {
+  const campo = document.getElementById('ah-precio');
+  if (!recNumero(campo ? campo.value : 0)) {
+    recAvisar('Escríbame cuánto cuesta, mijo.');
+    if (campo) campo.focus();
+    return;
+  }
+  recCalcularDeLaPregunta();
+  recIrAlRecibo();
+}
+
+function recPreguntaCambio() {
+  if (recViendo && recViendo.tipo === 'nuevo') recCalcularDeLaPregunta();
+}
+
 function recCalcularDeLaPregunta() {
   const campoPrecio = document.getElementById('ah-precio');
   const campoNombre = document.getElementById('ah-nombre');
@@ -462,6 +479,8 @@ function recPintarRecibo() {
   const guardar = document.getElementById('rec-guardar');
   const grupos = document.getElementById('rec-grupos');
   if (guardar) guardar.classList.toggle('oculto', recViendo.tipo !== 'nuevo');
+  const quitar = document.getElementById('rec-quitar');
+  if (quitar) quitar.classList.toggle('oculto', recViendo.tipo !== 'suelto');
   if (grupos) grupos.classList.add('oculto');
 
   // --- La cara de atrás ---
@@ -1016,18 +1035,37 @@ function recLimpiarPregunta() {
   recPintarLibreta();
 }
 
-function recAvisar(texto) {
+function recAvisar(texto, accion) {
   const av = document.getElementById('ah-aviso');
   if (!av) return;
   av.textContent = texto;
+  if (accion) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ah-aviso-btn';
+    b.textContent = accion.texto;
+    b.addEventListener('click', function () {
+      av.classList.add('oculto');
+      accion.hacer();
+    });
+    av.appendChild(b);
+  }
   av.classList.remove('oculto');
   if (recAvisoTimer) clearTimeout(recAvisoTimer);
-  recAvisoTimer = setTimeout(function () { av.classList.add('oculto'); }, 4000);
+  recAvisoTimer = setTimeout(function () { av.classList.add('oculto'); },
+    accion ? 7000 : 4000);
 }
 
 // ----------------------------------------------------------------
 // 6. La libreta — el "Ver" del diagrama
 // ----------------------------------------------------------------
+//
+// Cada renglón responde solo la pregunta que la persona trae: ¿cuándo me
+// alcanza? Antes había que tocar la cosa y leer el recibo para saberlo; ahora
+// se lee de un vistazo, y el recibo queda para el que quiera el detalle.
+//
+// No hay equis de borrar en el renglón: un dedo tembloroso borraba sin querer.
+// Borrar vive dentro del recibo ("Ya no lo quiero"), y con deshacer.
 function recPintarLibreta() {
   const cont = document.getElementById('ah-libreta-lista');
   const cuenta = document.getElementById('ah-libreta-cuenta');
@@ -1035,13 +1073,15 @@ function recPintarLibreta() {
 
   Promise.all([dbTodosLosItems(), dbGrupos()]).then(function (r) {
     const items = r[0];
-    const grupos = r[1];
+    const grupos = r[1].slice();
     const sueltos = items.filter(function (i) { return i.grupo === '(suelto)'; });
+    const a = recAjustes || ajustesVacios();
+    const conIngreso = ajustesTieneIngreso(a);
 
     if (cuenta) {
-      cuenta.textContent = items.length
-        ? items.length + (items.length === 1 ? ' cosa' : ' cosas')
-        : '';
+      cuenta.textContent = items.length ? String(items.length) : '';
+      cuenta.classList.toggle('oculto', !items.length);
+      cuenta.title = items.length + (items.length === 1 ? ' cosa' : ' cosas');
     }
 
     cont.innerHTML = '';
@@ -1055,69 +1095,170 @@ function recPintarLibreta() {
       return;
     }
 
-    grupos.forEach(function (g) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'ah-lib-item ah-lib-grupo';
+    // Lo que alcanza primero va arriba: la libreta es una fila de espera.
+    grupos.sort(function (x, y) { return x.total - y.total; });
+    sueltos.sort(function (x, y) { return x.precio - y.precio; });
 
-      const nom = document.createElement('span');
-      nom.className = 'ah-lib-nombre';
-      nom.textContent = g.nombre;
-      b.appendChild(nom);
-
-      const det = document.createElement('span');
-      det.className = 'ah-lib-det';
-      det.textContent = g.cuantos + (g.cuantos === 1 ? ' cosa' : ' cosas');
-      b.appendChild(det);
-
-      const plata = document.createElement('span');
-      plata.className = 'ah-lib-plata';
-      plata.textContent = recPlata(g.total);
-      b.appendChild(plata);
-
-      b.addEventListener('click', function () { recVerGrupo(g.nombre); });
-      cont.appendChild(b);
-    });
-
-    sueltos.forEach(function (it) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'ah-lib-item';
-
-      const nom = document.createElement('span');
-      nom.className = 'ah-lib-nombre';
-      nom.textContent = it.nombre || '(sin nombre)';
-      b.appendChild(nom);
-
-      const plata = document.createElement('span');
-      plata.className = 'ah-lib-plata';
-      plata.textContent = recPlata(it.precio);
-      b.appendChild(plata);
-
-      const x = document.createElement('span');
-      x.className = 'ah-lib-x';
-      x.textContent = '✕';
-      x.title = 'Quitar de la libreta';
-      x.addEventListener('click', function (e) {
-        e.stopPropagation();
-        dbBorrarItem(it.id).then(function () {
-          if (recViendo && recViendo.tipo === 'suelto' && recViendo.id === it.id) {
-            recEsconderRecibo();
-          }
-          recPintarLibreta();
+    if (grupos.length) {
+      cont.appendChild(recLibTitulo('Grupos'));
+      grupos.forEach(function (g) {
+        const b = recLibRenglon({
+          grupo: true,
+          nombre: g.nombre,
+          sub: g.cuantos + (g.cuantos === 1 ? ' cosa' : ' cosas'),
+          precio: g.total,
+          plazo: conIngreso ? recLibPlazo(g.total, a) : null
         });
+        b.addEventListener('click', function () { recVerGrupo(g.nombre); });
+        cont.appendChild(b);
       });
-      b.appendChild(x);
+    }
 
-      b.addEventListener('click', function () { recVerItem(it.id); });
-      cont.appendChild(b);
-    });
+    if (sueltos.length) {
+      if (grupos.length) cont.appendChild(recLibTitulo('Sueltas'));
+      sueltos.forEach(function (it) {
+        const b = recLibRenglon({
+          nombre: recNombreCorto(it.nombre) || '(sin nombre)',
+          sub: recTienda(it.link),
+          precio: it.precio,
+          plazo: conIngreso ? recLibPlazo(it.precio, a) : null
+        });
+        b.title = it.nombre || '';
+        b.addEventListener('click', function () { recVerItem(it.id); });
+        cont.appendChild(b);
+      });
+    }
   }).catch(function (e) {
     cont.innerHTML = '';
     const p = document.createElement('p');
     p.className = 'ah-guia';
     p.textContent = 'No pude abrir la libreta: ' + e.message;
     cont.appendChild(p);
+  });
+}
+
+function recLibTitulo(texto) {
+  const h = document.createElement('p');
+  h.className = 'ah-lib-seccion';
+  h.textContent = texto;
+  return h;
+}
+
+// d = { grupo?, nombre, sub, precio, plazo: { tono, texto } | null }
+function recLibRenglon(d) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'ah-lib-item' + (d.grupo ? ' ah-lib-grupo' : '');
+
+  if (d.grupo) {
+    const ico = document.createElement('span');
+    ico.className = 'ah-lib-ico';
+    ico.setAttribute('aria-hidden', 'true');
+    b.appendChild(ico);
+  }
+
+  const izq = document.createElement('span');
+  izq.className = 'ah-lib-izq';
+
+  const nom = document.createElement('span');
+  nom.className = 'ah-lib-nombre';
+  nom.textContent = d.nombre;
+  izq.appendChild(nom);
+
+  if (d.sub) {
+    const sub = document.createElement('span');
+    sub.className = 'ah-lib-sub';
+    sub.textContent = d.sub;
+    izq.appendChild(sub);
+  }
+  b.appendChild(izq);
+
+  const der = document.createElement('span');
+  der.className = 'ah-lib-der';
+
+  const plata = document.createElement('span');
+  plata.className = 'ah-lib-plata';
+  plata.textContent = recPlata(d.precio);
+  der.appendChild(plata);
+
+  if (d.plazo) {
+    const pz = document.createElement('span');
+    pz.className = 'ah-lib-plazo ah-lib-plazo-' + d.plazo.tono;
+    pz.textContent = d.plazo.texto;
+    der.appendChild(pz);
+  }
+  b.appendChild(der);
+
+  const ir = document.createElement('span');
+  ir.className = 'ah-lib-ir';
+  ir.setAttribute('aria-hidden', 'true');
+  ir.textContent = '›';
+  b.appendChild(ir);
+
+  return b;
+}
+
+// La respuesta corta, en la misma voz del recibo.
+function recLibPlazo(precio, ajustes) {
+  const v = ahorroCuentaUnitaria({ precio: precio }, ajustes);
+  const c = v.cuando;
+  if (c.yaLoTiene) return { tono: 'bien', texto: 'Ya lo puede comprar' };
+  if (!c.alcanzable) return { tono: 'no', texto: 'Todavía no alcanza' };
+  const dicho = ahorroPlazoEnPalabras(c.meses);
+  return {
+    tono: v.veredicto.caso === 'lento' ? 'lento' : 'bien',
+    texto: dicho.charAt(0).toUpperCase() + dicho.slice(1)
+  };
+}
+
+// Los nombres que vienen de una tienda traen de todo: "Amazon.com: MARCA -
+// Reloj automático para hombre, correa de cuero, 42 mm...". En la libreta se
+// muestra hasta la primera coma y sin el nombre de la tienda. Lo guardado no
+// se toca: el recibo y la hoja siguen con el nombre entero.
+const REC_TIENDAS = /amazon|mercado ?libre|falabella|[eé]xito|alkosto|ktronix|temu|shein|aliexpress|walmart|ebay/i;
+
+function recNombreCorto(nombre) {
+  let n = String(nombre || '').trim();
+  n = n.replace(/^[\w-]+(\.[\w-]+)+\s*:\s*/, '');
+  n = n.split(/\s+[|:–—-]\s+/).filter(function (parte) {
+    return !REC_TIENDAS.test(parte) || parte.split(/\s+/).length > 3;
+  }).join(' - ');
+  return n.split(',')[0].trim();
+}
+
+function recTienda(link) {
+  if (!link) return '';
+  try {
+    const host = new URL(link).hostname.replace(/^www\./, '');
+    const m = host.match(REC_TIENDAS);
+    if (!m) return host;
+    const t = m[0].toLowerCase().replace(/\s/g, '');
+    if (t === 'mercadolibre') return 'Mercado Libre';
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  } catch (e) { return ''; }
+}
+
+// "Ya no lo quiero": se borra, y por unos segundos se puede echar para atrás.
+function recQuitarDeLaLibreta() {
+  if (!recViendo || recViendo.tipo !== 'suelto') return;
+  const id = recViendo.id;
+  dbItem(id).then(function (it) {
+    if (!it) return;
+    return dbBorrarItem(id).then(function () {
+      recEsconderRecibo();
+      recViendo = null;
+      recAhora = null;
+      recPintarLibreta();
+      recAvisar('Lo quité de la libreta.', {
+        texto: 'Deshacer',
+        hacer: function () {
+          dbGuardarItem(it).then(function () {
+            recAvisar('Listo, volvió a la libreta.');
+            recPintarLibreta();
+          });
+        }
+      });
+    });
   });
 }
 

@@ -1166,9 +1166,9 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 9px 11px;
+  padding: 9px 9px 9px 12px;
   font-family: 'LiberationSans', sans-serif;
-  font-size: 0.86rem;
+  font-size: 0.96rem;
   text-align: left;
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
@@ -1178,12 +1178,17 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .ah-yo-resumen:hover { background: rgba(255, 255, 255, 0.2); }
 .ah-yo-resumen-txt { flex: 1; min-width: 0; line-height: 1.35; }
+/* "Cambiar" es un botón que se ve como botón, no un enlace subrayado */
 .ah-yo-resumen-cambiar {
   flex-shrink: 0;
-  font-size: 0.78rem;
-  color: var(--dorado);
-  text-decoration: underline;
+  padding: 5px 12px;
+  font-size: 0.84rem;
+  color: var(--marron);
+  background: var(--crema);
+  border-bottom: 2px solid rgba(122, 74, 34, 0.35);
+  border-radius: 999px;
 }
+.ah-yo-resumen:hover .ah-yo-resumen-cambiar { background: #fff; }
 
 /* ---------- La hoja del mes (src/cuaderno.js) ----------
    Una hoja de cuaderno escrita a lapicero y cortada como un recibo: el mismo
@@ -1195,7 +1200,7 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
    Por eso cada botón de aquí trae su propio :hover. */
 .ah-yo-cuerpo { padding: 0; }
 
-.cua-hoja { --cua-tinta: #1F3C88; }
+.cua-hoja { position: relative; --cua-tinta: #1F3C88; }
 .cua-cuerpo { padding: 16px 16px calc(10px + var(--rec-desgarro)); }
 .cua-hoja .rec-cab {
   padding-bottom: 8px;
@@ -1496,44 +1501,57 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
    pregunta se aparta: primero un dato, después la pregunta. */
 .ah-pregunta-lejos { opacity: 0.55; }
 
-/* El título es el botón que la pliega; el título se queda siempre a la vista. */
-.ah-pregunta-tit {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 0;
-  text-align: left;
-  background: none;
-  border-radius: 8px;
-}
-.ah-pregunta-tit:hover,
-.ah-pregunta-tit:active { background: none; transform: none; }
-.ah-pregunta-tit:focus-visible { outline: 3px solid var(--dorado); outline-offset: 3px; }
-.ah-pregunta-tit .ah-tit { display: block; flex: 1; min-width: 0; margin: 0; }
-.ah-pregunta-tit .ah-flecha { border-top-width: 7px; border-left-width: 6px; border-right-width: 6px; }
-.ah-pregunta:not(.cerrado) .ah-pregunta-tit .ah-flecha { transform: rotate(180deg); }
+.ah-pregunta-tit { margin: 0 0 10px; }
 
-.ah-pregunta-cuerpo {
-  overflow: hidden;
-  max-height: 300px;
-  padding-top: 9px;
-  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+.ah-etiqueta {
+  display: block;
+  margin: 10px 0 5px;
+  font-size: 0.92rem;
+  font-weight: bold;
+  color: #fff;
 }
-.ah-pregunta.cerrado .ah-pregunta-cuerpo {
-  max-height: 0;
-  padding-top: 0;
-  opacity: 0;
+.ah-pregunta .ah-campo { display: block; width: 100%; box-sizing: border-box; }
+.ah-pregunta .ah-campo-grande { text-align: left; }
+
+/* El botón que la gente viene a apretar: dorado, como la caja de arriba. */
+.ah-hacer-cuenta {
+  display: block;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 13px 10px;
+  font-size: 1.08rem;
+  color: var(--texto);
+  background: var(--dorado);
+  border-bottom: 3px solid var(--dorado-osc);
+  border-radius: 12px;
 }
+.ah-hacer-cuenta:hover { background: #F7C24F; }
+.ah-hacer-cuenta:active { transform: translateY(2px); border-bottom-width: 1px; }
+.ah-hacer-cuenta:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.ah-pista {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 12px 0 0;
+  padding: 9px 10px;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+}
+.ah-pista strong { color: var(--dorado); }
+.ah-pista-ico { flex-shrink: 0; width: 20px; height: 20px; color: var(--dorado); }
 
 /* ---------- 4. La libreta ---------- */
 .ah-libreta { margin-top: 13px; }
 .ah-libreta-tit {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 12px;
   font-family: 'ScothBrace', serif;
   font-size: 1.02rem;
   text-align: left;
@@ -1545,35 +1563,62 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .ah-libreta-tit:hover { background: rgba(255, 255, 255, 0.18); }
 .ah-libreta-tit-txt { flex: 1; min-width: 0; }
-.ah-libreta-cuenta { flex-shrink: 0; font-size: 0.78rem; color: var(--dorado); }
+/* Cuántas cosas: una pepita con el número, no una frase en cursiva */
+.ah-libreta-cuenta {
+  flex-shrink: 0;
+  min-width: 26px;
+  padding: 3px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: bold;
+  text-align: center;
+  color: var(--texto);
+  background: var(--dorado);
+  border-radius: 999px;
+}
 .ah-libreta:not(.cerrado) .ah-flecha { transform: rotate(180deg); }
 
+/* Abre y cierra sin tope de alto: con max-height fijo, una libreta larga se
+   cortaba abajo sin avisar. */
 .ah-libreta-cuerpo {
-  overflow: hidden;
-  max-height: 400px;
-  padding-top: 8px;
-  transition: max-height 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
+  display: grid;
+  grid-template-rows: 1fr;
+  padding-top: 6px;
+  transition: grid-template-rows 0.28s ease, padding-top 0.28s ease, opacity 0.2s ease;
 }
+.ah-libreta-cuerpo > * { overflow: hidden; min-height: 0; }
 .ah-libreta.cerrado .ah-libreta-cuerpo {
-  max-height: 0;
+  grid-template-rows: 0fr;
   padding-top: 0;
   opacity: 0;
 }
 
+.ah-lib-seccion {
+  margin: 10px 3px 6px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.ah-lib-seccion:first-child { margin-top: 4px; }
+
 /* Cada cosa apuntada. Es un botón: se toca y sale SU recibo (el "Ver" del
-   diagrama). Bien alto, para poder apuntarle sin cuidado. */
+   diagrama). Bien alto, para poder apuntarle sin cuidado. Papel sólido, no
+   vidrio: sobre el paisaje la letra se perdía. */
 .ah-lib-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  margin-bottom: 5px;
-  padding: 11px 11px;
+  min-height: 58px;
+  margin-bottom: 7px;
+  padding: 10px 8px 10px 12px;
   font-family: 'LiberationSans', sans-serif;
   font-size: 0.94rem;
   text-align: left;
   color: var(--texto);
-  background: rgba(251, 245, 226, 0.94);
+  background: var(--crema);
   border: 1px solid rgba(122, 74, 34, 0.3);
   border-bottom-width: 3px;
   border-radius: 10px;
@@ -1582,33 +1627,109 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 }
 .ah-lib-item:hover { background: #fff; }
 .ah-lib-item:active { transform: translateY(1px); border-bottom-width: 2px; }
-.ah-lib-item:focus-visible { outline: 3px solid var(--dorado); outline-offset: 1px; }
+.ah-lib-item:focus-visible { outline: 3px solid var(--dorado); outline-offset: -3px; }
 
-.ah-lib-grupo {
-  background: rgba(46, 125, 64, 0.92);
-  border-color: rgba(20, 83, 45, 0.6);
-  color: #fff;
+/* El grupo se reconoce por la carpeta y la orilla verde, no por un color de
+   fondo distinto que nadie sabía leer. */
+.ah-lib-grupo { border-left: 5px solid var(--verde); }
+.ah-lib-ico {
+  position: relative;
+  flex-shrink: 0;
+  width: 24px;
+  height: 17px;
+  margin-top: 3px;
+  background: var(--dorado);
+  border-radius: 2px 4px 4px 4px;
+  box-shadow: inset 0 -2px 0 var(--dorado-osc);
 }
-.ah-lib-grupo:hover { background: var(--verde); }
+.ah-lib-ico::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 10px;
+  height: 5px;
+  background: var(--dorado-osc);
+  border-radius: 3px 3px 0 0;
+}
 
-.ah-lib-nombre {
+.ah-lib-izq {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
-.ah-lib-det { flex-shrink: 0; font-size: 0.78rem; opacity: 0.85; }
-.ah-lib-plata { flex-shrink: 0; font-weight: bold; white-space: nowrap; }
-.ah-lib-x {
+.ah-lib-nombre {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-weight: bold;
+  line-height: 1.25;
+}
+.ah-lib-sub { font-size: 0.78rem; color: var(--marron); }
+
+.ah-lib-der {
   flex-shrink: 0;
-  padding: 2px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+.ah-lib-plata { font-size: 1rem; font-weight: bold; white-space: nowrap; }
+
+/* La respuesta: ¿cuándo le alcanza? La frase manda; el color solo acompaña. */
+.ah-lib-plazo {
+  padding: 3px 9px;
+  font-size: 0.76rem;
+  font-weight: bold;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+.ah-lib-plazo-bien  { color: var(--verde-oscuro); background: #DCEFD8; }
+.ah-lib-plazo-lento { color: var(--marron);       background: #FBE7B9; }
+.ah-lib-plazo-no    { color: var(--terracota);    background: #F7D9D3; }
+
+.ah-lib-ir {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--marron);
+  opacity: 0.55;
+}
+
+/* El "Deshacer" del aviso */
+.ah-aviso-btn:hover { background: #fff; }
+.ah-aviso-btn {
+  margin-left: 10px;
+  padding: 4px 12px;
+  font: inherit;
+  font-weight: bold;
+  color: var(--verde-oscuro);
+  background: var(--crema);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* Borrar, dentro del recibo de una cosa suelta. Discreto: no es lo que uno
+   viene a hacer, pero se encuentra. */
+.rec-quitar {
+  display: block;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 10px 8px;
+  font-family: 'LiberationSans', sans-serif;
   font-size: 0.86rem;
   color: var(--terracota);
-  border-radius: 5px;
+  background: transparent;
+  border: 1px dashed rgba(192, 57, 43, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
 }
-.ah-lib-x:hover { color: #fff; background: var(--terracota); }
+.rec-quitar:hover { background: rgba(192, 57, 43, 0.08); }
+.rec-quitar:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
 /* El aviso de "quedó apuntado" */
 .ah-aviso {
@@ -1637,9 +1758,30 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
    =========================================================== */
 
 .rec-caja {
+  position: relative;
   margin: 13px 0 0;
   perspective: 1800px;
 }
+
+/* La equis de cerrar: grande para el dedo, en la esquina de siempre. */
+.rec-cerrar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 36px;
+  text-align: center;
+  color: var(--marron);
+  background: rgba(122, 74, 34, 0.1);
+  border: 1px solid rgba(122, 74, 34, 0.25);
+  border-radius: 50%;
+}
+.rec-cerrar:hover { color: #fff; background: var(--marron); }
+.rec-cerrar:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
 
 .rec-giro {
   position: relative;
@@ -2333,7 +2475,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 @media (prefers-reduced-motion: reduce) {
   .rec-giro,
   .rec-flecha,
-  .ah-pregunta-cuerpo,
   .ah-libreta-cuerpo,
   .ah-flecha { transition: none; }
 }
@@ -2365,17 +2506,15 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  width: 100%;
+  gap: 8px;
   box-sizing: border-box;
-  margin: 0 0 12px;
-  padding: 10px 14px;
-  background: linear-gradient(178deg, #FFFDF5 0%, #F4EAD0 100%);
-  color: var(--marron);
-  border: 1px solid rgba(122, 74, 34, 0.3);
-  border-bottom: 3px solid rgba(122, 74, 34, 0.45);
-  border-radius: 12px;
-  font-size: 0.9rem;
+  margin: 18px auto 0;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  font-size: 0.84rem;
   transition: background 0.24s ease, color 0.24s ease,
               border-color 0.24s ease, transform 0.12s ease;
 }
@@ -2389,7 +2528,7 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   outline: 2px solid rgba(242, 178, 51, 0.95);
   outline-offset: 2px;
 }
-.ico-calc { width: 20px; height: 20px; flex-shrink: 0; }
+.ico-calc { width: 18px; height: 18px; flex-shrink: 0; }
 .btn-calc-txt { font-family: 'LiberationSans', sans-serif; font-weight: bold; }
 
 /* ===========================================================
