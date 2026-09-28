@@ -83,7 +83,11 @@ function ajustesVacios() {
     ahorroJuntado: 0,
     // Y lo que tiene juntado en el colchón. Esta es la reserva: no se toca, y
     // si para comprar algo hubiera que meterle mano, la app avisa.
-    colchonJuntado: 0
+    colchonJuntado: 0,
+    // Lo que suman este mes las cuotas de sus créditos. No lo escribe la
+    // persona: lo pone src/credito.js cada vez que algo cambia en un crédito,
+    // y se suma solo a lo necesario de la hoja del mes.
+    cuotasCreditos: 0
   };
 }
 
@@ -114,6 +118,7 @@ function ajustesNormalizar(crudo) {
   a.ahorroDisponible = crudo.ahorroDisponible === true;
   a.ahorroJuntado = ajustesNumero(crudo.ahorroJuntado);
   a.colchonJuntado = ajustesNumero(crudo.colchonJuntado);
+  a.cuotasCreditos = ajustesNumero(crudo.cuotasCreditos);
 
   // OJO AL AÑADIR CAMPOS NUEVOS: si un campo no se copia aquí, se pierde en
   // silencio en cada guardado, porque ajustesGuardar() pasa por esta función.
@@ -274,7 +279,7 @@ function ajustesTieneIngreso(a) {
 function ajustesFaltaElPrellenado(a) {
   if (!a) return true;
   const nada = NECESARIOS.every(function (r) { return !a.gastos[r.clave]; });
-  return nada && !(a.otros || []).some(function (o) { return o.monto > 0; });
+  return nada && !a.cuotasCreditos && !(a.otros || []).some(function (o) { return o.monto > 0; });
 }
 
 function ajustesDelCatalogo(clave) {

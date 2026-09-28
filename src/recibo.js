@@ -130,6 +130,7 @@ function ajustesCambiaronDeAfuera(a) {
   recPintarYo();
   if (recAhora) recRehacerLoQueSeEstaViendo();
   recPintarLibreta();
+  if (typeof credRepintar === 'function') credRepintar();
 }
 
 function recAtar(id, evento, hacer) {
@@ -173,6 +174,7 @@ function recRefrescar() {
   recPintarYo();
   if (recAhora) recRehacerLoQueSeEstaViendo();
   recPintarLibreta();
+  if (typeof credRepintar === 'function') credRepintar();
 }
 
 // Los campos de dinero se comportan como en TODA la app: al enfocarlos se ven
@@ -200,6 +202,7 @@ function recTrasGuardar(a) {
   // La cuenta cambia con los datos: que el recibo se repinte solo.
   if (recAhora) recRehacerLoQueSeEstaViendo();
   recPintarLibreta();
+  if (typeof credRepintar === 'function') credRepintar();
 }
 
 function recAbrirYo(abierto) {
@@ -416,6 +419,8 @@ function recPintarRecibo() {
     });
   }
 
+  // Un recibo a la vez: si estaba abierto el de un crédito, se va.
+  if (typeof credEsconder === 'function') credEsconder();
   caja.classList.remove('oculto');
   // Siempre se muestra por adelante: nadie quiere volver a un recibo volteado.
   caja.classList.remove('volteado');
@@ -1071,21 +1076,31 @@ function recPintarLibreta() {
   const cuenta = document.getElementById('ah-libreta-cuenta');
   if (!cont) return;
 
-  Promise.all([dbTodosLosItems(), dbGrupos()]).then(function (r) {
+  const creditos = typeof dbTodosLosCreditos === 'function'
+    ? dbTodosLosCreditos() : Promise.resolve([]);
+
+  Promise.all([dbTodosLosItems(), dbGrupos(), creditos]).then(function (r) {
     const items = r[0];
     const grupos = r[1].slice();
+    const deudas = r[2] || [];
     const sueltos = items.filter(function (i) { return i.grupo === '(suelto)'; });
     const a = recAjustes || ajustesVacios();
     const conIngreso = ajustesTieneIngreso(a);
 
+    const total = items.length + deudas.length;
     if (cuenta) {
-      cuenta.textContent = items.length ? String(items.length) : '';
-      cuenta.classList.toggle('oculto', !items.length);
-      cuenta.title = items.length + (items.length === 1 ? ' cosa' : ' cosas');
+      cuenta.textContent = total ? String(total) : '';
+      cuenta.classList.toggle('oculto', !total);
+      cuenta.title = total + (total === 1 ? ' cosa' : ' cosas');
     }
 
     cont.innerHTML = '';
 
+    // Las deudas van de primeras: una cuota que se vence pesa más que algo
+    // que se quiere comprar (src/credito.js).
+    if (typeof credPintarEnLibreta === 'function') credPintarEnLibreta(cont, deudas);
+
+    if (!items.length && deudas.length) return;
     if (!items.length) {
       const p = document.createElement('p');
       p.className = 'ah-guia';
@@ -1115,7 +1130,7 @@ function recPintarLibreta() {
     }
 
     if (sueltos.length) {
-      if (grupos.length) cont.appendChild(recLibTitulo('Sueltas'));
+      if (grupos.length || deudas.length) cont.appendChild(recLibTitulo('Sueltas'));
       sueltos.forEach(function (it) {
         const b = recLibRenglon({
           nombre: recNombreCorto(it.nombre) || '(sin nombre)',

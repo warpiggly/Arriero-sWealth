@@ -124,7 +124,28 @@ function cuaArmar() {
       rot.appendChild(tag);
     }
     cuaRenglon(cont, r.clave, r.rotulo, r.ayuda, rot, campo, null, r.guarda);
+    if (r.clave === 'deudas') cuaRenglonCreditos(cont);
   });
+}
+
+// Las cuotas de los créditos apuntados. No se escriben: se suman solas
+// (src/credito.js), y por eso van en letra de imprenta y no en tinta.
+function cuaRenglonCreditos(cont) {
+  const valor = document.createElement('span');
+  valor.className = 'cua-monto cua-solo';
+  valor.id = 'cua-creditos';
+  const rot = document.createElement('span');
+  rot.className = 'cua-fila-rot';
+  rot.textContent = 'Créditos';
+  const tag = document.createElement('small');
+  tag.className = 'cua-tag';
+  tag.textContent = 'se suman solos';
+  rot.appendChild(tag);
+  const fila = cuaRenglon(cont, 'deudas', 'Créditos',
+    'La cuota de este mes de los créditos que tiene apuntados. Se suma sola: ' +
+    'no la escriba otra vez en Deudas.', rot, valor, null, false);
+  fila.id = 'cua-creditos-fila';
+  fila.classList.add('cua-fila-creditos', 'oculto');
 }
 
 function cuaCampoMonto(id, rotulo) {
@@ -173,6 +194,7 @@ function cuaRenglon(cont, clave, rotulo, ayuda, rot, campo, quitar, guarda) {
 
   cont.appendChild(fila);
   cont.appendChild(nota);
+  return fila;
 }
 
 function cuaSvg(clave) {
@@ -303,6 +325,9 @@ function cuaAgregar(c) {
 function cuaPintar(a) {
   cuaArmar();
   NECESARIOS.forEach(function (r) { recPonerValor('cua-g-' + r.clave, a.gastos[r.clave]); });
+  const filaCred = document.getElementById('cua-creditos-fila');
+  if (filaCred) filaCred.classList.toggle('oculto', !a.cuotasCreditos);
+  cuaTexto('cua-creditos', recPlata(a.cuotasCreditos || 0));
   cuaPintarOtros(a);
 
   const h = ahorroHoja(a);
@@ -594,6 +619,11 @@ function cuaContenido(ctx, a, carriel, pinta) {
     cuaIcono(ctx, pinta, r.clave, izq, y);
     y = recdRenglon(ctx, pinta, r.rotulo + (r.guarda ? ' (se guarda)' : ''),
                     recPlata(a.gastos[r.clave] || 0), '', false, conIcono, der, y, CUA_TINTA);
+    if (r.clave === 'deudas' && a.cuotasCreditos) {
+      cuaIcono(ctx, pinta, 'deudas', izq, y);
+      y = recdRenglon(ctx, pinta, 'Créditos (se suman solos)', recPlata(a.cuotasCreditos),
+                      '', false, conIcono, der, y);
+    }
   });
 
   if (a.otros.length) {

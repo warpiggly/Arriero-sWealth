@@ -76,8 +76,9 @@ function ahorroHoja(ajustes) {
   const g = a.gastos || {};
   const ingreso = Math.max(0, a.ingreso || 0);
 
+  // Las cuotas de los créditos entran solas con las deudas (src/credito.js).
   const necesarios = ['mercado', 'casa', 'servicios', 'transporte', 'deudas']
-    .reduce(function (t, k) { return t + (g[k] || 0); }, 0);
+    .reduce(function (t, k) { return t + (g[k] || 0); }, 0) + (a.cuotasCreditos || 0);
   const otros = (a.otros || []).reduce(function (t, o) { return t + (o.monto || 0); }, 0);
   const ahorro = g.ahorro || 0;
   const gastado = necesarios + otros;

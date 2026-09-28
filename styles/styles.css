@@ -2915,3 +2915,256 @@ html.calc-abierta body { overflow: hidden; }
 @media (min-width: 640px) {
   body.modo-hoja .cotizar-rejilla { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ===========================================================
+   EL CRÉDITO (src/credito.js)
+   La otra pestaña de la pregunta y su recibo. Usa el mismo papel del recibo
+   de comprar (rec-*); aquí solo va lo que el crédito trae de más.
+   OJO: button:hover pinta de naranja cualquier botón, así que cada botón de
+   aquí trae su propio :hover.
+   =========================================================== */
+
+/* --- Las dos pestañas: con palabra y dibujito, no una flecha muda --- */
+.ah-pestanas {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 13px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+}
+.ah-pest {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px 6px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.88);
+  background: transparent;
+  border-radius: 999px;
+  transition: background 0.18s, color 0.18s;
+}
+.ah-pest:hover { background: rgba(255, 255, 255, 0.12); }
+.ah-pest.activa,
+.ah-pest.activa:hover { color: var(--texto); background: var(--crema); }
+.ah-pest:focus-visible { outline: 3px solid var(--dorado); outline-offset: 1px; }
+.ah-pest-ico { width: 19px; height: 19px; flex-shrink: 0; }
+
+/* La cara que entra, entra de lado: se ve que la tarjeta "pasó" */
+.ah-preg-cara { animation: ah-entra 0.26s ease; }
+@keyframes ah-entra {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ah-preg-cara { animation: none; }
+}
+
+.ah-par-cre { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ah-par-cre .ah-campo { display: block; width: 100%; box-sizing: border-box; }
+.ah-por-ciento { position: relative; }
+.ah-por-ciento .ah-campo { padding-right: 30px; }
+.ah-por-ciento span {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: var(--marron);
+  pointer-events: none;
+}
+
+/* La sugerencia de meses: sale sola mientras escribe */
+.ah-sugerencia {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(242, 178, 51, 0.18);
+  border-left: 4px solid var(--dorado);
+  border-radius: 9px;
+}
+.ah-sugerencia p { margin: 0; }
+.ah-sugerencia strong { color: var(--dorado); }
+.ah-sug-usar {
+  margin-top: 8px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  color: var(--texto);
+  background: var(--crema);
+  border-bottom: 2px solid rgba(122, 74, 34, 0.35);
+  border-radius: 999px;
+}
+.ah-sug-usar:hover { background: #fff; }
+
+/* --- El recibo del crédito --- */
+.cre-le-prestan {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(43, 33, 24, 0.5);
+}
+
+.cre-avance { padding: 12px 0 4px; }
+.cre-avance p { margin: 0; }
+.cre-avance-dice { font-size: 0.96rem; }
+.cre-avance .cre-avance-falta { margin-top: 6px; font-size: 0.82rem; color: rgba(43, 33, 24, 0.65); }
+.cre-barra {
+  height: 12px;
+  margin-top: 7px;
+  overflow: hidden;
+  background: rgba(122, 74, 34, 0.14);
+  border-radius: 999px;
+}
+.cre-barra span {
+  display: block;
+  height: 100%;
+  background: var(--verde);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.cre-mora {
+  margin: 10px 0 0;
+  padding: 10px 12px 10px 14px;
+  background: rgba(192, 57, 43, 0.09);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: 9px;
+}
+.cre-mora-tit { margin: 0 0 5px; font-weight: bold; color: #8E2018; }
+.cre-mora ul { margin: 0; padding-left: 18px; }
+.cre-mora li { margin: 4px 0; font-size: 0.9rem; line-height: 1.38; }
+
+/* Las cuotas */
+.cre-cuotas-caja { background: rgba(122, 74, 34, 0.07); }
+.cre-cuotas-cuerpo {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 0 10px 10px;
+}
+.cre-cuotas-caja.cerrado .cre-cuotas-cuerpo { display: none; }
+.cre-cuotas-guia { margin: 0 2px 8px; font-size: 0.8rem; line-height: 1.35; color: rgba(43, 33, 24, 0.65); }
+
+.cre-cuota {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+  padding: 7px 8px;
+  background: #fff;
+  border: 1px solid rgba(122, 74, 34, 0.2);
+  border-radius: 9px;
+}
+.cre-cuota-que { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.cre-cuota-que small { font-size: 0.78rem; color: rgba(43, 33, 24, 0.6); }
+.cre-cuota-plata {
+  flex-shrink: 0;
+  width: 108px;
+  padding: 7px 8px;
+  font-family: 'LiberationSans', sans-serif;
+  font-size: 0.94rem;
+  font-weight: bold;
+  text-align: right;
+  color: var(--texto);
+  background: #fff;
+  border: 1px solid rgba(46, 125, 64, 0.35);
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+.cre-cuota-plata:focus { outline: 0; box-shadow: 0 0 0 2px var(--verde); }
+
+/* Chulear: una caja grande, fácil de atinarle */
+.cre-chulo { position: relative; flex-shrink: 0; width: 30px; height: 30px; cursor: pointer; }
+.cre-chulo input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.cre-chulo-caja {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  border: 2px solid rgba(122, 74, 34, 0.45);
+  border-radius: 7px;
+}
+.cre-chulo input:checked + .cre-chulo-caja { background: var(--verde); border-color: var(--verde-oscuro); }
+.cre-chulo input:checked + .cre-chulo-caja::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 13px;
+  margin: 3px auto 0;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.cre-chulo input:focus-visible + .cre-chulo-caja { outline: 3px solid var(--dorado); outline-offset: 2px; }
+
+.cre-cuota-pagada { background: rgba(46, 125, 64, 0.08); border-color: rgba(46, 125, 64, 0.3); }
+.cre-cuota-pagada .cre-cuota-que strong {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: rgba(43, 33, 24, 0.55);
+}
+.cre-cuota-atrasada,
+.cre-cuota-corta { background: rgba(192, 57, 43, 0.08); border-color: rgba(192, 57, 43, 0.45); }
+.cre-cuota-atrasada .cre-cuota-que small,
+.cre-cuota-corta .cre-cuota-que small { color: #8E2018; font-weight: bold; }
+
+/* En mora: el papel entero se pone rojo, con una franja arriba */
+.cre-roja .rec-cara {
+  background:
+    linear-gradient(to top,
+      rgba(142, 32, 24, 0.16) 0,
+      rgba(142, 32, 24, 0.05) 7px,
+      rgba(142, 32, 24, 0) 19px),
+    #FCEDEA;
+  box-shadow:
+    inset 0 6px 0 var(--terracota),
+    0 10px 26px -12px rgba(0, 0, 0, 0.45),
+    0 2px 7px rgba(0, 0, 0, 0.26);
+}
+.cre-roja .rec-marca,
+.cre-roja .rec-precio,
+.cre-roja .rec-renglon-fuerte .rec-val { color: #8E2018; }
+.cre-roja .rec-puntos {
+  background: repeating-linear-gradient(to right,
+    rgba(142, 32, 24, 0.5) 0 3px, transparent 3px 7px);
+}
+
+/* --- La hoja de cuotas (cara de atrás) --- */
+.cre-atras-campos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.cre-atras-campos label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--marron);
+}
+.cre-atras-campos .rec-hoja-input { border-radius: 6px; font-weight: bold; }
+.cre-hoja th.cre-hoja-fecha { width: 108px; }
+.cre-hoja th.rec-hoja-plata { width: auto; }
+.cre-hoja th.cre-hoja-chulo,
+.cre-hoja td.cre-hoja-chulo { width: 36px; text-align: center; }
+.cre-hoja td.cre-hoja-fecha { padding: 6px 8px; font-size: 0.84rem; white-space: nowrap; }
+.cre-hoja td.cre-hoja-dato { padding: 6px 8px; font-size: 0.86rem; color: rgba(43, 33, 24, 0.75); }
+.cre-hoja td.cre-hoja-chulo input { width: 18px; height: 18px; margin: 0; cursor: pointer; }
+.cre-hoja-pagada td { background: rgba(46, 125, 64, 0.07); }
+.cre-hoja-mal td { background: rgba(192, 57, 43, 0.08); }
+
+/* --- En la libreta y en la hoja del mes --- */
+.ah-lib-deuda { border-left: 5px solid var(--terracota); }
+.cua-solo { color: rgba(43, 33, 24, 0.75); font-weight: bold; }

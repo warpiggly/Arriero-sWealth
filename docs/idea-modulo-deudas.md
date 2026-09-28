@@ -1,5 +1,13 @@
 # Idea rescatada — Módulo de Deudas
 
+> **Construido el 28 de septiembre de 2026** como la pestaña "Sacar un crédito"
+> de la vista de Ahorro: cuentas en [src/deudas.js](../src/deudas.js), cara en
+> [src/credito.js](../src/credito.js), guardado en el store `creditos` de
+> [src/db.js](../src/db.js). Decisiones de David: cuota fija con tasa mensual;
+> pagar de más termina antes; la próxima cuota se suma sola a lo necesario de
+> la hoja del mes; rojo si se venció una cuota sin chulear, si pagó menos o si
+> la cuota no le cabe. Las 7 categorías de abajo siguen sin usarse.
+
 > Origen: rama `NewFeatures` (commit `1c1101f`, 13 de junio de 2025).
 > Esa rama quedó congelada en GitHub porque es de **antes de la reestructuración**:
 > tenía `popup.js`, `styles.css` y `debt.js` sueltos en la raíz, y hoy el código vive

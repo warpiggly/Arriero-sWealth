@@ -248,6 +248,31 @@
            cuenta" (o Enter): apretar un boton da la confianza de haber
            pedido la respuesta. Si llega un precio de clic derecho, sale solo. -->
       <div id="ah-pregunta" class="ah-pregunta">
+        <!-- Las dos caras de la pregunta. Pestanas con palabras y dibujito, no
+             una flecha muda: se lee de un vistazo que hay dos cosas y cual
+             esta prendida. La del credito la pinta src/credito.js. -->
+        <div class="ah-pestanas" role="tablist" aria-label="Qu&#233; quiere hacer">
+          <button type="button" id="ah-pest-compra" class="ah-pest activa"
+                  role="tab" aria-selected="true" aria-controls="ah-preg-compra">
+            <svg class="ah-pest-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H7"/>
+              <circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>
+            </svg>
+            Comprar algo
+          </button>
+          <button type="button" id="ah-pest-credito" class="ah-pest"
+                  role="tab" aria-selected="false" aria-controls="ah-preg-credito">
+            <svg class="ah-pest-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2.5" y="5.5" width="19" height="13" rx="2"/>
+              <path d="M2.5 10h19M6 15h4"/>
+            </svg>
+            Sacar un cr&#233;dito
+          </button>
+        </div>
+
+        <div id="ah-preg-compra" class="ah-preg-cara" role="tabpanel">
         <h3 class="ah-tit ah-pregunta-tit">&#191;Quiere comprar algo?</h3>
 
         <label for="ah-nombre" class="ah-etiqueta">&#191;Qu&#233; es?</label>
@@ -272,6 +297,48 @@
           <span>&#191;Lo vio en internet? Se&#241;ale el precio con el mouse y
           haga <strong>clic derecho</strong>.</span>
         </p>
+        </div>
+
+        <!-- La cara del credito. Las mismas reglas de la de comprar: etiqueta
+             encima, un boton para pedir la respuesta. La sugerencia de meses
+             sale sola mientras escribe. -->
+        <div id="ah-preg-credito" class="ah-preg-cara oculto" role="tabpanel">
+          <h3 class="ah-tit ah-pregunta-tit">&#191;Va a sacar un cr&#233;dito?</h3>
+
+          <label for="cre-nombre" class="ah-etiqueta">&#191;Qu&#233; es?</label>
+          <input type="text" id="cre-nombre" class="ah-campo"
+                 placeholder="Por ejemplo: la moto" autocomplete="off">
+
+          <label for="cre-monto" class="ah-etiqueta">&#191;Cu&#225;nto le prestan?</label>
+          <input type="text" inputmode="numeric" id="cre-monto"
+                 class="ah-campo ah-campo-grande" placeholder="$ 0" autocomplete="off">
+
+          <div class="ah-par-cre">
+            <div>
+              <label for="cre-meses" class="ah-etiqueta">&#191;En cu&#225;ntos meses?</label>
+              <input type="text" inputmode="numeric" id="cre-meses" class="ah-campo"
+                     placeholder="Ej: 12" autocomplete="off">
+            </div>
+            <div>
+              <label for="cre-tasa" class="ah-etiqueta">&#191;Inter&#233;s al mes?</label>
+              <div class="ah-por-ciento">
+                <input type="text" inputmode="decimal" id="cre-tasa" class="ah-campo"
+                       placeholder="Ej: 2" autocomplete="off">
+                <span aria-hidden="true">%</span>
+              </div>
+            </div>
+          </div>
+          <p class="ah-guia ah-guia-chica">
+            El inter&#233;s est&#225; en el papel del banco. Si dice
+            &ldquo;mensual&rdquo; o &ldquo;M.V.&rdquo;, es ese n&#250;mero.
+          </p>
+
+          <div id="cre-sugerencia" class="ah-sugerencia oculto" aria-live="polite"></div>
+
+          <button type="button" id="cre-hacer-cuenta" class="ah-hacer-cuenta">
+            H&#225;game la cuenta del cr&#233;dito
+          </button>
+        </div>
       </div>
 
       <!-- ============ 3. EL RECIBO DE DOS CARAS ============
@@ -452,6 +519,144 @@
               </div>
 
               <button type="button" class="rec-voltear" data-voltear="1">
+                <span class="rec-flecha" aria-hidden="true">&#8634;</span>
+                Voltear y ver la cuenta
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============ 3b. EL RECIBO DEL CREDITO ============
+           El mismo papel del recibo de comprar (las clases rec-*), con lo que
+           un credito trae de mas: las cuotas para ir chuleando, el total con
+           intereses, y el aviso de mora -- que pone el papel en rojo. Por
+           detras, la hoja de cuotas mes por mes. Lo pinta src/credito.js. -->
+      <div id="cre-recibo" class="rec-caja cre-caja oculto">
+        <button type="button" id="cre-cerrar" class="rec-cerrar"
+                title="Cerrar el recibo" aria-label="Cerrar el recibo">&#10005;</button>
+        <div class="rec-giro">
+
+          <!-- ---------- CARA DE ADELANTE ---------- -->
+          <div class="rec-cara rec-adelante">
+            <div class="rec-cuerpo">
+              <div class="rec-cab">
+                <p class="rec-marca">Arriero&rsquo;s Wealth</p>
+                <p class="rec-sub">su cr&#233;dito, mijo</p>
+              </div>
+              <hr class="rec-puntos">
+
+              <div class="rec-que-es">
+                <h3 id="cre-nombre-rec" class="rec-nombre"></h3>
+                <span class="cre-le-prestan">Le prestan</span>
+                <span id="cre-monto-rec" class="rec-precio"></span>
+                <span id="cre-condiciones" class="rec-donde"></span>
+              </div>
+              <hr class="rec-puntos">
+
+              <div id="cre-renglones" class="rec-renglones"></div>
+              <hr class="rec-puntos">
+
+              <!-- Cuanto lleva: la barrita se llena a medida que chulea -->
+              <div id="cre-avance" class="cre-avance"></div>
+
+              <div id="cre-veredicto" class="rec-veredicto"></div>
+
+              <!-- Solo si va en mora o para alla: que hacer. Nunca un "no"
+                   pelado (regla 1 de ahorro.js). -->
+              <div id="cre-mora" class="cre-mora oculto">
+                <p class="cre-mora-tit">Para no quedar en mora:</p>
+                <ul id="cre-mora-lista"></ul>
+              </div>
+
+              <!-- Las cuotas. Con mas de 6 van plegadas: si no, el recibo de
+                   un credito a 3 anos no se acaba nunca. -->
+              <div id="cre-cuotas-caja" class="rec-plegable cre-cuotas-caja">
+                <button type="button" id="cre-cuotas-caja-tit" class="rec-plegable-tit"
+                        aria-expanded="true">
+                  <span id="cre-cuotas-tit-txt" class="rec-plegable-txt"></span>
+                  <span class="rec-plegable-flecha" aria-hidden="true"></span>
+                </button>
+                <div class="cre-cuotas-cuerpo">
+                  <p class="cre-cuotas-guia">
+                    Chulee cada cuota cuando la pague. Si pag&#243; otra plata,
+                    c&#225;mbiela en el cuadrito y todo se vuelve a hacer.
+                  </p>
+                  <div id="cre-cuotas"></div>
+                </div>
+              </div>
+
+              <div id="cre-guardar" class="rec-guardar">
+                <button type="button" id="cre-g-guardar" class="rec-btn-g">
+                  Gu&#225;rdemelo en mis deudas
+                </button>
+                <button type="button" id="cre-g-dejar" class="rec-btn-g rec-btn-g-suave">
+                  D&#233;jelo as&#237;
+                </button>
+              </div>
+
+              <button type="button" id="cre-quitar" class="rec-quitar oculto">
+                Quitarlo de mis deudas
+              </button>
+
+              <button type="button" id="cre-descargar" class="rec-descargar">
+                <span class="rec-descargar-ico" aria-hidden="true">&#8595;</span>
+                <span>Desc&#225;rguemelo como imagen</span>
+              </button>
+
+              <button type="button" class="rec-voltear cre-voltear">
+                <span class="rec-flecha" aria-hidden="true">&#8634;</span>
+                <span>Voltear y ver la hoja de cuotas</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ---------- CARA DE ATRAS: la hoja de cuotas ---------- -->
+          <div class="rec-cara rec-atras">
+            <div class="rec-cuerpo">
+              <div class="rec-atras-cab">
+                <h4>La hoja de cuotas</h4>
+                <span id="cre-atras-cuantas"></span>
+              </div>
+              <p class="ah-guia">
+                Escriba en los cuadritos blancos. Todo el recibo se vuelve a
+                hacer solo.
+              </p>
+
+              <div class="cre-atras-campos">
+                <label>Le prestan
+                  <input type="text" inputmode="numeric" id="cre-a-monto" class="rec-hoja-input">
+                </label>
+                <label>Meses
+                  <input type="text" inputmode="numeric" id="cre-a-meses" class="rec-hoja-input">
+                </label>
+                <label>Inter&#233;s al mes (%)
+                  <input type="text" inputmode="decimal" id="cre-a-tasa" class="rec-hoja-input">
+                </label>
+                <label>Primera cuota
+                  <input type="date" id="cre-a-primera" class="rec-hoja-input">
+                </label>
+              </div>
+
+              <div class="rec-hoja-scroll">
+                <table class="rec-hoja cre-hoja">
+                  <thead>
+                    <tr>
+                      <th class="rec-hoja-num">&#8470;</th>
+                      <th class="cre-hoja-fecha">Fecha</th>
+                      <th class="rec-hoja-plata">Cuota</th>
+                      <th class="rec-hoja-plata">Inter&#233;s</th>
+                      <th class="rec-hoja-plata">Abono</th>
+                      <th class="rec-hoja-plata">Queda debiendo</th>
+                      <th class="cre-hoja-chulo">&#10003;</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cre-hoja-cuerpo"></tbody>
+                </table>
+              </div>
+
+              <button type="button" class="rec-voltear cre-voltear">
                 <span class="rec-flecha" aria-hidden="true">&#8634;</span>
                 Voltear y ver la cuenta
               </button>
@@ -879,6 +1084,7 @@
   <!-- Las cuentas. Tampoco toca la pantalla: funciones puras que reciben los
        datos y devuelven la respuesta con su frase. -->
   <script src="src/ahorro.js"></script>
+  <script src="src/deudas.js"></script>
   <!-- La calculadora quedo suelta: no le pide nada a nadie ni nadie le pide
        nada a ella (ver el encabezado de src/calculadora.js). -->
   <script src="src/calculadora.js"></script>
@@ -886,6 +1092,7 @@
   <script src="src/recibo.js"></script>
   <script src="src/cuaderno.js"></script>
   <script src="src/recibo-descargar.js"></script>
+  <script src="src/credito.js"></script>
   <script src="src/biblioteca.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>

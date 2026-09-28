@@ -25,9 +25,11 @@
 // =================================================================
 
 const DB_NOMBRE = 'arriero';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const DB_ITEMS = 'items';
 const DB_GRUPOS = 'grupos';
+// Los créditos (src/deudas.js y src/credito.js). Llegaron en la versión 2.
+const DB_CREDITOS = 'creditos';
 
 // Un ítem sin grupo (una cosa suelta) lleva esta marca en vez de cadena vacía:
 // IndexedDB no indexa el string vacío de forma confiable en todos los
@@ -70,6 +72,10 @@ function dbAbrir() {
         // Los grupos tienen store propio para que uno pueda existir VACÍO
         // (recién creado, antes de meterle la primera cosa).
         db.createObjectStore(DB_GRUPOS, { keyPath: 'nombre' });
+      }
+
+      if (!db.objectStoreNames.contains(DB_CREDITOS)) {
+        db.createObjectStore(DB_CREDITOS, { keyPath: 'id', autoIncrement: true });
       }
     };
 
@@ -273,12 +279,76 @@ function dbBorrarGrupo(nombre) {
 }
 
 // ----------------------------------------------------------------
+// Los créditos
+// ----------------------------------------------------------------
+//
+// credito = { nombre, monto, tasa, meses, primera, pagos: {k: monto},
+//             pagados: {k: true}, creado }
+// `pagos` solo trae los meses que la persona corrigió a mano.
+function dbLimpiarCredito(d) {
+  const limpiarMapa = function (m, esPlata) {
+    const salida = {};
+    Object.keys(m || {}).forEach(function (k) {
+      const n = parseInt(k, 10);
+      if (!(n > 0)) return;
+      if (esPlata) {
+        const v = Number(m[k]);
+        if (isFinite(v) && v >= 0) salida[n] = Math.round(v);
+      } else if (m[k] === true) {
+        salida[n] = true;
+      }
+    });
+    return salida;
+  };
+  return {
+    nombre: dbLimpiarTexto(d.nombre, 120),
+    monto: dbLimpiarPrecio(d.monto),
+    tasa: Math.max(0, Math.min(100, Number(d.tasa) || 0)),
+    meses: Math.max(1, Math.min(600, Math.round(Number(d.meses) || 1))),
+    primera: Number(d.primera) || Date.now(),
+    pagos: limpiarMapa(d.pagos, true),
+    pagados: limpiarMapa(d.pagados, false),
+    creado: Number(d.creado) || Date.now()
+  };
+}
+
+// Guardar uno nuevo. Devuelve su id.
+function dbGuardarCredito(datos) {
+  const c = dbLimpiarCredito(datos || {});
+  return dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.add(c); });
+}
+
+// Reemplazar uno que ya existe (chulear, corregir una cuota, la fecha...).
+function dbActualizarCredito(id, datos) {
+  const c = dbLimpiarCredito(datos || {});
+  c.id = Number(id);
+  return dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.put(c); });
+}
+
+function dbCredito(id) {
+  return dbHacer(DB_CREDITOS, 'readonly', function (s) { return s.get(Number(id)); });
+}
+
+function dbTodosLosCreditos() {
+  return dbHacer(DB_CREDITOS, 'readonly', function (s) {
+    return s.getAll();
+  }).then(function (lista) {
+    return (lista || []).sort(function (a, b) { return b.creado - a.creado; });
+  });
+}
+
+function dbBorrarCredito(id) {
+  return dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.delete(Number(id)); });
+}
+
+// ----------------------------------------------------------------
 // Botar todo (lo usa el botón de la ventanita de pruebas)
 // ----------------------------------------------------------------
 function dbBorrarTodo() {
   return Promise.all([
     dbHacer(DB_ITEMS, 'readwrite', function (s) { return s.clear(); }),
-    dbHacer(DB_GRUPOS, 'readwrite', function (s) { return s.clear(); })
+    dbHacer(DB_GRUPOS, 'readwrite', function (s) { return s.clear(); }),
+    dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.clear(); })
   ]).then(function () { return true; });
 }
 
