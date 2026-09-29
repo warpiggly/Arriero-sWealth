@@ -8,17 +8,30 @@
   <link rel="stylesheet" href="styles/magic.css">
 </head>
 <body>
+  <!-- LOS PAISAJES DE FONDO, uno por estrella. Estan los tres puestos y se
+       cambian con un fundido (ponerFondo(), src/app.js): la 1a estrella es el
+       campo, la guia el camino del arriero y la escuela el pueblo. -->
+  <div class="fondos" aria-hidden="true">
+    <div class="fondo activo" data-fondo="campo"></div>
+    <div class="fondo" data-fondo="camino"></div>
+    <div class="fondo" data-fondo="pueblo"></div>
+  </div>
+
   <!-- Navegación: estrellas para cambiar de vista.
        Estrella 1 = Las dos mulas del arriero: Ahorro (Metas) y Cobrar (Cotizar).
                     Se alterna entre ellas con las bolitas-mula de abajo.
-       Estrella 2 = En construcción (próximamente).
-       (La vieja "Mi Despensa" murió el 29 de septiembre de 2026: lo que uno
-       siempre usa ahora se guarda dentro de la hoja del trabajo.) -->
+       Estrella 2 = ¿Cómo se usa, mijo? (la guía: src/guia.js).
+       Estrella 3 = La escuela del arriero (aprender de plata: src/escuela.js).
+       Las dos hablan con la voz de un abuelo que le enseña al nieto: con
+       cariño, pero sin alcahuetería. -->
   <nav class="estrellas">
     <button class="estrella activa" data-view="metas" title="Ahorro y cobrar">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
-    <button class="estrella" data-view="construccion" title="En construcción">
+    <button class="estrella" data-view="guia" title="¿Cómo se usa, mijo?">
+      <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
+    </button>
+    <button class="estrella" data-view="escuela" title="La escuela del arriero">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
   </nav>
@@ -764,6 +777,12 @@
             <p class="rec-sub">&#191;cu&#225;nto le cobro, mijo?</p>
           </div>
 
+          <!-- Solo mientras se practica con el ejemplo de la guia -->
+          <div id="cob-ejemplo" class="cob-ejemplo oculto">
+            <span>&#9998; Esto es un ejemplo para practicar. Juegue tranquilo.</span>
+            <button type="button" id="cob-ejemplo-borrar" class="cob-enlace">Borrar el ejemplo</button>
+          </div>
+
           <div class="cua-fila">
             <label class="cua-fila-rot cob-rot-fijo" for="cob-cliente">Para qui&#233;n</label>
             <input type="text" id="cob-cliente" class="cua-tinta cob-texto" maxlength="80"
@@ -961,16 +980,64 @@
     </div><!-- /#panel-calculo -->
   </div>
 
-  <!-- ===================== VISTA: EN CONSTRUCCIÓN (próximamente) ===================== -->
-  <!-- Placeholder de la 3ª estrella. Todavía no hace nada: solo un aviso en la
-       voz del arriero para que el usuario sepa que aquí vendrá algo. -->
-  <div id="construccion" class="vista">
-    <div class="en-construccion">
-      <div class="en-construccion-ico" aria-hidden="true">🚧</div>
-      <h3>Aquí estamos trabajando, mijo</h3>
-      <p>Esta gaveta todavía está en obra. Vuelva prontico que le tenemos una sorpresa.</p>
-      <span class="en-construccion-firma">— Su arriero de confianza</span>
+  <!-- ===================== ESTRELLA 2: ¿CÓMO SE USA, MIJO? ===================== -->
+  <!-- El manual, con la voz del abuelo. Lo arma src/guia.js desde sus listas:
+       aqui solo van las cajas vacias. -->
+  <div id="guia" class="vista">
+    <div class="abu-cab">
+      <img class="abu-cara" src="assets/images/abuelo-arriero.png" alt="">
+      <div class="abu-globo" id="guia-globo"></div>
     </div>
+
+    <div class="abu-tarjeta abu-letra">
+      <p class="abu-tarjeta-tit">¿No alcanza a leer bien? Agrande la letra</p>
+      <div class="abu-letra-botones" role="group" aria-label="Tamaño de la letra">
+        <button type="button" class="abu-letra-btn" data-letra="normal" aria-pressed="true">A</button>
+        <button type="button" class="abu-letra-btn abu-letra-g" data-letra="grande" aria-pressed="false">A</button>
+        <button type="button" class="abu-letra-btn abu-letra-mg" data-letra="muy-grande" aria-pressed="false">A</button>
+      </div>
+    </div>
+
+    <h3 class="abu-seccion">Paso a paso</h3>
+    <div id="guia-pasos"></div>
+
+    <div class="abu-tarjeta abu-practica">
+      <p class="abu-tarjeta-tit">¿Le da miedo dañar algo? Practique primero</p>
+      <p class="abu-tarjeta-txt">Le lleno la hoja de Cobrar con un trabajo de mentiras, el de
+        Don Julio. Juegue con los números todo lo que quiera. Cuando termine, lo borra
+        y su hoja queda como estaba.</p>
+      <button type="button" id="guia-ejemplo" class="ah-hacer-cuenta">Llénemela con un ejemplo</button>
+    </div>
+
+    <h3 class="abu-seccion">Lo que la gente pregunta</h3>
+    <div id="guia-preguntas"></div>
+
+    <div class="abu-tarjeta abu-acerca">
+      <p class="abu-tarjeta-tit">De dónde sale esta app</p>
+      <p class="abu-tarjeta-txt">Arriero’s Wealth la hizo David Salazar, en Colombia, para que
+        nadie regale su trabajo ni se gaste lo que no tiene. Todo lo que usted escribe se
+        queda en este computador: no se manda a ninguna parte.</p>
+      <p class="abu-version" id="guia-version"></p>
+    </div>
+  </div>
+
+  <!-- ===================== ESTRELLA 3: LA ESCUELA DEL ARRIERO ===================== -->
+  <!-- Aprender de plata: lecciones cortas, las palabras raras y cuentas de
+       verdad. Lo arma src/escuela.js. -->
+  <div id="escuela" class="vista">
+    <div class="abu-cab">
+      <img class="abu-cara" src="assets/images/abuelo-arriero.png" alt="">
+      <div class="abu-globo" id="escuela-globo"></div>
+    </div>
+
+    <h3 class="abu-seccion">Lo que me enseñó la vida</h3>
+    <div id="escuela-lecciones"></div>
+
+    <h3 class="abu-seccion">Cuentas de verdad</h3>
+    <div id="escuela-cuentas"></div>
+
+    <h3 class="abu-seccion">Las palabras raras</h3>
+    <div id="escuela-palabras" class="abu-tarjeta abu-palabras"></div>
   </div>
 
   <!-- ===================== LA CALCULADORA DEL ARRIERO ===================== -->
@@ -1063,6 +1130,9 @@
   <script src="src/cobro.js"></script>
   <script src="src/cobrar.js"></script>
   <script src="src/cobro-descargar.js"></script>
+  <!-- Las estrellas 2 y 3: la guía y la escuela del arriero -->
+  <script src="src/guia.js"></script>
+  <script src="src/escuela.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
 

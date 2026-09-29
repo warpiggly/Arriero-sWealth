@@ -18,9 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const selMoneda = document.getElementById('selector-moneda');
   if (selMoneda) selMoneda.addEventListener('change', () => cambiarMoneda(selMoneda.value));
 
-  // Estrellas: cambiar de vista
+  cargarLetra();
+  document.querySelectorAll('[data-letra]').forEach(b => {
+    b.addEventListener('click', () => ponerLetra(b.dataset.letra, true));
+  });
+
+  // Estrellas: cambiar de vista. La 1ª vuelve a la mula que estaba al frente
+  // (Ahorro o Cobrar), no siempre a Ahorro.
+  let ultimaMula = 'metas';
   document.querySelectorAll('.estrella').forEach(b => {
-    b.addEventListener('click', () => cambiarVista(b.dataset.view, b));
+    b.addEventListener('click', () => {
+      const v = vistaActiva();
+      if (v === 'metas' || v === 'cotizar') ultimaMula = v;
+      cambiarVista(b.dataset.view === 'metas' ? ultimaMula : b.dataset.view, b);
+    });
   });
 
   // Las DOS MULAS (control de abajo): un toque cambia de sección Y abre su
@@ -44,20 +55,48 @@ function formatearInputMoneda(el) {
   el.value = digitos ? parseInt(digitos, 10).toLocaleString('es-CO') : '';
 }
 
+// El orden de las vistas, de izquierda a derecha: dice para dónde se desliza
+// la que entra. Ahorro y Cobrar son las dos mulas de la 1ª estrella.
+const ORDEN_VISTAS = ['metas', 'cotizar', 'guia', 'escuela'];
+
+// El paisaje de fondo de cada estrella (las capas .fondo de popup.html).
+const FONDO_DE_VISTA = { metas: 'campo', cotizar: 'campo', guia: 'camino', escuela: 'pueblo' };
+
 // Muestra la vista indicada y marca la estrella activa
 function cambiarVista(idVista, estrella) {
-  document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+  const antes = vistaActiva();
+  document.querySelectorAll('.vista').forEach(v => {
+    v.classList.remove('activa', 'entra-der', 'entra-izq');
+  });
   const vista = document.getElementById(idVista);
-  if (vista) vista.classList.add('activa');
+  if (vista) {
+    // Hacia la derecha entra desde la derecha, como pasar la hoja de un
+    // cuaderno. Se fuerza un reflow para que la animación arranque de nuevo.
+    const dir = ORDEN_VISTAS.indexOf(idVista) >= ORDEN_VISTAS.indexOf(antes) ? 'entra-der' : 'entra-izq';
+    void vista.offsetWidth;
+    vista.classList.add('activa');
+    if (antes && antes !== idVista) vista.classList.add(dir);
+  }
 
   document.querySelectorAll('.estrella').forEach(e => e.classList.remove('activa'));
   if (estrella) estrella.classList.add('activa');
+
+  ponerFondo(FONDO_DE_VISTA[idVista] || 'campo');
+  // En la guía y en la escuela no hay número que mostrar: la caja dorada se
+  // recoge para dejarle el espacio al abuelo.
+  document.body.classList.toggle('sin-jornal', idVista === 'guia' || idVista === 'escuela');
 
   // Las dos mulas (bolitas) solo se ven en la 1ª estrella y resaltan la activa.
   actualizarBolitas(idVista);
 
   // El número grande de la cabecera cambia de significado según la vista.
   actualizarCabecera();
+}
+
+function ponerFondo(cual) {
+  document.querySelectorAll('.fondo').forEach(f => {
+    f.classList.toggle('activo', f.dataset.fondo === cual);
+  });
 }
 
 // Panel colapsable que le corresponde a cada mula.
@@ -113,15 +152,99 @@ function vistaActiva() {
 
 // Escribe la etiqueta y el número grande de la cabecera (la caja dorada).
 // Lo usan Ahorro y Cobrar, según cuál esté al frente.
+//
+// EL NÚMERO NO SALTA, CUENTA. Al pasar de Ahorro a Cobrar (o cuando cambia
+// la cifra) sube o baja de a poquito hasta llegar, como el contador de una
+// báscula, y la etiqueta entra con un fundido. Así se ve que el número CAMBIÓ
+// de significado, en vez de aparecer otro sin aviso.
+let jornalAnim = null;
+let jornalValor = null;
+
 function pintarJornal(etiqueta, valorTexto) {
   const lbl = document.getElementById('jornal-label');
   const num = document.getElementById('jornal-num');
-  if (lbl) lbl.textContent = etiqueta;
-  if (num) {
-    num.textContent = valorTexto;
-    // El rojo lo pone la vista que lo necesite (Cobrar, bajo el básico).
-    num.classList.remove('jornal-rojo');
+  if (lbl && lbl.textContent !== etiqueta) {
+    lbl.textContent = etiqueta;
+    reanimar(lbl, 'jornal-entra');
   }
+  if (!num) return;
+  // El rojo lo pone la vista que lo necesite (Cobrar, bajo el básico).
+  num.classList.remove('jornal-rojo');
+
+  const destino = numeroDePlata(valorTexto);
+  if (jornalAnim) cancelAnimationFrame(jornalAnim);
+  jornalAnim = null;
+
+  if (destino === null || jornalValor === null || destino === jornalValor) {
+    if (num.textContent !== valorTexto) {
+      num.textContent = valorTexto;
+      reanimar(num, 'jornal-entra');
+    }
+    jornalValor = destino;
+    return;
+  }
+
+  const desde = jornalValor;
+  const inicio = performance.now();
+  const dura = Math.min(900, 420 + Math.log10(Math.abs(destino - desde) + 1) * 60);
+  jornalValor = destino;
+  num.classList.add('jornal-contando');
+  const paso = function (ahora) {
+    const t = Math.min(1, (ahora - inicio) / dura);
+    const suave = 1 - Math.pow(1 - t, 3);
+    if (t < 1) {
+      num.textContent = formatearDineroLimpio(Math.round(desde + (destino - desde) * suave));
+      jornalAnim = requestAnimationFrame(paso);
+    } else {
+      num.textContent = valorTexto;
+      num.classList.remove('jornal-contando');
+      jornalAnim = null;
+    }
+  };
+  jornalAnim = requestAnimationFrame(paso);
+}
+
+// "$ 4.400.000" -> 4400000. Solo si el texto es EXACTAMENTE plata escrita
+// como la escribe la app; si no (un guion, una frase), null y no se anima.
+function numeroDePlata(txt) {
+  const digitos = soloDigitos(txt);
+  if (!digitos) return null;
+  const n = parseInt(digitos, 10);
+  return formatearDineroLimpio(n) === txt ? n : null;
+}
+
+function reanimar(el, clase) {
+  el.classList.remove(clase);
+  void el.offsetWidth;
+  el.classList.add(clase);
+}
+
+// ----------------------------------------------------------------
+// La letra: normal, grande o muy grande
+//
+// Todo el tamaño de la app sale del zoom del <body> (styles.css, --zoom). Con
+// la letra más grande la ventana también se ensancha: es la misma app, vista
+// de más cerca. Se recuerda en chrome.storage.sync.
+// ----------------------------------------------------------------
+const LETRAS = { normal: 0.75, grande: 0.88, 'muy-grande': 1 };
+
+function ponerLetra(cual, guardar) {
+  const zoom = LETRAS[cual] || LETRAS.normal;
+  document.documentElement.style.setProperty('--zoom', String(zoom));
+  document.querySelectorAll('[data-letra]').forEach(b => {
+    const si = b.dataset.letra === cual;
+    b.classList.toggle('prendida', si);
+    b.setAttribute('aria-pressed', si ? 'true' : 'false');
+  });
+  if (guardar) {
+    try { chrome.storage.sync.set({ letra: cual }); } catch (e) { /* sin almacén */ }
+  }
+}
+
+function cargarLetra() {
+  try {
+    chrome.storage.sync.get(['letra'], d => ponerLetra(d.letra || 'normal', false));
+  } catch (e) { ponerLetra('normal', false); }
 }
 
 // Repinta la cabecera con lo que corresponde a la vista activa: en AHORRO,

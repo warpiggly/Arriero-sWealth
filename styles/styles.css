@@ -47,6 +47,7 @@
 }
 
 :root {
+  --zoom:         0.75;
   --crema:        #FBF5E2;
   --crema-trans:  rgba(251, 245, 226, 0.92);
   --verde-oscuro: #14532D;
@@ -77,9 +78,10 @@ body {
   font-family: 'LiberationSans', sans-serif;
 
   /* Tamaño general de la app: achica TODO proporcionalmente (letras, cajas,
-     imágenes, anchos, la hoja de cálculo). Cambie este número para agrandar o
-     achicar la app entera: 1 = tamaño original · 0.75 = 25% más pequeña. */
-  zoom: 0.75;
+     imágenes, anchos, la hoja de cálculo). Sale de --zoom (en :root): 0.75 es
+     la letra normal, y los botones "A A A" de la guía lo suben (ponerLetra,
+     src/app.js). 1 = tamaño original · 0.75 = 25% más pequeña. */
+  zoom: var(--zoom);
   /* Fondo transparente a propósito: el color cremita vive en body::before.
      Si lo dejamos opaco aquí, en equipos con aceleración por hardware
      desactivada (típico en algunos Windows 10) el fondo tapa la capa de
@@ -92,26 +94,52 @@ body {
   box-sizing: border-box;
 }
 
-/* Paisaje de fondo, desenfocado (capa detrás del contenido).
-   IMPORTANTE: el `zoom: 0.75` del <body> también encoge este fondo. Para que la
-   imagen se vea al MISMO tamaño de antes (sin encoger), dividimos sus medidas
-   entre 0.75 (= /0.75). Así el zoom lo vuelve a su tamaño original en pantalla,
-   pero el resto de la app sí queda pequeño. Si cambia el zoom del body, cambie
-   también ese 0.75 aquí. */
+/* La base cremita, detrás de los paisajes.
+   IMPORTANTE: el zoom del <body> también encoge esta capa. Para que se vea
+   al MISMO tamaño real con cualquier letra, sus medidas se dividen entre
+   --zoom: el zoom las vuelve a su tamaño de siempre en pantalla. */
 body::before {
   content: '';
   position: fixed;
-  top: calc(-16px / 0.75);
-  left: calc(-16px / 0.75);
-  width: calc(512px / 0.75);   /* tamaño fijo, compensado para el zoom del body */
-  height: calc(632px / 0.75);  /* alto fijo (mayor que la ventana) -> estático */
+  top: calc(-16px / var(--zoom));
+  left: calc(-16px / var(--zoom));
+  width: calc(512px / var(--zoom));
+  height: calc(632px / var(--zoom));
   z-index: -2;
-  background-color: var(--crema);   /* base cremita (antes vivía en body) */
-  background-image: url('../assets/images/ChatGPT Image Sep 20, 2025, 08_48_10 AM.png');
+  background-color: var(--crema);
+}
+
+/* LOS PAISAJES: uno por estrella, los tres puestos uno encima del otro. El
+   que está .activo se ve; al cambiar de estrella se funden (el viejo se va
+   apagando mientras el nuevo aparece) y el nuevo se acerca despacito, como
+   cuando uno llega caminando a un sitio. Van en z-index -2 igual que la base,
+   pero después en el HTML, así que quedan encima de ella. */
+.fondo {
+  position: fixed;
+  top: calc(-16px / var(--zoom));
+  left: calc(-16px / var(--zoom));
+  width: calc(512px / var(--zoom));
+  height: calc(632px / var(--zoom));
+  z-index: -2;
   background-size: cover;
-  background-position: left 8%;
   background-repeat: no-repeat;
-  filter: blur(calc(2px / 0.75));
+  filter: blur(calc(2px / var(--zoom)));
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 0.9s ease, transform 2.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fondo.activo { opacity: 1; transform: scale(1); }
+.fondo[data-fondo="campo"] {
+  background-image: url('../assets/images/ChatGPT Image Sep 20, 2025, 08_48_10 AM.png');
+  background-position: left 8%;
+}
+.fondo[data-fondo="camino"] {
+  background-image: url('../assets/images/arriero-banner.png');
+  background-position: 42% 30%;
+}
+.fondo[data-fondo="pueblo"] {
+  background-image: url('../assets/images/Gemini_Generated_Image_7jiefz7jiefz7jie.png');
+  background-position: 55% 40%;
 }
 
 /* Capa semitransparente para mejorar la legibilidad */
@@ -455,27 +483,6 @@ body::after {
   .bolita-mula.activa.abierta .bolita-medalla::after { animation: none; }
 }
 
-/* ---------- Cartel "En construcción" (3ª estrella) ---------- */
-.en-construccion {
-  text-align: center;
-  margin: 26px 14px;
-  padding: 26px 20px;
-  background: var(--crema-trans);
-  border: 2px dashed var(--dorado-osc);
-  border-radius: 16px;
-  box-shadow: var(--sombra);
-}
-.en-construccion-ico { font-size: 2.6rem; line-height: 1; margin-bottom: 6px; }
-.en-construccion h3 { color: var(--verde-oscuro); margin: 6px 0; }
-.en-construccion p { color: var(--texto); margin: 6px 0; }
-.en-construccion-firma {
-  display: block;
-  margin-top: 12px;
-  color: var(--marron);
-  font-style: italic;
-  font-size: 0.85rem;
-}
-
 /* ---------- Encabezado / logo ---------- */
 .app-header { text-align: center; padding: 0 16px; }
 .app-logo { display: block; width: 82%; max-width: 1030px; margin: 0 auto 6px; }
@@ -500,6 +507,7 @@ body::after {
 }
 .jornal-num {
   display: block;
+  font-variant-numeric: tabular-nums;
   font-family: 'ScothBrace', serif;
   font-size: 1.7rem;
   color: var(--texto);
@@ -664,7 +672,9 @@ button:active { transform: translateY(1px); }
    La caja donde vive todo. El acabado de vidrio sobre el paisaje del fondo es
    de la app, no de la vista. */
 #panel-metas,
-#panel-calculo {
+#panel-calculo,
+#guia.activa,
+#escuela.activa {
   background: rgba(20, 45, 30, 0.42);
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
@@ -2860,3 +2870,318 @@ html.calc-abierta body { overflow: hidden; }
 .cob-bajo-basico { font-weight: bold; color: #FFC2B8; }
 .cob-nota-ojo { font-weight: bold; color: var(--terracota); }
 .jornal-num.jornal-rojo { color: #B3261E; }
+
+/* ===========================================================
+   AL CAMBIAR DE ESTRELLA (src/app.js, cambiarVista)
+   La vista nueva entra deslizándose desde el lado hacia el que se fue, como
+   pasar la hoja de un cuaderno. El paisaje de fondo se funde (ver .fondo).
+   Sin la media de "reducir movimiento" a propósito: el proyecto ya decidió
+   que la app se vea igual en todos los equipos (ver el pulso del precio).
+   =========================================================== */
+.vista.entra-der { animation: vista-der 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.vista.entra-izq { animation: vista-izq 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes vista-der {
+  from { opacity: 0; transform: translateX(38px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes vista-izq {
+  from { opacity: 0; transform: translateX(-38px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* --- El número de arriba: la etiqueta entra, la cifra cuenta --- */
+.jornal-entra { animation: jornal-entra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes jornal-entra {
+  from { opacity: 0; transform: translateY(7px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.jornal-num { transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease; }
+.jornal-num.jornal-contando {
+  transform: scale(1.05);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.75);
+}
+
+/* En la guía y la escuela la caja dorada se recoge: no hay número que decir. */
+.jornal-box {
+  max-height: 140px;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.35s ease, margin 0.5s ease, padding 0.5s ease;
+}
+body.sin-jornal .jornal-box {
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+}
+
+/* ===========================================================
+   EL ABUELO: la guía (src/guia.js) y la escuela (src/escuela.js)
+   Un abuelo arriero que le enseña al nieto, con cariño y firmeza. El papel
+   es el mismo crema del resto de la app; lo que dice él va en su globo y en
+   las citas amarillas, en cursiva, para que se sienta que alguien habla.
+   =========================================================== */
+/* Guía y escuela van en el mismo vidrio de Ahorro y Cobrar: sobre el cielo
+   clarito de los paisajes, la letra crema de los títulos se perdía. */
+#guia.activa, #escuela.activa { margin: 4px 12px 0; }
+
+.abu-cab {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 2px 0 12px;
+}
+.abu-cara {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  object-position: 60% 40%;
+  image-rendering: pixelated;
+  background: #FFFCF6;
+  border: 3px solid var(--dorado);
+  border-radius: 50%;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  animation: abu-respira 4.5s ease-in-out infinite;
+}
+@keyframes abu-respira {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-3px) rotate(-1.5deg); }
+}
+.abu-globo {
+  position: relative;
+  flex: 1;
+  min-height: 3.4em;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  font-size: 0.98rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--texto);
+  background: var(--crema);
+  border: 2px solid rgba(122, 74, 34, 0.35);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+/* La colita del globo, apuntando al abuelo */
+.abu-globo::before {
+  content: '';
+  position: absolute;
+  left: -11px;
+  bottom: 8px;
+  width: 16px;
+  height: 16px;
+  background: var(--crema);
+  border-left: 2px solid rgba(122, 74, 34, 0.35);
+  border-bottom: 2px solid rgba(122, 74, 34, 0.35);
+  transform: rotate(45deg) skew(12deg, 12deg);
+}
+.abu-globo.escribiendo::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--naranja);
+  animation: refran-cursor 0.7s step-end infinite;
+}
+
+/* Los títulos de sección, con su adorno a los lados */
+.abu-seccion { margin: 18px 0 10px; font-size: 1.32rem; }
+.abu-seccion::before,
+.abu-seccion::after { content: '✦'; margin: 0 9px; font-size: 0.8rem; color: var(--dorado); vertical-align: middle; }
+
+/* --- Las tarjetas sueltas --- */
+.abu-tarjeta {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  background: rgba(251, 245, 226, 0.95);
+  border: 1px solid rgba(122, 74, 34, 0.28);
+  border-bottom-width: 3px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+.abu-tarjeta-tit { margin: 0 0 6px; font-size: 1rem; font-weight: bold; color: var(--verde-oscuro); }
+.abu-tarjeta-txt { margin: 0; font-size: 0.93rem; line-height: 1.45; }
+.abu-practica .ah-hacer-cuenta { margin-top: 11px; }
+.abu-version { margin: 6px 0 0; font-size: 0.78rem; color: var(--marron); }
+.abu-version:empty { display: none; }
+
+/* La letra: tres A de tres tamaños, como en los botones del control */
+.abu-letra { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.abu-letra .abu-tarjeta-tit { margin: 0; }
+.abu-letra-botones { display: flex; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.abu-letra-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 0.95rem;
+  color: var(--texto);
+  background: #fff;
+  border: 1.5px solid rgba(122, 74, 34, 0.4);
+  border-bottom-width: 3px;
+  border-radius: 10px;
+}
+.abu-letra-g { font-size: 1.2rem; }
+.abu-letra-mg { font-size: 1.5rem; }
+.abu-letra-btn:hover { background: rgba(242, 178, 51, 0.25); }
+.abu-letra-btn.prendida,
+.abu-letra-btn.prendida:hover { background: var(--dorado); border-color: var(--dorado-osc); }
+.abu-letra-btn:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+
+/* --- Los plegables: pasos, preguntas, lecciones y cuentas --- */
+.abu-plegable {
+  margin: 0 0 8px;
+  overflow: hidden;
+  background: rgba(251, 245, 226, 0.95);
+  border: 1px solid rgba(122, 74, 34, 0.28);
+  border-bottom-width: 3px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+}
+.abu-plegable summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.3;
+  color: var(--texto);
+  list-style: none;
+  cursor: pointer;
+}
+.abu-plegable summary::-webkit-details-marker { display: none; }
+.abu-plegable summary::after {
+  content: '›';
+  margin-left: auto;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--marron);
+  transition: transform 0.25s ease;
+}
+.abu-plegable[open] summary::after { transform: rotate(90deg); }
+.abu-plegable summary:hover { background: rgba(242, 178, 51, 0.14); }
+.abu-plegable summary:focus-visible { outline: 3px solid var(--dorado); outline-offset: -3px; }
+.abu-plegable[open] summary { border-bottom: 1px dashed rgba(122, 74, 34, 0.3); }
+.abu-plegable-tit { min-width: 0; }
+.abu-plegable-cuerpo { padding: 4px 14px 14px; animation: abu-abre 0.35s ease both; }
+@keyframes abu-abre {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.abu-num {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 0.88rem;
+  color: #fff;
+  background: var(--verde);
+  border-radius: 50%;
+}
+.abu-leccion .abu-num { background: var(--marron); }
+
+/* Lo que dice el abuelo: una cita con su comilla grande */
+.abu-dice {
+  position: relative;
+  margin: 10px 0 8px;
+  padding: 10px 12px 10px 34px;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.45;
+  color: #4A3620;
+  background: rgba(242, 178, 51, 0.15);
+  border-left: 4px solid var(--dorado);
+  border-radius: 8px;
+}
+.abu-dice::before {
+  content: '“';
+  position: absolute;
+  left: 9px;
+  top: -2px;
+  font-family: 'ScothBrace', serif;
+  font-size: 2.2rem;
+  font-style: normal;
+  color: var(--dorado-osc);
+}
+
+.abu-pasos { margin: 8px 0 12px; padding-left: 24px; }
+.abu-pasos li { margin: 7px 0; padding-left: 2px; font-size: 0.95rem; line-height: 1.4; }
+.abu-pasos li::marker { font-weight: bold; color: var(--verde); }
+
+.abu-muestreme {
+  display: block;
+  width: 100%;
+  padding: 11px 10px;
+  font-size: 0.94rem;
+  color: #fff;
+  background: var(--verde);
+  border-bottom: 3px solid var(--verde-oscuro);
+  border-radius: 10px;
+}
+.abu-muestreme::after { content: '  →'; }
+.abu-muestreme:hover { background: var(--verde-oscuro); }
+.abu-muestreme:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+
+.abu-respuesta { margin: 0; padding-top: 10px; font-size: 0.93rem; line-height: 1.45; }
+
+/* La regla de cada lección: como escrita a mano en el tablero */
+.abu-regla {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--verde-oscuro);
+  background: rgba(46, 125, 64, 0.08);
+  border: 2px dashed rgba(46, 125, 64, 0.5);
+  border-radius: 10px;
+  transform: rotate(-0.6deg);
+}
+
+.abu-cuenta .rec-renglon { font-size: 0.92rem; }
+.abu-cuenta .abu-total { margin-top: 6px; padding-top: 8px; border-top: 2px solid var(--texto); }
+.abu-cuenta-nota { margin: 8px 0 0; font-size: 0.84rem; font-style: italic; line-height: 1.4; color: rgba(43, 33, 24, 0.7); }
+
+.abu-glosario { margin: 0; }
+.abu-glosario dt { margin: 11px 0 2px; font-size: 0.96rem; font-weight: bold; color: var(--verde-oscuro); }
+.abu-glosario dt:first-child { margin-top: 0; }
+.abu-glosario dd {
+  margin: 0;
+  padding-bottom: 9px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-bottom: 1px dotted rgba(122, 74, 34, 0.35);
+}
+.abu-glosario dd:last-child { border-bottom: 0; padding-bottom: 0; }
+
+/* "Muéstreme": el sitio brilla un momentico. Lleva también una sombra por
+   DENTRO porque el papel de los recibos tiene máscara y se come el borde de
+   afuera. */
+.abu-brillo { animation: abu-brillo 2.6s ease both; }
+@keyframes abu-brillo {
+  0%, 100%      { outline: 3px solid rgba(242, 178, 51, 0); outline-offset: 4px; box-shadow: inset 0 0 0 0 rgba(242, 178, 51, 0); }
+  15%, 50%, 85% { outline: 3px solid rgba(242, 178, 51, 1); outline-offset: 4px; box-shadow: inset 0 0 0 4px rgba(242, 178, 51, 0.9); }
+  32%, 67%      { outline: 3px solid rgba(242, 178, 51, 0.25); outline-offset: 7px; box-shadow: inset 0 0 0 2px rgba(242, 178, 51, 0.35); }
+}
+
+/* El aviso de "esto es un ejemplo" en la hoja de Cobrar */
+.cob-ejemplo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 8px 11px;
+  font-size: 0.86rem;
+  color: var(--cua-tinta);
+  background: rgba(31, 60, 136, 0.08);
+  border: 1.5px dashed rgba(31, 60, 136, 0.45);
+  border-radius: 8px;
+}

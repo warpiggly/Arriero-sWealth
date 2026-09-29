@@ -61,6 +61,26 @@ let cobFirmaMat = null;
 let cobFirmaOtros = null;
 let cobTimerGuardar = null;
 let cobAvisoTimer = null;
+// Mientras se practica con el ejemplo de la guía (src/guia.js), aquí queda la
+// hoja que la persona tenía antes, para devolvérsela intacta al borrarlo.
+let cobAntesDelEjemplo = null;
+
+// El trabajo de mentiras para practicar. Don Julio es el mismo de la guía.
+const COB_EJEMPLO = {
+  cliente: 'Don Julio',
+  trabajo: 'Pintar la sala y el comedor',
+  unidad: 'dias',
+  tiempo: 2,
+  materiales: [
+    { nombre: 'Pintura (galón)', cantidad: 3, precio: 90000 },
+    { nombre: 'Rodillo y brocha', cantidad: 1, precio: 25000 }
+  ],
+  transporte: 30000,
+  otros: [{ clave: 'ayudante', nombre: 'Ayudante', monto: 80000 }],
+  margen: 30,
+  descuento: 0,
+  tipo: 'cobro'
+};
 
 document.addEventListener('DOMContentLoaded', function () {
   if (!document.getElementById('cob-recibo')) return;
@@ -98,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   cobAtar('cob-hacer', 'click', cobHacerLaCuenta);
   cobAtar('cob-nuevo', 'click', cobEmpezarOtro);
+  cobAtar('cob-ejemplo-borrar', 'click', cobQuitarEjemplo);
 
   // --- La cuenta de cobro ---
   cobAtar('cob-r-cerrar', 'click', cobEsconderRecibo);
@@ -174,6 +195,8 @@ function cobCargar() {
     const guardado = data[COB_TRABAJO_KEY] || {};
     cobTrabajo = cobTrabajoNormal(guardado.trabajo);
     cobEditando = guardado.editando || null;
+    cobAntesDelEjemplo = guardado.antesDelEjemplo || null;
+    cobPintarEjemplo();
     cobAbrirYo(!(cobPerfil.ganarMes > 0));
     cobPintarTodo();
     cobCargarCuentas();
@@ -215,7 +238,7 @@ function cobGuardarYa() {
   if (!alm) return;
   const datos = {};
   datos[COB_PERFIL_KEY] = cobPerfil;
-  datos[COB_TRABAJO_KEY] = { trabajo: cobTrabajo, editando: cobEditando };
+  datos[COB_TRABAJO_KEY] = { trabajo: cobTrabajo, editando: cobEditando, antesDelEjemplo: cobAntesDelEjemplo };
   alm.set(datos);
 }
 
@@ -784,6 +807,7 @@ function cobPonerIconosQuietos() {
 }
 
 function cobEmpezarOtro() {
+  if (cobAntesDelEjemplo) { cobQuitarEjemplo(); return; }
   const margen = cobTrabajo ? cobTrabajo.margen : 30;
   cobTrabajo = Object.assign(cobroTrabajoVacio(), { margen: margen });
   cobEditando = null;
@@ -795,6 +819,44 @@ function cobEmpezarOtro() {
   cobPintarEditando();
   const f = document.getElementById('cob-cliente');
   if (f) f.focus();
+}
+
+// ----------------------------------------------------------------
+// Practicar con un ejemplo (lo llama la guía, src/guia.js)
+// ----------------------------------------------------------------
+function cobCargarEjemplo() {
+  if (!cobTrabajo) return;
+  if (!cobAntesDelEjemplo) {
+    cobAntesDelEjemplo = { trabajo: JSON.parse(JSON.stringify(cobTrabajo)), editando: cobEditando };
+  }
+  cobTrabajo = cobTrabajoNormal(JSON.parse(JSON.stringify(COB_EJEMPLO)));
+  cobEditando = null;
+  cobFirmaMat = null;
+  cobFirmaOtros = null;
+  if (cobAhora && !cobAhora.guardada) cobEsconderRecibo();
+  cobGuardarYa();
+  cobPintarHoja();
+  cobPintarEditando();
+  cobPintarEjemplo();
+}
+
+function cobQuitarEjemplo() {
+  if (!cobAntesDelEjemplo) return;
+  cobTrabajo = cobTrabajoNormal(cobAntesDelEjemplo.trabajo);
+  cobEditando = cobAntesDelEjemplo.editando || null;
+  cobAntesDelEjemplo = null;
+  cobFirmaMat = null;
+  cobFirmaOtros = null;
+  if (cobAhora && !cobAhora.guardada) cobEsconderRecibo();
+  cobGuardarYa();
+  cobPintarHoja();
+  cobPintarEditando();
+  cobPintarEjemplo();
+  cobAvisar('Listo: borré el ejemplo. Su hoja quedó como estaba.');
+}
+
+function cobPintarEjemplo() {
+  cobMostrar('cob-ejemplo', !!cobAntesDelEjemplo);
 }
 
 function cobPintarEditando() {
@@ -1005,6 +1067,10 @@ function cobPintarAbonos(c) {
 function cobGuardar() {
   const c = cobAhora;
   if (!c) return;
+  if (cobAntesDelEjemplo && !c.guardada) {
+    cobAvisar('Esto es de práctica, mijo: no se guarda. Pero así mismito se hace con uno de verdad.');
+    return;
+  }
   const esNueva = !c.id;
   const hacer = esNueva ? dbGuardarCobro(c) : dbActualizarCobro(c.id, c).then(function () { return c.id; });
   hacer.then(function (id) {
