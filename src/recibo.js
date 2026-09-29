@@ -166,7 +166,7 @@ function recPlata(n) {
 }
 
 // Rehacer TODO lo que se está viendo. Lo llama refrescarTodo() de
-// logic_quotation.js cuando la persona cambia la moneda: no basta con
+// src/app.js cuando la persona cambia la moneda: no basta con
 // repintar, porque las frases del veredicto llevan las cifras metidas por
 // dentro y quedarían en la moneda vieja.
 function recRefrescar() {
@@ -181,11 +181,11 @@ function recRefrescar() {
 // solo los dígitos (para poder editar sin pelear con los puntos) y al salir se
 // les ponen los puntos de miles, para leerlos como en una factura.
 //
-// El patrón y las funciones son de src/logic_quotation.js, que ya lo hacía con
+// El patrón y las funciones son de src/app.js, que ya lo hacía con
 // los campos de Cobrar. Se reutiliza en vez de inventar otro: así la app se
 // siente igual en todas sus pantallas, que con este público es lo que más
 // pesa. Se atan a mano (y no con la clase .input-money) porque varios de estos
-// campos se crean después de que logic_quotation.js ya pasó por el DOM.
+// campos se crean después de que src/app.js ya pasó por el DOM.
 function recAtarMoneda(el) {
   if (!el) return;
   if (typeof soloDigitos !== 'function' || typeof formatearInputMoneda !== 'function') return;
@@ -249,7 +249,7 @@ function recPintarYo() {
 
 // EL NÚMERO GRANDE DE LA CABECERA, en la vista de Ahorro.
 //
-// Lo llama src/logic_quotation.js cada vez que se cambia de vista (es decir,
+// Lo llama src/app.js cada vez que se cambia de vista (es decir,
 // cada vez que se toca la mula de AHORRO), y también esta pantalla cuando los
 // datos cambian. Tiene que existir con este nombre: si no, la cabecera se
 // queda con el guion del marcador temporal.
@@ -325,7 +325,7 @@ function recRevisarCapturado() {
 }
 
 // Deja la vista de Ahorro al frente y su panel abierto, con el recibo a la
-// vista. Las dos funciones son de src/logic_quotation.js (que ya cargó antes
+// vista. Las dos funciones son de src/app.js (que ya cargó antes
 // que este archivo); se llaman sueltas y no activarMula() a propósito, porque
 // esa alterna --- si el panel ya estaba abierto, lo cerraría.
 function recAbrirAhorroDeUna() {

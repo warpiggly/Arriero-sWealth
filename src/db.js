@@ -25,11 +25,14 @@
 // =================================================================
 
 const DB_NOMBRE = 'arriero';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const DB_ITEMS = 'items';
 const DB_GRUPOS = 'grupos';
 // Los créditos (src/deudas.js y src/credito.js). Llegaron en la versión 2.
 const DB_CREDITOS = 'creditos';
+// Las cuentas de cobro y los presupuestos (src/cobro.js y src/cobrar.js).
+// Llegaron en la versión 3.
+const DB_COBROS = 'cobros';
 
 // Un ítem sin grupo (una cosa suelta) lleva esta marca en vez de cadena vacía:
 // IndexedDB no indexa el string vacío de forma confiable en todos los
@@ -76,6 +79,10 @@ function dbAbrir() {
 
       if (!db.objectStoreNames.contains(DB_CREDITOS)) {
         db.createObjectStore(DB_CREDITOS, { keyPath: 'id', autoIncrement: true });
+      }
+
+      if (!db.objectStoreNames.contains(DB_COBROS)) {
+        db.createObjectStore(DB_COBROS, { keyPath: 'id', autoIncrement: true });
       }
     };
 
@@ -342,13 +349,77 @@ function dbBorrarCredito(id) {
 }
 
 // ----------------------------------------------------------------
+// Las cuentas de cobro
+// ----------------------------------------------------------------
+//
+// cobro = { numero, tipo: 'cobro'|'presupuesto', cliente, trabajo, yo, fecha,
+//           renglones: [{ rotulo, valor }], descuentoPct, descuento, total,
+//           abonos: [{ monto, fecha }], datos, creado }
+// `renglones` y `total` son lo que vio el cliente: se guardan tal cual para
+// que la cuenta no cambie sola si mañana la persona sube lo que vale su día.
+// `datos` es la hoja del trabajo, para poder volver a abrirla y corregirla.
+function dbLimpiarCobro(d) {
+  const plata = function (v) {
+    const n = Number(v);
+    return isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : 0;
+  };
+  return {
+    numero: Math.max(1, Math.round(Number(d.numero) || 1)),
+    tipo: d.tipo === 'presupuesto' ? 'presupuesto' : 'cobro',
+    cliente: dbLimpiarTexto(d.cliente, 80),
+    trabajo: dbLimpiarTexto(d.trabajo, 120),
+    yo: dbLimpiarTexto(d.yo, 80),
+    fecha: Number(d.fecha) || Date.now(),
+    renglones: (Array.isArray(d.renglones) ? d.renglones : []).slice(0, 60).map(function (r) {
+      return { rotulo: dbLimpiarTexto(r && r.rotulo, 120), valor: plata(r && r.valor) };
+    }),
+    descuentoPct: Math.max(0, Math.min(100, Number(d.descuentoPct) || 0)),
+    descuento: plata(d.descuento),
+    total: plata(d.total),
+    abonos: (Array.isArray(d.abonos) ? d.abonos : []).slice(0, 200).map(function (a) {
+      return { monto: plata(a && a.monto), fecha: Number(a && a.fecha) || Date.now() };
+    }).filter(function (a) { return a.monto > 0; }),
+    datos: d.datos && typeof d.datos === 'object' ? JSON.parse(JSON.stringify(d.datos)) : null,
+    creado: Number(d.creado) || Date.now()
+  };
+}
+
+function dbGuardarCobro(datos) {
+  const c = dbLimpiarCobro(datos || {});
+  return dbHacer(DB_COBROS, 'readwrite', function (s) { return s.add(c); });
+}
+
+function dbActualizarCobro(id, datos) {
+  const c = dbLimpiarCobro(datos || {});
+  c.id = Number(id);
+  return dbHacer(DB_COBROS, 'readwrite', function (s) { return s.put(c); });
+}
+
+function dbCobro(id) {
+  return dbHacer(DB_COBROS, 'readonly', function (s) { return s.get(Number(id)); });
+}
+
+function dbTodosLosCobros() {
+  return dbHacer(DB_COBROS, 'readonly', function (s) {
+    return s.getAll();
+  }).then(function (lista) {
+    return (lista || []).sort(function (a, b) { return b.creado - a.creado; });
+  });
+}
+
+function dbBorrarCobro(id) {
+  return dbHacer(DB_COBROS, 'readwrite', function (s) { return s.delete(Number(id)); });
+}
+
+// ----------------------------------------------------------------
 // Botar todo (lo usa el botón de la ventanita de pruebas)
 // ----------------------------------------------------------------
 function dbBorrarTodo() {
   return Promise.all([
     dbHacer(DB_ITEMS, 'readwrite', function (s) { return s.clear(); }),
     dbHacer(DB_GRUPOS, 'readwrite', function (s) { return s.clear(); }),
-    dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.clear(); })
+    dbHacer(DB_CREDITOS, 'readwrite', function (s) { return s.clear(); }),
+    dbHacer(DB_COBROS, 'readwrite', function (s) { return s.clear(); })
   ]).then(function () { return true; });
 }
 

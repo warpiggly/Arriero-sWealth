@@ -200,7 +200,7 @@ body::after {
 }
 .bolitas-mulas.oculta { display: none; }
 
-/* Pista bajo las mulas. Se oculta junto con la barra (en Despensa / construcción). */
+/* Pista bajo las mulas. Se oculta junto con la barra (en construcción). */
 .mulas-hint {
   text-align: center;
   margin: 4px 0 14px;
@@ -623,94 +623,6 @@ h4 {
   padding-bottom: 6px;
 }
 
-/* ===========================================================
-   PANEL DE DATOS — estilo empresarial, limpio y rápido
-   (Solo afecta lo que está dentro de #panel-calculo. El fondo,
-    logo, estrellas, precio y mariposas quedan intactos.)
-   =========================================================== */
-
-/* ---------- Tarjetas de sección ---------- */
-.categoria-gastos {
-  background: #FCFAF2;                 /* blanco cálido, sólido y nítido */
-  border: 1px solid rgba(122, 74, 34, 0.12);
-  border-left: 3px solid var(--dorado); /* acento cálido discreto */
-  border-radius: 12px;
-  padding: 13px 15px;
-  margin-bottom: 11px;
-  box-shadow: 0 1px 2px rgba(43, 33, 24, 0.06),
-              0 6px 16px rgba(43, 33, 24, 0.07);
-}
-
-/* Secciones expandibles/contraíbles */
-.colapsable h4 {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
-  margin-bottom: 0;
-}
-.colapsable h4::after {
-  content: '\2212';            /* − */
-  color: var(--naranja);
-  font-size: 1.2rem;
-  margin-left: 8px;
-}
-.colapsable.cerrada h4::after { content: '\002B'; }  /* + */
-.colapsable.cerrada h4 { border-bottom: none; padding-bottom: 0; }
-.colapsable > *:not(h4) { margin-top: 8px; }
-.colapsable.cerrada > *:not(h4) { display: none; }
-
-.gasto-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 9px 0;
-  font-size: 0.82rem;
-}
-.gasto-item label {
-  flex: 1;
-  padding-right: 10px;
-  color: #5a4a36;
-  font-family: 'LiberationSans', sans-serif;
-}
-
-input, select {
-  font-family: 'LiberationSans', sans-serif;
-  border: 1px solid var(--marron);
-  border-radius: 6px;
-  padding: 6px 8px;
-  background: #fff;
-  color: var(--texto);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-input:focus, select:focus {
-  border-color: var(--naranja);
-  box-shadow: 0 0 0 2px rgba(232, 116, 44, 0.25);
-}
-.gasto-item input, .gasto-item select { width: 110px; }
-
-/* ---------- Inputs dentro del panel (más legibles y consistentes) ---------- */
-#panel-calculo input,
-#panel-calculo select {
-  border: 1px solid #d9cdb0;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 0.84rem;
-  background: #fff;
-}
-#panel-calculo input:focus,
-#panel-calculo select:focus {
-  border-color: var(--dorado-osc);
-  box-shadow: 0 0 0 3px rgba(242, 178, 51, 0.28);
-}
-#panel-calculo .gasto-item input,
-#panel-calculo .gasto-item select { width: 132px; }
-
-/* Cifras alineadas a la derecha = se leen como en una factura */
-.input-num { text-align: right; font-variant-numeric: tabular-nums; }
-
 /* ---------- Botones ---------- */
 button {
   font-family: 'LiberationSans', sans-serif;
@@ -727,318 +639,6 @@ button {
 button:hover { background: var(--naranja-osc); }
 button:active { transform: translateY(1px); }
 
-.btn-principal {
-  display: block;
-  width: 100%;
-  background: var(--verde);
-  margin: 10px 0;
-}
-.btn-principal:hover { background: var(--verde-oscuro); }
-
-.btn-secundario { background: var(--dorado); color: var(--texto); }
-.btn-secundario:hover { background: var(--dorado-osc); }
-
-.gasto-item button, .btn-eliminar {
-  margin-left: 6px;
-  padding: 3px 9px;
-  font-size: 0.8rem;
-  background: var(--terracota);
-}
-.gasto-item button:hover, .btn-eliminar:hover { background: #9c2c20; }
-
-/* ---------- Formulario para agregar ítems ---------- */
-.gasto-personalizado-form {
-  margin-top: 10px;
-  padding: 12px;
-  background: rgba(46, 125, 64, 0.06);
-  border: 1px solid rgba(46, 125, 64, 0.18);
-  border-radius: 10px;
-}
-/* Botón "Agregar..." = acción principal del mini-formulario: ancho completo */
-.gasto-personalizado-form > button {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  background: var(--verde);
-}
-.gasto-personalizado-form > button:hover { background: var(--verde-oscuro); }
-.gasto-personalizado-form .hint {
-  margin: 8px 0 0;
-  font-size: 0.72rem;
-  color: var(--marron);
-  text-align: center;
-  opacity: 0.85;
-}
-
-/* ---------- Atajos de margen (chips rápidos) ---------- */
-.margen-chips {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-.chip-margen {
-  flex: 1;
-  padding: 7px 0;
-  font-family: 'LiberationSans', sans-serif;
-  font-size: 0.82rem;
-  background: #fff;
-  color: var(--texto);
-  border: 1px solid var(--dorado);
-  border-radius: 999px;
-}
-.chip-margen:hover { background: rgba(242, 178, 51, 0.35); }
-.chip-margen.activo {
-  background: var(--dorado);
-  border-color: var(--dorado-osc);
-  font-weight: bold;
-}
-
-/* ---------- Listas ---------- */
-#materiales-container, #herramientas-container, #presupuestos-container {
-  max-height: 170px;
-  overflow-y: auto;
-  margin-bottom: 8px;
-}
-#subtotalMateriales, #subtotalHerramientas {
-  font-size: 0.82rem;
-  text-align: right;
-  margin: 6px 0 0;
-  color: var(--texto);
-}
-
-/* Tarjeta de presupuesto guardado */
-.presupuesto-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff;
-  border: 1px solid rgba(122, 74, 34, 0.14);
-  border-left: 3px solid var(--verde);
-  border-radius: 10px;
-  padding: 9px 11px;
-  margin: 7px 0;
-  font-size: 0.82rem;
-  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
-}
-.presupuesto-item .info { flex: 1; }
-.presupuesto-item .nombre { font-family: 'LiberationSans', sans-serif; font-weight: bold; color: var(--texto); font-size: 0.9rem; }
-.presupuesto-item .detalle { color: var(--marron); font-size: 0.74rem; }
-.presupuesto-item button { padding: 4px 8px; font-size: 0.8rem; }
-.presupuesto-item .btn-cargar { background: var(--verde); }
-.presupuesto-item .btn-cargar:hover { background: var(--verde-oscuro); }
-
-/* ---------- Desglose de costos ---------- */
-#resultado-cotizacion {
-  background: #FCFAF2;
-  border: 1px solid rgba(122, 74, 34, 0.12);
-  border-left: 3px solid var(--verde);
-  border-radius: 12px;
-  padding: 13px 16px;
-  margin-bottom: 11px;
-  box-shadow: 0 1px 2px rgba(43, 33, 24, 0.06),
-              0 6px 16px rgba(43, 33, 24, 0.07);
-}
-#resultado-cotizacion p {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 7px 0;
-  font-size: 0.85rem;
-}
-#resultado-cotizacion p span:last-child { font-variant-numeric: tabular-nums; }
-#resultado-cotizacion hr { border: none; border-top: 1px solid var(--dorado); margin: 8px 0; }
-
-.frase-arriero {
-  font-family: 'LiberationSans', sans-serif;
-  font-style: italic;
-  text-align: center;
-  color: var(--marron);
-  font-size: 0.85rem;
-  margin: 6px 0 0;
-}
-
-/* ===========================================================
-   MI DESPENSA + EL BUFET (presets reutilizables)
-   =========================================================== */
-
-/* Intro de la vista despensa: color mostaza (el mismo del precio) */
-.despensa-intro {
-  margin: 0 6px 14px;
-  line-height: 1.4;
-  font-size: 0.85rem;
-  text-align: center;
-  color: var(--dorado-osc);
-  font-family: 'LiberationSans', sans-serif;
-}
-
-/* ---------- Tabla de piezas guardadas (clic = sumar al presupuesto) ---------- */
-.lib-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid rgba(122, 74, 34, 0.14);
-  border-left: 3px solid var(--dorado);
-  border-radius: 10px;
-  padding: 9px 11px;
-  margin: 7px 0;
-  font-size: 0.82rem;
-  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.05s;
-}
-.lib-item:hover { background: var(--crema); border-color: var(--dorado-osc); }
-.lib-item:active { transform: translateY(1px); }
-.lib-item .info { flex: 1; min-width: 0; }
-.lib-item .nombre { font-family: 'LiberationSans', sans-serif; font-weight: bold; color: var(--texto); font-size: 0.9rem; }
-.lib-item .detalle { color: var(--marron); font-size: 0.74rem; font-variant-numeric: tabular-nums; }
-
-/* ---------- "💾 Guardar en despensa" (en la vista de cotizar) ---------- */
-.guardar-despensa {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-.guardar-despensa .nombre-despensa { flex: 1; min-width: 0; }
-.btn-guardar-despensa {
-  background: var(--dorado);
-  color: var(--texto);
-  font-size: 0.82rem;
-  padding: 7px 12px;
-  white-space: nowrap;
-}
-.btn-guardar-despensa:hover { background: var(--dorado-osc); }
-.btn-guardar-despensa.ok { background: var(--verde); color: #fff; }
-/* Dentro del mini-formulario de materiales/herramientas, ocupa todo el ancho */
-.gasto-personalizado-form > .btn-guardar-despensa { display: block; width: 100%; margin-top: 8px; }
-
-/* ---------- Ítem editable del presupuesto (material/herramienta) ---------- */
-.item-cotiz {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "nombre acciones"
-    "campos total";
-  gap: 6px 8px;
-  align-items: center;
-  background: #fff;
-  border: 1px solid rgba(122, 74, 34, 0.14);
-  border-left: 3px solid var(--naranja);
-  border-radius: 10px;
-  padding: 9px 11px;
-  margin: 7px 0;
-  box-shadow: 0 1px 3px rgba(43, 33, 24, 0.07);
-}
-.item-cotiz .item-nombre {
-  grid-area: nombre;
-  font-family: 'LiberationSans', sans-serif;
-  font-weight: bold;
-  font-size: 0.88rem;
-  color: var(--texto);
-}
-.item-cotiz .item-campos {
-  grid-area: campos;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.item-cotiz .item-campos label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.72rem;
-  color: #5a4a36;
-}
-#panel-calculo .item-cotiz .item-campos input { width: 84px; padding: 5px 7px; }
-.item-cotiz .item-total {
-  grid-area: total;
-  justify-self: end;
-  font-size: 0.78rem;
-  color: var(--marron);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.item-cotiz .item-acciones {
-  grid-area: acciones;
-  justify-self: end;
-  display: flex;
-  gap: 4px;
-}
-.item-cotiz .btn-lock {
-  padding: 3px 8px;
-  font-size: 0.85rem;
-  background: var(--dorado);
-}
-.item-cotiz .btn-lock:hover { background: var(--dorado-osc); }
-.item-cotiz .btn-lock.activo { background: var(--verde); }
-
-/* Estado bloqueado: candado total (no se edita ni se elimina) */
-.item-cotiz.bloqueado {
-  border-left-color: var(--verde);
-  background: #f4f8f3;
-}
-.item-cotiz.bloqueado .item-campos input:disabled {
-  background: #eee9da;
-  color: var(--texto);
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
-/* ===========================================================
-   CABECERA COMPACTA EN "MI DESPENSA"
-   Al activarse .modo-despensa en <body>, el logo se achica y va a la
-   izquierda, el precio queda al centro y el refrán a la derecha.
-   El selector de moneda se oculta. Transiciones suaves y simples.
-   =========================================================== */
-
-/* Transiciones que dan la sensación de movimiento al compactar */
-.app-logo { transition: width 0.45s ease; }
-.jornal-box { transition: padding 0.45s ease, margin 0.45s ease, border-radius 0.45s ease; }
-.jornal-label, .jornal-num { transition: font-size 0.45s ease; }
-.selector-moneda-wrap { transition: opacity 0.3s ease; }
-
-body.modo-despensa .top-chrome {
-  display: flex;
-  flex-wrap: wrap;          /* el refrán se va a una segunda fila, debajo */
-  align-items: center;
-  gap: 6px 10px;
-  padding: 4px 14px 8px;
-  animation: barra-entra 0.45s ease;
-}
-
-/* Logo: a la izquierda, un poquito más grande */
-body.modo-despensa .app-header { flex: 0 0 auto; padding: 0; }
-body.modo-despensa .app-logo { width: 122px; margin: 0; }
-
-/* Moneda: se oculta en este modo */
-body.modo-despensa .selector-moneda-wrap { display: none; }
-
-/* Precio: solo el número, más pequeño y junto al logo */
-body.modo-despensa .jornal-box {
-  margin: 0;
-  padding: 15px 20px;
-  border-radius: 10px;
-}
-body.modo-despensa .jornal-label { display: none; }
-body.modo-despensa .jornal-num { font-size: 1.1rem; }
-
-/* Refrán: pasa a una fila completa debajo, como en el menú principal */
-body.modo-despensa .refran-arriero {
-  flex: 0 0 93%;
-  margin: 0 0 4px;
-  padding: 10px 15px;
-  max-width: none;
-}
-body.modo-despensa .refran-texto { font-size: 0.76rem; line-height: 1.3; }
-body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
-
-@keyframes barra-entra {
-  from { opacity: 0.25; transform: translateY(-7px); }
-  to   { opacity: 1;    transform: translateY(0); }
-}
-
 /* Utilidad GLOBAL: esconder sin borrar del DOM.
    La usan la ventana de la calculadora y su fondo (#calc-ventana, #calc-fondo),
    la barra de las mulas y varias secciones de Cobrar. Vive aquí, con las otras
@@ -1046,14 +646,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
    rediseño estaba enterrada al final de los estilos de Ahorro, y al borrar esa
    sección se fue con ella (la calculadora quedaba abierta al arrancar). */
 .oculto { display: none !important; }
-
-/* Texto de ayuda genérico (también fuera del mini-formulario verde) */
-.hint {
-  font-size: 0.72rem;
-  color: var(--marron);
-  opacity: 0.85;
-  margin: 8px 0 0;
-}
 
 /* ===========================================================
    VISTA DE AHORRO — "¿cuándo puedo comprarlo, mijo?"
@@ -1071,7 +663,8 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
 /* ---------- Panel de la cuenta: vidrio esmerilado ----------
    La caja donde vive todo. El acabado de vidrio sobre el paisaje del fondo es
    de la app, no de la vista. */
-#panel-metas {
+#panel-metas,
+#panel-calculo {
   background: rgba(20, 45, 30, 0.42);
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
@@ -2479,23 +2072,6 @@ body.modo-despensa .refran-icono img { width: 26px; height: 26px; }
   .ah-flecha { transition: none; }
 }
 
-/* Pulso del precio cuando una pieza de la despensa cambia el total */
-.jornal-num.pulso { animation: precio-pulso 0.5s ease; }
-@keyframes precio-pulso {
-  0%   { transform: scale(1); }
-  30%  { transform: scale(1.14); color: var(--naranja-osc); }
-  100% { transform: scale(1); }
-}
-
-/* Antes aquí se desactivaban estas animaciones cuando el sistema tenía
-   "reducir animaciones" activado (típico en Windows 10). Se quitó para que
-   la experiencia sea igual en cualquier equipo. Para volver a respetar ese
-   ajuste del sistema, reactiva:
-   @media (prefers-reduced-motion: reduce) {
-     body.modo-despensa .top-chrome { animation: none; }
-     .jornal-num.pulso { animation: none; }
-     .app-logo, .jornal-box, .jornal-label, .jornal-num { transition: none; }
-   } */
 
 /* ===========================================================
    BOTÓN QUE SACA LA CALCULADORA (vista de Ahorro)
@@ -2764,159 +2340,6 @@ html.calc-abierta body { overflow: hidden; }
 .calc-tecla.t-igual:hover { background: linear-gradient(178deg, #2E7D40 0%, var(--verde-oscuro) 100%); }
 
 /* ===========================================================
-   VISTA COBRAR — REJILLA DE MOSAICOS
-
-   Cada sección desplegable es un cuadro, dos por fila. Cerrado, el cuadro
-   muestra ícono + nombre + su valor actual. Al tocarlo se despliega y pasa a
-   ocupar el ancho completo de la fila (los formularios de adentro no caben en
-   media columna: la etiqueta y el campo quedarían apretadísimos).
-
-   OJO: todo va colgado de .cotizar-rejilla. Las clases .categoria-gastos y
-   .colapsable las comparte la vista "Mi Despensa", que NO se toca aquí.
-
-   Sobre la letra: los títulos pasan de ScothBrace a LiberationSans. ScothBrace
-   es una fuente DISPLAY y a tamaño chico se vuelve difícil de leer; en cuerpo de
-   texto a 0.78rem se lee mucho mejor, que era el punto de "más entendible".
-   =========================================================== */
-.cotizar-rejilla {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-}
-
-/* --- El cuadro --- */
-.cotizar-rejilla > .colapsable {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 0;                 /* el relleno lo lleva el h4 (zona de clic) */
-  margin: 0;                  /* la separación la da el gap de la rejilla */
-  border-radius: 11px;
-  overflow: hidden;
-  transition: border-color 0.24s ease, background 0.24s ease;
-}
-
-/* #resultado-cotizacion trae padding y margin puestos por ID, que le ganan en
-   especificidad a la regla de arriba. Hay que anularlos a mano. Su borde
-   izquierdo verde sí se conserva: distingue el resultado de los datos. */
-.cotizar-rejilla > #resultado-cotizacion {
-  padding: 0;
-  margin: 0;
-  border-radius: 11px;
-}
-.cotizar-rejilla > #resultado-cotizacion .cat-cuerpo p { font-size: 0.8rem; }
-
-/* Abierto = ocupa la fila completa */
-.cotizar-rejilla > .colapsable:not(.cerrada) {
-  grid-column: 1 / -1;
-  border-left-color: var(--naranja);
-  background: #FFFDF6;
-}
-/* El desglose mantiene su acento verde incluso abierto */
-.cotizar-rejilla > #resultado-cotizacion:not(.cerrada) { border-left-color: var(--verde); }
-
-/* --- La cabecera: ES el cuadro cuando está cerrado --- */
-.cotizar-rejilla .colapsable h4 {
-  display: flex;
-  flex-direction: column;      /* cerrado: ícono, nombre y valor uno bajo otro */
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 3px;
-  flex: 1;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 10px 22px 11px 11px;   /* el hueco de la derecha es para la flecha */
-  margin: 0;
-  border: none;
-  border-radius: 0;
-  font-family: 'LiberationSans', sans-serif;
-  font-size: 0.78rem;
-  font-weight: bold;
-  color: var(--verde-oscuro);
-  line-height: 1.25;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.2s ease;
-}
-.cotizar-rejilla .colapsable h4:hover { background: rgba(242, 178, 51, 0.16); }
-/* Fuera el +/− de texto del estilo viejo: aquí la señal es la flecha */
-.cotizar-rejilla .colapsable h4::after { content: none; }
-/* Y el estilo base le quitaba el relleno de abajo al cerrarse */
-.cotizar-rejilla .colapsable.cerrada h4 { padding-bottom: 11px; }
-
-/* Abierto: la cabecera se pone en una sola línea horizontal */
-.cotizar-rejilla .colapsable:not(.cerrada) h4 {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-  padding: 10px 24px 10px 12px;
-  border-bottom: 1px solid rgba(122, 74, 34, 0.16);
-  font-size: 0.86rem;
-}
-.cotizar-rejilla .colapsable:not(.cerrada) .cat-valor { margin-left: auto; }
-
-.cat-ico {
-  font-size: 0.98rem;
-  line-height: 1;
-  flex-shrink: 0;
-  /* Los emoji vienen muy saturados: se bajan un poco para que no griten */
-  filter: saturate(0.85);
-}
-.cat-tit { display: block; }
-
-/* El valor actual de la sección: lo que hace útil el mosaico cerrado */
-.cat-valor {
-  font-family: 'LiberationSans', sans-serif;
-  font-size: 0.76rem;
-  font-weight: bold;
-  color: var(--naranja-osc);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-/* Flechita: a la derecha cerrado, abajo abierto */
-.cat-flecha {
-  position: absolute;
-  top: 13px;
-  right: 10px;
-  width: 0;
-  height: 0;
-  border-left: 4.5px solid transparent;
-  border-right: 4.5px solid transparent;
-  border-top: 5.5px solid var(--dorado-osc);
-  transform: rotate(-90deg);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.cotizar-rejilla .colapsable:not(.cerrada) .cat-flecha { transform: rotate(0deg); }
-
-/* --- El contenido --- */
-.cotizar-rejilla .cat-cuerpo {
-  padding: 11px 13px 13px;
-  margin-top: 0;              /* el estilo base ponía margin-top: 8px */
-  animation: cat-abre 0.26s ease both;
-}
-@keyframes cat-abre {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Letra de adentro: más pequeña, pero con más contraste para que se lea --- */
-.cotizar-rejilla .gasto-item { font-size: 0.8rem; margin: 8px 0; }
-.cotizar-rejilla .gasto-item label { color: #4A3C2A; }
-.cotizar-rejilla .cat-cuerpo p { font-size: 0.8rem; }
-.cotizar-rejilla .hint { font-size: 0.7rem; }
-.cotizar-rejilla .cat-cuerpo button { font-size: 0.82rem; }
-
-/* Con el panel de Metas ensanchado no aplica, pero si algún día la app se
-   ensancha en Cobrar, la rejilla pasa sola a tres columnas. */
-@media (min-width: 640px) {
-  body.modo-hoja .cotizar-rejilla { grid-template-columns: repeat(3, 1fr); }
-}
-
-/* ===========================================================
    EL CRÉDITO (src/credito.js)
    La otra pestaña de la pregunta y su recibo. Usa el mismo papel del recibo
    de comprar (rec-*); aquí solo va lo que el crédito trae de más.
@@ -3168,3 +2591,272 @@ html.calc-abierta body { overflow: hidden; }
 /* --- En la libreta y en la hoja del mes --- */
 .ah-lib-deuda { border-left: 5px solid var(--terracota); }
 .cua-solo { color: rgba(43, 33, 24, 0.75); font-weight: bold; }
+
+/* ===========================================================
+   COBRAR (src/cobrar.js) — la hoja del trabajo y la cuenta de cobro
+   Rehecha el 29 de septiembre de 2026 con la cara de Ahorro: la hoja usa el
+   papel de la hoja del mes (cua-*) y la cuenta de cobro el del recibo
+   (rec-*). Aquí solo va lo que Cobrar trae de más.
+
+   OJO: button:hover pinta de naranja cualquier botón, así que cada botón de
+   aquí trae su propio :hover.
+   =========================================================== */
+
+/* --- 1. Lo que vale su día --- */
+.cob-yo-cuerpo {
+  padding: 12px 12px 13px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+}
+.cob-yo-cuerpo .ah-campo { display: block; width: 100%; box-sizing: border-box; }
+.cob-yo-cuerpo .ah-campo-grande { text-align: left; }
+.cob-yo-cuerpo .ah-etiqueta small { font-weight: normal; opacity: 0.8; }
+.cob-vale {
+  margin: 10px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+}
+.cob-vale strong { color: var(--dorado); }
+.cob-vale-ojo { display: block; margin-top: 5px; font-size: 0.82rem; color: #FBE7B9; }
+
+/* --- 2. La hoja del trabajo --- */
+.cob-rot-fijo { flex: 0 0 98px; }
+.cob-texto { flex: 1; min-width: 0; padding: 5px 2px; font-size: 0.98rem; }
+
+.cob-tiempo { display: flex; align-items: center; gap: 12px; margin: 6px 0 4px; }
+.cob-tiempo-num {
+  width: 92px;
+  padding: 2px 4px;
+  font-size: 1.45rem;
+  text-align: center;
+  border-bottom-color: rgba(31, 60, 136, 0.25);
+}
+.cob-unidad {
+  display: inline-flex;
+  padding: 2px;
+  border: 1.5px solid rgba(31, 60, 136, 0.35);
+  border-radius: 999px;
+}
+.cob-unidad-btn {
+  padding: 6px 15px;
+  font-size: 0.9rem;
+  color: var(--cua-tinta);
+  background: transparent;
+  border-radius: 999px;
+}
+.cob-unidad-btn:hover { background: rgba(31, 60, 136, 0.09); }
+.cob-unidad-btn.prendida,
+.cob-unidad-btn.prendida:hover { color: #fff; background: var(--cua-tinta); }
+
+.cob-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 6px; }
+.cob-chip {
+  padding: 5px 11px;
+  font-size: 0.84rem;
+  color: var(--cua-tinta);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(31, 60, 136, 0.3);
+  border-radius: 999px;
+}
+.cob-chip:hover { background: rgba(31, 60, 136, 0.08); }
+.cob-chip.prendida,
+.cob-chip.prendida:hover { color: var(--texto); background: var(--dorado); border-color: var(--dorado-osc); }
+.cob-chip:focus-visible,
+.cob-unidad-btn:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; }
+.cob-chip-otro {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.84rem;
+  font-weight: bold;
+  color: var(--cua-tinta);
+}
+.cob-chip-otro input {
+  width: 38px;
+  padding: 3px 2px;
+  text-align: right;
+  border-bottom-color: rgba(31, 60, 136, 0.3);
+}
+
+.cob-ico-quieto { cursor: default; }
+.cob-nota { margin-top: 2px; font-style: normal; }
+.cob-nota:empty { display: none; }
+.cob-enlace,
+.cob-enlace:hover {
+  display: inline;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  color: var(--cua-tinta);
+  text-decoration: underline;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Lo que compra: qué · cuántos · a cómo */
+.cob-fila-mat { gap: 5px; }
+.cob-mat-nombre { flex: 1 1 auto; }
+.cob-por { flex-shrink: 0; font-size: 0.9rem; color: rgba(43, 33, 24, 0.5); }
+.cob-mat-cant { flex-shrink: 0; width: 38px; padding: 5px 2px; font-size: 1rem; text-align: center; }
+.cob-mat-precio { width: 96px; }
+.cob-estrella {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: rgba(224, 153, 28, 0.75);
+  background: transparent;
+  border-radius: 50%;
+}
+.cob-estrella:hover { background: rgba(242, 178, 51, 0.18); }
+.cob-estrella.prendida { color: var(--dorado-osc); }
+.cob-mat-nota { margin: 1px 0 3px 4px; font-size: 0.78rem; color: rgba(43, 33, 24, 0.65); }
+.cob-mat-nota:empty { display: none; }
+
+/* Lo que siempre uso: la vieja despensa, ahora a la mano */
+.cob-siempre { margin: 8px 0 2px; }
+.cob-siempre-tit { margin: 0 0 5px; font-size: 0.82rem; font-weight: bold; color: var(--marron); }
+.cob-siempre-tit small { font-weight: normal; }
+.cob-siempre-lista { display: flex; flex-wrap: wrap; gap: 6px; }
+.cob-siempre-chip {
+  display: inline-flex;
+  overflow: hidden;
+  background: rgba(242, 178, 51, 0.12);
+  border: 1px solid rgba(122, 74, 34, 0.35);
+  border-radius: 999px;
+}
+.cob-siempre-usar {
+  padding: 6px 4px 6px 12px;
+  font-size: 0.82rem;
+  color: var(--texto);
+  background: transparent;
+  border-radius: 0;
+}
+.cob-siempre-usar:hover { background: rgba(242, 178, 51, 0.32); }
+.cob-siempre-x {
+  padding: 0 10px;
+  font-size: 1rem;
+  color: var(--terracota);
+  background: transparent;
+  border-radius: 0;
+}
+.cob-siempre-x:hover { background: rgba(192, 57, 43, 0.12); }
+
+.cob-pct { margin: 4px 0 0; }
+.cob-pct .cob-chips { margin: 2px 0 6px; }
+
+.cob-editando {
+  margin: 12px 0 0;
+  padding: 8px 11px;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--marron);
+  background: rgba(242, 178, 51, 0.16);
+  border-radius: 8px;
+}
+.cob-editando .cob-enlace { color: var(--marron); }
+
+/* --- 3. La cuenta de cobro --- */
+.cob-r-tipo {
+  margin: 4px 0 0;
+  font-size: 0.96rem;
+  font-weight: bold;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--texto);
+}
+.cob-r-partes { padding: 11px 0 3px; }
+.cob-r-parte { display: flex; align-items: baseline; gap: 8px; margin: 3px 0; font-size: 0.98rem; }
+.cob-r-parte-rot { flex-shrink: 0; color: rgba(43, 33, 24, 0.6); }
+.cob-r-parte-val { min-width: 0; font-weight: bold; overflow-wrap: anywhere; }
+.cob-r-parte-vacia { flex: 1; height: 1.1em; border-bottom: 1px solid rgba(43, 33, 24, 0.4); }
+.cob-r-letras {
+  display: block;
+  margin: 6px 0 0;
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.35;
+  color: rgba(43, 33, 24, 0.72);
+}
+.cob-r-rot { min-width: 0; white-space: normal; }
+
+/* El sello de caucho: con palabras, nunca solo el color */
+.cob-r-estado { display: flex; justify-content: center; }
+.cob-sello {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 88%;
+  margin: 12px 0 4px;
+  padding: 8px 16px;
+  text-align: center;
+  border: 3px solid;
+  border-radius: 8px;
+  transform: rotate(-1.5deg);
+}
+.cob-sello strong { font-size: 1.12rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.cob-sello span { margin-top: 2px; font-size: 0.82rem; color: rgba(43, 33, 24, 0.75); }
+.cob-sello-bien  { color: var(--verde-oscuro); border-color: var(--verde); background: rgba(46, 125, 64, 0.08); transform: rotate(-4deg); }
+.cob-sello-ojo   { color: #8F3F10; border-color: var(--naranja-osc); background: rgba(200, 94, 30, 0.08); }
+.cob-sello-lento { color: #7A5B04; border-color: var(--dorado-osc); background: rgba(242, 178, 51, 0.14); }
+
+.cob-r-abonos .cua-rotulo { margin-top: 10px; }
+.cob-r-abonos .rec-renglon { align-items: center; }
+
+.cob-abonar {
+  margin: 12px 0 0;
+  padding: 11px 12px;
+  background: rgba(46, 125, 64, 0.09);
+  border: 1px solid rgba(46, 125, 64, 0.3);
+  border-radius: 10px;
+}
+.cob-abonar-rot { display: block; margin: 0 0 6px; font-size: 0.92rem; font-weight: bold; }
+.cob-abonar-fila { display: flex; gap: 6px; }
+.cob-abonar-fila .ah-campo { background: #fff; border-color: rgba(43, 33, 24, 0.25); }
+.cob-abonar-fila .rec-btn-g { flex: 0 0 auto; padding: 10px 12px; }
+.cob-pago-todo { display: block; width: 100%; margin-top: 7px; }
+
+.cob-r-tipo-btn {
+  display: block;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 10px 8px;
+  font-size: 0.86rem;
+  color: var(--verde-oscuro);
+  background: rgba(46, 125, 64, 0.08);
+  border: 1px dashed rgba(46, 125, 64, 0.45);
+  border-radius: 10px;
+}
+.cob-r-tipo-btn:hover { background: rgba(46, 125, 64, 0.16); }
+
+.cob-r-nota {
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  font-style: italic;
+  text-align: center;
+  color: rgba(43, 33, 24, 0.55);
+}
+
+/* --- 4. Mis cuentas de cobro --- */
+.cob-lib-vacia { margin: 8px 4px; font-size: 0.88rem; text-align: center; color: rgba(255, 255, 255, 0.9); }
+.cob-lib-pagada { opacity: 0.82; }
+
+/* --- El básico: qué tan lejos está su hora (pedido por David, 29 sep) ---
+   Por debajo va en rojo y CON PALABRAS; el número de arriba también se
+   pone rojo. */
+.cob-basico-dice {
+  margin: 8px 0 0;
+  padding: 8px 11px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #fff;
+  border-radius: 8px;
+}
+.cob-basico-bien { background: rgba(46, 125, 64, 0.85); }
+.cob-basico-no { font-weight: bold; background: rgba(192, 57, 43, 0.92); }
+.cob-bajo-basico { font-weight: bold; color: #FFC2B8; }
+.cob-nota-ojo { font-weight: bold; color: var(--terracota); }
+.jornal-num.jornal-rojo { color: #B3261E; }

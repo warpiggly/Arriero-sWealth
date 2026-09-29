@@ -24,11 +24,14 @@ ya se equivocó y ahora te aconseja con cariño para que no te tumben.
 
 ## ✨ Qué hace hoy
 
-- **Calcula tu tarifa por hora** a partir del ingreso que quieres al mes y tus
-  horas facturables.
-- **Cotiza un trabajo completo**: mano de obra + materiales + desgaste de
-  herramientas + transporte + otros costos + tu margen de ganancia.
-- **Guarda presupuestos** con nombre para reutilizarlos ("DJ set 4 horas", etc.).
+- **Cuánto vale tu día**: lo que te quieres ganar al mes ÷ los días que trabajas.
+- **La hoja del trabajo** (para ti): tu tiempo en días u horas, lo que compras,
+  los gastos, tu ganancia y el descuento, y abajo: *Cóbrele*.
+- **La cuenta de cobro** (para el cliente): número, fecha, total en letras y
+  renglón por renglón, **sin mostrar tu ganancia**. Se baja como imagen para
+  mandarla por WhatsApp. También sale como presupuesto.
+- **Lo que te deben**: cada cuenta guardada lleva sus abonos y se sella
+  *PAGADO* cuando terminan de pagarte.
 - **Multi-moneda** (COP, USD, EUR, MXN, ARS, CLP, PEN, BRL, GBP, CNY, JPY) sin
   depender de internet ni de APIs externas — usa el formateo nativo del navegador.
 - **Detalle bonito**: mariposas y chispas estilo Encanto, 100 % decorativas.
@@ -51,7 +54,10 @@ arrieros-wealth/
 ├── popup.html             La ventana que se abre al pulsar el ícono
 │
 ├── src/                   El código JavaScript
-│   ├── logic_quotation.js   Cerebro: cálculo de cotización + interfaz
+│   ├── app.js               Vistas, mulas, cabecera y moneda (va primero)
+│   ├── cobro.js             Las cuentas de Cobrar (puras) y la plata en letras
+│   ├── cobrar.js            La hoja del trabajo, la cuenta de cobro y los fiados
+│   ├── cobro-descargar.js   La cuenta de cobro como imagen
 │   ├── magic.js             Mariposas y chispas decorativas
 │   ├── background.js        Menú contextual (⚠️ pendiente de migrar, ver abajo)
 │   └── contentScript.js     Mensajes en la página (⚠️ pendiente de migrar)
@@ -72,8 +78,8 @@ arrieros-wealth/
 
 ### Una regla simple para entender el código
 
-- **`src/logic_quotation.js`** es el corazón. Las fórmulas están comentadas arriba
-  del archivo: `Precio de venta = Costo total × (1 + Margen)`.
+- **`src/cobro.js`** es el corazón de Cobrar. Las fórmulas están comentadas arriba
+  del archivo: `Cóbrele = le cuesta + ganancia − descuento`.
 - **`styles/`** solo decide cómo se ve, nunca cómo se calcula.
 - Nada se guarda en servidores: todo vive en `chrome.storage` del usuario.
 

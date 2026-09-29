@@ -11,13 +11,11 @@
   <!-- Navegación: estrellas para cambiar de vista.
        Estrella 1 = Las dos mulas del arriero: Ahorro (Metas) y Cobrar (Cotizar).
                     Se alterna entre ellas con las bolitas-mula de abajo.
-       Estrella 2 = Mi Despensa (piezas guardadas del cotizador).
-       Estrella 3 = En construcción (próximamente). -->
+       Estrella 2 = En construcción (próximamente).
+       (La vieja "Mi Despensa" murió el 29 de septiembre de 2026: lo que uno
+       siempre usa ahora se guarda dentro de la hoja del trabajo.) -->
   <nav class="estrellas">
     <button class="estrella activa" data-view="metas" title="Ahorro y cobrar">
-      <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
-    </button>
-    <button class="estrella" data-view="vista2" title="Mi Despensa">
       <img src="assets/images/Estrellas-cambiopagina.png" alt="estrella">
     </button>
     <button class="estrella" data-view="construccion" title="En construcción">
@@ -25,9 +23,7 @@
     </button>
   </nav>
 
-  <!-- Cabecera compartida. En la vista "Mi Despensa" se compacta en una barra
-       (logo a la izquierda, precio en el centro, refrán a la derecha) con una
-       animación suave. La clase .modo-despensa en <body> dispara ese modo. -->
+  <!-- Cabecera compartida: logo, moneda, el número grande y el refrán. -->
   <div class="top-chrome">
     <!-- Logo -->
     <header class="app-header">
@@ -35,15 +31,14 @@
     </header>
 
     <!-- Selector de moneda: compacto, arriba del precio. El usuario la cambia
-         cuando quiera. Las opciones las llena logic_quotation.js (lista MONEDAS). -->
+         cuando quiera. Las opciones las llena src/app.js (lista MONEDAS). -->
     <div class="selector-moneda-wrap">
       <select id="selector-moneda" title="Cambiar moneda"></select>
     </div>
 
     <!-- Resultado destacado: número grande que cambia según la vista activa.
-         En Metas muestra "Te falta ahorrar", en Cotizar "Deberías cobrar".
-         Lo actualiza pintarJornal() (logic_quotation.js). Se compacta solo en
-         la vista "Mi Despensa". -->
+         En Ahorro muestra "Puede guardar", en Cobrar "Deberías cobrar".
+         Lo actualiza pintarJornal() (src/app.js). -->
     <div class="jornal-box">
       <span class="jornal-label" id="jornal-label">Te falta ahorrar:</span>
       <span class="jornal-num" id="jornal-num">$0</span>
@@ -108,7 +103,7 @@
        mundo ya sabe usar las dos.
 
        OJO CON EL id="panel-metas": no es decorativo. panelDeVista() y
-       activarMula(), en src/logic_quotation.js, lo buscan por ese id para que
+       activarMula(), en src/app.js, lo buscan por ese id para que
        la mula de AHORRO de abajo abra y cierre su contenido. Si se le cambia
        el nombre o se quita, la mula deja de responder. -->
   <div id="metas" class="vista activa">
@@ -703,296 +698,267 @@
     </div><!-- /#panel-metas -->
   </div>
 
-  <!-- ===================== VISTA: COTIZAR (para independientes) ===================== -->
-  <div id="cotizar" class="vista">
+  <!-- ===================== VISTA: COBRAR ===================== -->
+  <!-- Rehecha el 29 de septiembre de 2026 con la cara de Ahorro. Dos papeles,
+       uno para cada persona:
+         1. lo que vale su dia ...... se pone una vez; se pliega a un renglon
+         2. LA HOJA DEL TRABAJO ..... para usted: su tiempo, lo que compra, los
+                                      gastos, la raya y "Cobrele". Aqui SI se
+                                      ve la ganancia
+         3. LA CUENTA DE COBRO ...... para el cliente: renglones, total en
+                                      letras, numero y fecha. NUNCA la ganancia
+         4. mis cuentas de cobro .... lo que le deben, los presupuestos y lo
+                                      que ya le pagaron
+       Las cuentas viven en src/cobro.js; la pantalla, en src/cobrar.js; la
+       imagen que se baja, en src/cobro-descargar.js.
 
-    <!-- Contenedor maestro: todas las secciones expandibles.
-         Arranca CERRADO: se abre tocando la mula de COBRAR de arriba
-         (ya no hay botón "+" propio de desplegar). -->
+       OJO CON EL id="panel-calculo": panelDeVista() y activarMula(), en
+       src/app.js, lo buscan por ese id para que la mula de COBRAR lo abra. -->
+  <div id="cotizar" class="vista">
     <div id="panel-calculo" class="master-contenido cerrado">
 
-    <!-- REJILLA DE MOSAICOS: cada sección es un cuadro, dos por fila. Cerrado,
-         el cuadro muestra ícono, nombre y su valor actual (así se ve en qué va
-         todo sin abrir nada). Al tocar el cuadro se despliega y pasa a ocupar
-         el ancho completo de la fila: los formularios de adentro necesitan el
-         ancho, en media columna quedarían apretadísimos.
+      <!-- ============ 1. LO QUE VALE SU DIA ============ -->
+      <div id="cob-yo" class="ah-yo">
+        <button type="button" id="cob-yo-resumen" class="ah-yo-resumen oculto" aria-expanded="false">
+          <span id="cob-yo-resumen-txt" class="ah-yo-resumen-txt"></span>
+          <span class="ah-yo-resumen-cambiar"><span aria-hidden="true">&#9998;</span> Cambiar</span>
+        </button>
 
-         El <h4> es el que lleva todo el relleno del cuadro a propósito: así,
-         estando cerrado, el cuadro ENTERO es zona de clic (el manejador vive en
-         el h4, ver logic_quotation.js). El contenido va aparte en .cat-cuerpo.
+        <div id="cob-yo-cuerpo" class="cob-yo-cuerpo">
+          <h3 class="ah-tit">&#191;Cu&#225;nto vale su d&#237;a, mijo?</h3>
+          <p class="ah-guia">Se pone una sola vez. Con esto le cobro bien su tiempo en cada trabajo.</p>
 
-         Las clases .categoria-gastos y .colapsable se mantienen porque "Mi
-         Despensa" las comparte; todo el estilo nuevo va colgado de
-         .cotizar-rejilla para no tocar esa vista. -->
-    <div class="cotizar-rejilla">
+          <label for="cob-ganar" class="ah-etiqueta">&#191;Cu&#225;nto se quiere ganar al mes?</label>
+          <input type="text" inputmode="numeric" id="cob-ganar"
+                 class="ah-campo ah-campo-grande" placeholder="$ 0" autocomplete="off">
 
-    <!-- Tarifa por hora -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">⏱</span>
-        <span class="cat-tit">Tu tarifa por hora</span>
-        <span class="cat-valor" id="val-tarifa">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="ingresoDeseado">Ingreso que quieres al mes:</label>
-          <input type="text" inputmode="numeric" class="input-num input-money" id="ingresoDeseado" placeholder="3.000.000">
-        </div>
-        <div class="gasto-item">
-          <label for="horasFacturables">Horas facturables al mes:</label>
-          <input type="number" inputmode="numeric" class="input-num" id="horasFacturables" min="0" placeholder="120">
-        </div>
-        <p id="tarifaHora"><strong>Tu hora vale:</strong> $0</p>
-        <div class="guardar-despensa">
-          <input type="text" class="nombre-despensa" id="save-tarifa-nombre" placeholder="Nombre (ej: Tarifa premium)">
-          <button type="button" class="btn-guardar-despensa" data-guardar="tarifa">💾 Guardar en despensa</button>
+          <label for="cob-dias-mes" class="ah-etiqueta">&#191;Cu&#225;ntos d&#237;as trabaja al mes?</label>
+          <input type="text" inputmode="numeric" id="cob-dias-mes"
+                 class="ah-campo" placeholder="22" autocomplete="off">
+
+          <p id="cob-vale" class="cob-vale"></p>
+
+          <!-- El basico: con que se compara su hora. Si queda por debajo,
+               la frase y el numero de arriba se ponen en rojo. -->
+          <label for="cob-basico" class="ah-etiqueta">&#191;A c&#243;mo est&#225; el b&#225;sico la hora?</label>
+          <input type="text" inputmode="numeric" id="cob-basico"
+                 class="ah-campo" placeholder="$ 0" autocomplete="off">
+          <p id="cob-basico-dice" class="cob-basico-dice oculto" aria-live="polite"></p>
+
+          <label for="cob-yo-nombre" class="ah-etiqueta">Su nombre <small>(sale en la cuenta de cobro)</small></label>
+          <input type="text" id="cob-yo-nombre" class="ah-campo" maxlength="80"
+                 placeholder="Por ejemplo: Luis Arango, pintor" autocomplete="off">
+
+          <button type="button" id="cob-yo-listo" class="ah-hacer-cuenta">Listo</button>
         </div>
       </div>
-    </div>
 
-    <!-- Mano de obra -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">💪</span>
-        <span class="cat-tit">Mano de obra</span>
-        <span class="cat-valor" id="val-tiempo">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="horasTrabajo">Horas de este trabajo:</label>
-          <input type="number" inputmode="numeric" class="input-num" id="horasTrabajo" min="0" placeholder="0">
-        </div>
-        <p id="costoManoObra"><strong>Costo de tu tiempo:</strong> $0</p>
-        <div class="guardar-despensa">
-          <input type="text" class="nombre-despensa" id="save-tiempo-nombre" placeholder="Nombre (ej: Jornada completa)">
-          <button type="button" class="btn-guardar-despensa" data-guardar="tiempo">💾 Guardar en despensa</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Materiales -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">📦</span>
-        <span class="cat-tit">Materiales</span>
-        <span class="cat-valor" id="val-materiales">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div id="materiales-container"></div>
-        <div class="gasto-personalizado-form">
-          <div class="gasto-item">
-            <label for="material-nombre">Nombre:</label>
-            <input type="text" id="material-nombre" placeholder="Ej: Pintura">
+      <!-- ============ 2. LA HOJA DEL TRABAJO ============
+           El mismo papel de la hoja del mes (clases cua-*): renglones azules,
+           cifras en tinta, la raya y los totales. Para la persona, no para
+           el cliente: aqui la ganancia se ve. -->
+      <div class="cua-hoja rec-cara cob-hoja">
+        <div class="cua-cuerpo">
+          <div class="rec-cab">
+            <p class="rec-marca">Arriero&rsquo;s Wealth</p>
+            <p class="rec-sub">&#191;cu&#225;nto le cobro, mijo?</p>
           </div>
-          <div class="gasto-item">
-            <label for="material-costo">Costo unitario:</label>
-            <input type="text" inputmode="numeric" class="input-num input-money" id="material-costo">
+
+          <div class="cua-fila">
+            <label class="cua-fila-rot cob-rot-fijo" for="cob-cliente">Para qui&#233;n</label>
+            <input type="text" id="cob-cliente" class="cua-tinta cob-texto" maxlength="80"
+                   placeholder="Don Julio" autocomplete="off">
           </div>
-          <div class="gasto-item">
-            <label for="material-cantidad">Cantidad:</label>
-            <input type="number" inputmode="numeric" class="input-num" id="material-cantidad" min="1" value="1">
+          <div class="cua-fila">
+            <label class="cua-fila-rot cob-rot-fijo" for="cob-trabajo">Qu&#233; trabajo</label>
+            <input type="text" id="cob-trabajo" class="cua-tinta cob-texto" maxlength="120"
+                   placeholder="Pintar la sala" autocomplete="off">
           </div>
-          <button id="agregar-material">Agregar material</button>
-          <button type="button" class="btn-guardar-despensa" data-guardar="material">💾 Guardar en despensa</button>
-          <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
-        </div>
-        <p id="subtotalMateriales"><strong>Subtotal materiales:</strong> $0</p>
-      </div>
-    </div>
 
-    <!-- Herramientas -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">🔧</span>
-        <span class="cat-tit">Herramientas</span>
-        <span class="cat-valor" id="val-herramientas">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div id="herramientas-container"></div>
-        <div class="gasto-personalizado-form">
-          <div class="gasto-item">
-            <label for="herramienta-nombre">Nombre:</label>
-            <input type="text" id="herramienta-nombre" placeholder="Ej: Taladro">
+          <!-- Su tiempo -->
+          <p class="cua-rotulo">Su tiempo</p>
+          <div class="cob-tiempo">
+            <input type="text" inputmode="decimal" id="cob-tiempo" class="cua-tinta cob-tiempo-num"
+                   placeholder="0" autocomplete="off" aria-label="Cu&#225;nto tiempo le lleva">
+            <div class="cob-unidad" role="group" aria-label="En d&#237;as o en horas">
+              <button type="button" class="cob-unidad-btn" data-unidad="dias" aria-pressed="true">d&#237;as</button>
+              <button type="button" class="cob-unidad-btn" data-unidad="horas" aria-pressed="false">horas</button>
+            </div>
           </div>
-          <div class="gasto-item">
-            <label for="herramienta-costo">Valor inicial:</label>
-            <input type="text" inputmode="numeric" class="input-num input-money" id="herramienta-costo">
+          <div id="cob-chips-tiempo" class="cob-chips"></div>
+          <div class="cua-fila">
+            <span class="cua-ico cob-ico-quieto" aria-hidden="true" data-ico="tiempo"></span>
+            <span class="cua-fila-rot">Mano de obra</span>
+            <span class="rec-lin"></span>
+            <span id="cob-mano" class="cua-monto cua-solo"></span>
           </div>
-          <div class="gasto-item">
-            <label for="herramienta-anios">Años de vida:</label>
-            <input type="number" inputmode="numeric" class="input-num" id="herramienta-anios" min="0.5" step="0.5" placeholder="Ej: 5">
+          <p id="cob-mano-nota" class="cua-ayuda cob-nota"></p>
+
+          <!-- Lo que compra -->
+          <p class="cua-rotulo">Lo que compra para el trabajo</p>
+          <div id="cob-materiales"></div>
+          <button type="button" id="cob-mas-material" class="cua-mas">
+            <span class="cua-mas-signo" aria-hidden="true">+</span> Anotar material
+          </button>
+          <div id="cob-siempre" class="cob-siempre oculto">
+            <p class="cob-siempre-tit">Lo que siempre uso <small>(toque para anotarlo)</small></p>
+            <div id="cob-siempre-lista" class="cob-siempre-lista"></div>
           </div>
-          <div class="gasto-item">
-            <label for="herramienta-uso">Nivel de uso:</label>
-            <select id="herramienta-uso">
-              <option value="600">Poco uso (≈2 h/día)</option>
-              <option value="1200" selected>Medio uso (≈4 h/día)</option>
-              <option value="2400">Mucho uso (≈8 h/día)</option>
-            </select>
+
+          <!-- Los otros gastos -->
+          <p class="cua-rotulo">Otros gastos</p>
+          <div class="cua-fila">
+            <span class="cua-ico cob-ico-quieto" aria-hidden="true" data-ico="transporte"></span>
+            <label class="cua-fila-rot" for="cob-transporte">Transporte</label>
+            <span class="rec-lin"></span>
+            <input type="text" inputmode="numeric" id="cob-transporte" class="cua-tinta cua-monto"
+                   placeholder="$ 0" autocomplete="off">
           </div>
-          <button id="agregar-herramienta">Agregar herramienta</button>
-          <button type="button" class="btn-guardar-despensa" data-guardar="herramienta">💾 Guardar en despensa</button>
-          <p class="hint">Presiona Enter para agregar · "Guardar en despensa" usa estos mismos datos</p>
-        </div>
-        <p id="subtotalHerramientas"><strong>Subtotal herramientas:</strong> $0</p>
-      </div>
-    </div>
+          <div id="cob-otros"></div>
+          <button type="button" id="cob-mas-otro" class="cua-mas" aria-expanded="false">
+            <span class="cua-mas-signo" aria-hidden="true">+</span> Anotar otro gasto
+          </button>
+          <div id="cob-catalogo" class="cua-catalogo oculto"></div>
 
-    <!-- Otros costos -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">🚚</span>
-        <span class="cat-tit">Otros costos</span>
-        <span class="cat-valor" id="val-otros">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="costoTransporte">Transporte:</label>
-          <input type="text" inputmode="numeric" class="input-num input-money" id="costoTransporte">
-        </div>
-        <div class="gasto-item">
-          <label for="otrosGastos">Otros gastos:</label>
-          <input type="text" inputmode="numeric" class="input-num input-money" id="otrosGastos">
-        </div>
-      </div>
-    </div>
+          <!-- La raya -->
+          <hr class="cua-raya">
+          <div class="cua-total cua-total-chico">
+            <span class="cua-total-rot">Lo que le cuesta a usted</span>
+            <span class="rec-lin"></span>
+            <span class="cua-total-val" id="cob-costo"></span>
+          </div>
 
-    <!-- Margen -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">📈</span>
-        <span class="cat-tit">Margen de ganancia</span>
-        <span class="cat-valor" id="val-margen">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="margenGanancia">Margen (%):</label>
-          <input type="number" inputmode="numeric" class="input-num" id="margenGanancia" min="0" value="30">
-        </div>
-        <div class="margen-chips" id="margen-chips">
-          <button type="button" class="chip-margen" data-margen="20">20%</button>
-          <button type="button" class="chip-margen" data-margen="30">30%</button>
-          <button type="button" class="chip-margen" data-margen="40">40%</button>
-          <button type="button" class="chip-margen" data-margen="50">50%</button>
-        </div>
-      </div>
-    </div>
+          <div class="cob-pct">
+            <div class="cua-total cua-total-chico">
+              <span class="cua-total-rot">Su ganancia</span>
+              <span class="rec-lin"></span>
+              <span class="cua-total-val" id="cob-ganancia"></span>
+            </div>
+            <div id="cob-chips-margen" class="cob-chips" role="group" aria-label="Porcentaje de ganancia"></div>
+          </div>
 
-    <!-- Descuento -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">🏷️</span>
-        <span class="cat-tit">Descuento</span>
-        <span class="cat-valor" id="val-descuento">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="descuentoPorcentaje">Descuento (%):</label>
-          <input type="number" inputmode="numeric" class="input-num" id="descuentoPorcentaje" min="0" value="0">
-        </div>
-        <div class="guardar-despensa">
-          <input type="text" class="nombre-despensa" id="save-descuento-nombre" placeholder="Nombre (ej: Cliente frecuente)">
-          <button type="button" class="btn-guardar-despensa" data-guardar="descuento">💾 Guardar en despensa</button>
+          <div class="cob-pct">
+            <div class="cua-total cua-total-chico">
+              <span class="cua-total-rot">Descuento al cliente</span>
+              <span class="rec-lin"></span>
+              <span class="cua-total-val" id="cob-descuento"></span>
+            </div>
+            <div id="cob-chips-descuento" class="cob-chips" role="group" aria-label="Porcentaje de descuento"></div>
+          </div>
+
+          <hr class="cua-raya cua-raya-doble">
+          <div class="cua-total cua-total-grande">
+            <span class="cua-total-rot">C&#243;brele</span>
+            <span class="rec-lin"></span>
+            <span class="cua-total-val" id="cob-total"></span>
+          </div>
+          <p class="cua-sello" id="cob-sello"></p>
+
+          <p id="cob-editando" class="cob-editando oculto"></p>
+
+          <button type="button" id="cob-hacer" class="ah-hacer-cuenta">
+            H&#225;game la cuenta de cobro
+          </button>
+          <button type="button" id="cob-nuevo" class="rec-descargar">
+            Empezar otro trabajo
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Desglose de costos -->
-    <div id="resultado-cotizacion" class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">🧾</span>
-        <span class="cat-tit">Desglose de costos</span>
-        <span class="cat-valor" id="val-desglose">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <p><strong>Costo total:</strong> <span id="cotiz-costo-total">$0</span></p>
-        <p><strong>Ganancia (<span id="cotiz-margen-pct">30</span>%):</strong> <span id="cotiz-ganancia">$0</span></p>
-        <p><strong>Descuento (<span id="cotiz-descuento-pct">0</span>%):</strong> <span id="cotiz-descuento">$0</span></p>
-      </div>
-    </div>
+      <!-- ============ 3. LA CUENTA DE COBRO ============
+           El papel que se le manda al cliente. El mismo recibo de Ahorro
+           (clases rec-*) con lo que trae una cuenta de cobro de verdad:
+           numero, fecha, a quien, el total en letras. Sin ganancia. -->
+      <div id="cob-recibo" class="rec-caja cob-caja oculto">
+        <button type="button" id="cob-r-cerrar" class="rec-cerrar"
+                title="Cerrar la cuenta" aria-label="Cerrar la cuenta">&#10005;</button>
+        <div class="rec-giro">
+          <div class="rec-cara rec-adelante">
+            <div class="rec-cuerpo">
+              <div class="rec-cab">
+                <p class="rec-marca">Arriero&rsquo;s Wealth</p>
+                <p class="cob-r-tipo" id="cob-r-tipo"></p>
+                <p class="rec-sub" id="cob-r-fecha"></p>
+              </div>
+              <hr class="rec-puntos">
 
-    <!-- Guardar este presupuesto con nombre -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">💾</span>
-        <span class="cat-tit">Guardar presupuesto</span>
-        <span class="cat-valor" id="val-guardar">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div class="gasto-item">
-          <label for="nombrePresupuesto">Nombre:</label>
-          <input type="text" id="nombrePresupuesto" placeholder="Ej: DJ set 4 horas">
+              <div id="cob-r-partes" class="cob-r-partes"></div>
+
+              <div class="rec-que-es">
+                <span class="cre-le-prestan">La suma de</span>
+                <span id="cob-r-total" class="rec-precio"></span>
+                <span id="cob-r-letras" class="cob-r-letras"></span>
+              </div>
+              <hr class="rec-puntos">
+
+              <div id="cob-r-renglones" class="rec-renglones"></div>
+              <hr class="rec-puntos">
+
+              <div id="cob-r-estado" class="cob-r-estado"></div>
+              <div id="cob-r-abonos" class="cob-r-abonos"></div>
+
+              <!-- Anotar lo que le van pagando. Solo en una cuenta guardada
+                   que todavia debe algo. -->
+              <div id="cob-abonar" class="cob-abonar oculto">
+                <label for="cob-abono" class="cob-abonar-rot">&#191;Le pagaron algo?</label>
+                <div class="cob-abonar-fila">
+                  <input type="text" inputmode="numeric" id="cob-abono" class="ah-campo"
+                         placeholder="$ 0" autocomplete="off">
+                  <button type="button" id="cob-abono-anotar" class="rec-btn-g">Anotar abono</button>
+                </div>
+                <button type="button" id="cob-pago-todo" class="rec-btn-g cob-pago-todo">
+                  &#10003; Ya me pag&#243; todo
+                </button>
+              </div>
+
+              <div id="cob-r-guardar" class="rec-guardar">
+                <button type="button" id="cob-r-g-guardar" class="rec-btn-g">
+                  Gu&#225;rdemela en mis cuentas
+                </button>
+                <button type="button" id="cob-r-g-dejar" class="rec-btn-g rec-btn-g-suave">
+                  D&#233;jela as&#237;
+                </button>
+              </div>
+
+              <button type="button" id="cob-r-tipo-btn" class="cob-r-tipo-btn"></button>
+
+              <button type="button" id="cob-r-descargar" class="rec-descargar">
+                <span class="rec-descargar-ico" aria-hidden="true">&#8595;</span>
+                <span>Desc&#225;rguemela como imagen</span>
+              </button>
+
+              <button type="button" id="cob-r-corregir" class="rec-voltear oculto">
+                <span class="rec-flecha" aria-hidden="true">&#9998;</span>
+                <span>Corregirla en la hoja</span>
+              </button>
+
+              <button type="button" id="cob-r-quitar" class="rec-quitar oculto">
+                Quitarla de mis cuentas
+              </button>
+
+              <p class="cob-r-nota">
+                Tranquilo: el cliente no ve su ganancia. Va dentro de la mano de obra.
+              </p>
+            </div>
+          </div>
         </div>
-        <p id="estado-edicion" class="frase-arriero"></p>
-        <button id="guardarPresupuesto" class="btn-principal">Guardar presupuesto</button>
-        <button id="nuevoPresupuesto" class="btn-secundario">Empezar uno nuevo</button>
       </div>
-    </div>
 
-    <!-- Presupuestos guardados -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>
-        <span class="cat-ico" aria-hidden="true">📋</span>
-        <span class="cat-tit">Mis presupuestos</span>
-        <span class="cat-valor" id="val-presupuestos">—</span>
-        <span class="cat-flecha" aria-hidden="true"></span>
-      </h4>
-      <div class="cat-cuerpo">
-        <div id="presupuestos-container"></div>
-        <p id="sin-presupuestos" class="frase-arriero">Todavía no ha guardado ninguno, mijo.</p>
+      <!-- ============ 4. MIS CUENTAS DE COBRO ============ -->
+      <div id="cob-libreta" class="ah-libreta">
+        <button type="button" id="cob-libreta-tit" class="ah-libreta-tit" aria-expanded="true">
+          <span class="ah-libreta-tit-txt">Mis cuentas de cobro</span>
+          <span id="cob-libreta-cuenta" class="ah-libreta-cuenta oculto"></span>
+          <span class="ah-flecha" aria-hidden="true"></span>
+        </button>
+        <div class="ah-libreta-cuerpo">
+          <div id="cob-libreta-lista"></div>
+        </div>
       </div>
-    </div>
 
-    </div><!-- /.cotizar-rejilla -->
+      <p id="cob-aviso" class="ah-aviso oculto" role="status" aria-live="polite"></p>
 
     </div><!-- /#panel-calculo -->
-  </div>
-
-  <!-- ===================== VISTA 2: MI DESPENSA ===================== -->
-  <div id="vista2" class="vista">
-    <h3>Mi Despensa</h3>
-    <p class="despensa-intro">Toque cualquier pieza guardada para sumarla a su presupuesto. Mire arriba cómo cambia lo que debería cobrar, mijo. (Para guardar nuevas, llene los datos en la vista de Cotizar.)</p>
-
-    <!-- Cada gaveta es una tabla: clic en la fila la aplica al presupuesto;
-         la X la borra de la despensa. Las llena biblioteca.js. -->
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>Tarifas</h4>
-      <div id="lib-tarifas-container" class="lib-tabla"></div>
-      <p id="lib-tarifas-vacio" class="frase-arriero">Todavía no ha guardado tarifas.</p>
-    </div>
-
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>Tiempos (mano de obra)</h4>
-      <div id="lib-tiempos-container" class="lib-tabla"></div>
-      <p id="lib-tiempos-vacio" class="frase-arriero">Todavía no ha guardado tiempos.</p>
-    </div>
-
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>Materiales / insumos</h4>
-      <div id="lib-materiales-container" class="lib-tabla"></div>
-      <p id="lib-materiales-vacio" class="frase-arriero">Todavía no ha guardado materiales.</p>
-    </div>
-
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>Herramientas / equipos</h4>
-      <div id="lib-herramientas-container" class="lib-tabla"></div>
-      <p id="lib-herramientas-vacio" class="frase-arriero">Todavía no ha guardado herramientas.</p>
-    </div>
-
-    <div class="categoria-gastos colapsable cerrada">
-      <h4>Descuentos</h4>
-      <div id="lib-descuentos-container" class="lib-tabla"></div>
-      <p id="lib-descuentos-vacio" class="frase-arriero">Todavía no ha guardado descuentos.</p>
-    </div>
   </div>
 
   <!-- ===================== VISTA: EN CONSTRUCCIÓN (próximamente) ===================== -->
@@ -1070,9 +1036,9 @@
 
   </div><!-- /#calc-ventana -->
 
-  <!-- logic_quotation.js va primero: define helpers (formatearDinero, valorNumerico,
+  <!-- app.js va primero: define helpers (formatearDinero, soloDigitos,
        cambiarVista, pintarJornal...) que reutiliza el resto de la app. -->
-  <script src="src/logic_quotation.js"></script>
+  <script src="src/app.js"></script>
   <!-- Como se lee un precio escrito por humanos. Va PRIMERO porque db.js lo
        usa al guardar, y el service worker del menu contextual lo carga aparte
        con importScripts. -->
@@ -1093,7 +1059,10 @@
   <script src="src/cuaderno.js"></script>
   <script src="src/recibo-descargar.js"></script>
   <script src="src/credito.js"></script>
-  <script src="src/biblioteca.js"></script>
+  <!-- Cobrar: las cuentas (puras), la pantalla y la imagen que se baja -->
+  <script src="src/cobro.js"></script>
+  <script src="src/cobrar.js"></script>
+  <script src="src/cobro-descargar.js"></script>
   <script src="src/refranes.js"></script>
   <script src="src/magic.js"></script>
 
