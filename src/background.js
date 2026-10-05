@@ -77,13 +77,45 @@ function botarLoViejo() {
   } catch (e) { /* si no hay almacén, no hay nada que botar */ }
 }
 
+// Los textos del menú en los dos idiomas. El idioma lo escoge la persona en
+// el popup y src/i18n.js lo copia en chrome.storage.sync.
+const TEXTOS_MENU = {
+  es: {
+    titulo: "Arriero: ¿cuándo puedo comprarlo?",
+    sinPrecio: "No pude leer un precio en lo que seleccionaste, mijo. Selecciona solo el número."
+  },
+  en: {
+    titulo: "Arriero: when can I buy it?",
+    sinPrecio: "Couldn't read a price in what you picked, kiddo. Just select the number."
+  }
+};
+let idiomaMenu = 'es';
+
+function textosMenu() { return TEXTOS_MENU[idiomaMenu] || TEXTOS_MENU.es; }
+
+function ponerIdiomaMenu(cual) {
+  idiomaMenu = cual === 'en' ? 'en' : 'es';
+  try { chrome.contextMenus.update("calcularCompra", { title: textosMenu().titulo }, () => void chrome.runtime.lastError); }
+  catch (e) { /* el menú aún no existe */ }
+}
+
+function leerIdiomaMenu() {
+  try { chrome.storage.sync.get(['idioma'], d => ponerIdiomaMenu(d.idioma)); } catch (e) { /* sin almacén */ }
+}
+
+chrome.storage.onChanged.addListener((cambios, area) => {
+  if (area === 'sync' && cambios.idioma) ponerIdiomaMenu(cambios.idioma.newValue);
+});
+chrome.runtime.onStartup.addListener(leerIdiomaMenu);
+leerIdiomaMenu();
+
 // Crear la opción en el menú contextual (solo cuando hay texto seleccionado)
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "calcularCompra",
-    title: "Arriero: ¿cuándo puedo comprarlo?",
+    title: textosMenu().titulo,
     contexts: ["selection"]
-  });
+  }, leerIdiomaMenu);
 
   botarLoViejo();
 });
@@ -111,7 +143,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (tab && tab.id !== undefined) {
       chrome.tabs.sendMessage(tab.id, {
         action: "mostrarAlerta",
-        mensaje: "No pude leer un precio en lo que seleccionaste, mijo. Selecciona solo el número."
+        mensaje: textosMenu().sinPrecio
       });
     }
     return;

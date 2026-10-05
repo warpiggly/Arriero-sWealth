@@ -46,6 +46,7 @@
     <!-- Selector de moneda: compacto, arriba del precio. El usuario la cambia
          cuando quiera. Las opciones las llena src/app.js (lista MONEDAS). -->
     <div class="selector-moneda-wrap">
+      <button id="btn-idioma" class="btn-idioma" type="button">EN</button>
       <select id="selector-moneda" title="Cambiar moneda"></select>
     </div>
 
@@ -302,7 +303,7 @@
             <path d="M12 2.5v7M6 9.5h12"/>
             <path d="M12 2.5a6 6 0 0 1 6 6v1h-6z" fill="currentColor" stroke="none"/>
           </svg>
-          <span>&#191;Lo vio en internet? Se&#241;ale el precio con el mouse y
+          <span data-i18n-html>&#191;Lo vio en internet? Se&#241;ale el precio con el mouse y
           haga <strong>clic derecho</strong>.</span>
         </p>
         </div>
@@ -507,7 +508,7 @@
                 <h4>Corregir</h4>
                 <span id="rec-atras-cuantas"></span>
               </div>
-              <p class="ah-guia">
+              <p class="ah-guia" data-i18n-html>
                 Solo lo de <strong>este</strong> recibo. Escriba en los
                 cuadritos blancos.
               </p>
@@ -1105,6 +1106,14 @@
 
   <!-- app.js va primero: define helpers (formatearDinero, soloDigitos,
        cambiarVista, pintarJornal...) que reutiliza el resto de la app. -->
+  <!-- El idioma va antes que todo: define t() y los diccionarios en inglés. -->
+  <script src="src/i18n.js"></script>
+  <script src="src/i18n/en-base.js"></script>
+  <script src="src/i18n/en-ahorro.js"></script>
+  <script src="src/i18n/en-recibo.js"></script>
+  <script src="src/i18n/en-credito.js"></script>
+  <script src="src/i18n/en-cobrar.js"></script>
+  <script src="src/i18n/en-guia.js"></script>
   <script src="src/app.js"></script>
   <!-- Como se lee un precio escrito por humanos. Va PRIMERO porque db.js lo
        usa al guardar, y el service worker del menu contextual lo carga aparte

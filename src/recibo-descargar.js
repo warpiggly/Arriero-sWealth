@@ -76,7 +76,7 @@ function recdDescargar() {
     .catch(function (e) {
       console.error('No se pudo bajar el recibo:', e);
       if (typeof recAvisar === 'function') {
-        recAvisar('No se pudo bajar el recibo. Intente otra vez.');
+        recAvisar(t('No se pudo bajar el recibo. Intente otra vez.'));
       }
     })
     .then(function () {
@@ -125,16 +125,16 @@ function recdCarriel() {
 }
 
 function recdNombreArchivo(c) {
-  const quees = c.desglose ? (c.grupo || 'mi grupo') : (c.nombre || 'recibo');
+  const quees = c.desglose ? (c.grupo || t('mi grupo')) : (c.nombre || t('recibo'));
   const limpio = String(quees)
     .toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   // fuera tildes
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 40) || 'recibo';
+    .slice(0, 40) || t('recibo');
   const h = new Date();
   const dos = function (n) { return String(n).padStart(2, '0'); };
-  return 'recibo-' + limpio + '-' +
+  return t('recibo') + '-' + limpio + '-' +
          h.getFullYear() + dos(h.getMonth() + 1) + dos(h.getDate()) + '.png';
 }
 
@@ -160,7 +160,7 @@ function recdBajar(lienzo, nombre) {
       // No se revoca de una: Chrome todavía está leyendo el blob.
       setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
       if (typeof recAvisar === 'function') {
-        recAvisar('Listo: el recibo quedó en sus Descargas.');
+        recAvisar(t('Listo: el recibo quedó en sus Descargas.'));
       }
       listo();
     }, 'image/png');
@@ -207,8 +207,8 @@ function recdContenido(ctx, c, carriel, pinta) {
   });
   y += 5;
   y = recdParrafo(ctx, pinta, esGrupo
-        ? c.cuantos + (c.cuantos === 1 ? ' cosa apuntada' : ' cosas en un grupo')
-        : '¿cuándo puedo comprarlo, mijo?', {
+        ? t(c.cuantos === 1 ? '{n} cosa apuntada' : '{n} cosas en un grupo', { n: c.cuantos })
+        : t('¿cuándo puedo comprarlo, mijo?'), {
     x: centro, y: y, ancho: der - izq, fuente: 'italic 13px LiberationSans',
     color: 'rgba(43, 33, 24, 0.55)', centrado: true, alto: 17
   });
@@ -218,8 +218,8 @@ function recdContenido(ctx, c, carriel, pinta) {
 
   // --- Qué es y cuánto cuesta ---
   y += 22;
-  y = recdParrafo(ctx, pinta, esGrupo ? (c.grupo || 'Mi grupo')
-                                      : (c.nombre || 'Lo que usted quiere'), {
+  y = recdParrafo(ctx, pinta, esGrupo ? (c.grupo || t('Mi grupo'))
+                                      : (c.nombre || t('Lo que usted quiere')), {
     x: centro, y: y, ancho: der - izq, fuente: 'bold 25px LiberationSans',
     color: RECD_COLOR.texto, centrado: true, alto: 30
   });
@@ -229,7 +229,7 @@ function recdContenido(ctx, c, carriel, pinta) {
     color: RECD_COLOR.verdeOscuro, centrado: true
   });
 
-  const donde = esGrupo ? (c.cuantos + ' cosas, todo junto')
+  const donde = esGrupo ? t('{n} cosas, todo junto', { n: c.cuantos })
                         : (c.link ? recdDominio(c.link) : '');
   if (donde) {
     y += 8;
@@ -245,7 +245,7 @@ function recdContenido(ctx, c, carriel, pinta) {
   // --- Cosa por cosa (solo el grupal) ---
   if (esGrupo) {
     y += 16;
-    y = recdRotulito(ctx, pinta, 'Cosa por cosa', izq, y);
+    y = recdRotulito(ctx, pinta, t('Cosa por cosa'), izq, y);
     y += 10;
     // El "en cuanto lo tiene" se mide de una vez para TODAS las filas: si cada
     // fila se acomodara sola, los pesos quedarian en escalera y esto dejaria
@@ -259,29 +259,29 @@ function recdContenido(ctx, c, carriel, pinta) {
       y = recdFilaDesglose(ctx, pinta, d, izq, der, y, anchoCuando);
     });
     y += 4;
-    y = recdRenglon(ctx, pinta, 'Todo junto', recdPlata(c.total), '', true, izq, der, y);
+    y = recdRenglon(ctx, pinta, t('Todo junto'), recdPlata(c.total), '', true, izq, der, y);
     y += 14;
     y = recdPuntos(ctx, pinta, izq, der, y);
   }
 
   // --- Cuánto ahorra y cuándo lo tiene ---
   y += 14;
-  y = recdRenglon(ctx, pinta, 'Usted ahorra', recdPlata(c.capacidad.alMes),
-                  '/ mes', false, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Usted ahorra'), recdPlata(c.capacidad.alMes),
+                  t('/ mes'), false, izq, der, y);
 
   if (c.juntado && c.juntado.paraComprar > 0) {
-    y = recdRenglon(ctx, pinta, 'Ya tiene', recdPlata(c.juntado.paraComprar),
+    y = recdRenglon(ctx, pinta, t('Ya tiene'), recdPlata(c.juntado.paraComprar),
                     '', false, izq, der, y);
   }
 
-  const rotCuando = esGrupo ? 'Todo junto' : 'Lo tendrá';
+  const rotCuando = esGrupo ? t('Todo junto') : t('Lo tendrá');
   if (c.cuando.yaLoTiene) {
-    y = recdRenglon(ctx, pinta, rotCuando, 'ya mismo', '', true, izq, der, y);
+    y = recdRenglon(ctx, pinta, rotCuando, t('ya mismo'), '', true, izq, der, y);
   } else if (c.cuando.meses === null) {
-    y = recdRenglon(ctx, pinta, rotCuando, 'no se sabe todavía', '', true, izq, der, y);
+    y = recdRenglon(ctx, pinta, rotCuando, t('no se sabe todavía'), '', true, izq, der, y);
   } else {
     y = recdRenglon(ctx, pinta, rotCuando, c.cuandoEnPalabras, '', true, izq, der, y);
-    y = recdRenglon(ctx, pinta, 'O sea, para', c.fecha, '', false, izq, der, y);
+    y = recdRenglon(ctx, pinta, t('O sea, para'), c.fecha, '', false, izq, der, y);
   }
 
   y += 14;
@@ -290,7 +290,7 @@ function recdContenido(ctx, c, carriel, pinta) {
   // --- Lo que le pesa ---
   if (c.loQuePesa) {
     y += 16;
-    y = recdRotulito(ctx, pinta, 'Lo que le pesa', izq, y);
+    y = recdRotulito(ctx, pinta, t('Lo que le pesa'), izq, y);
     y += 12;
     y = recdParrafo(ctx, pinta, c.loQuePesa, {
       x: izq, y: y, ancho: der - izq, fuente: '16px LiberationSans',
@@ -321,7 +321,7 @@ function recdContenido(ctx, c, carriel, pinta) {
   // --- El aviso, cuando la cuenta se hizo con gastos supuestos ---
   if (c.avisoPrellenado) {
     y += 12;
-    y = recdParrafo(ctx, pinta, 'Ojo con esta cuenta, mijo: ' + c.avisoPrellenado, {
+    y = recdParrafo(ctx, pinta, t('Ojo con esta cuenta, mijo: {aviso}', { aviso: c.avisoPrellenado }), {
       x: izq, y: y, ancho: der - izq, fuente: '13px LiberationSans',
       color: 'rgba(43, 33, 24, 0.62)', alto: 18
     });
@@ -336,7 +336,7 @@ function recdContenido(ctx, c, carriel, pinta) {
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });
   y += 6;
-  y = recdLinea(ctx, pinta, 'Cuenta hecha con Arriero’s Wealth', {
+  y = recdLinea(ctx, pinta, t('Cuenta hecha con Arriero’s Wealth|recibo'), {
     x: centro, y: y, fuente: '12px LiberationSans',
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });
@@ -412,23 +412,23 @@ function recdFilaDesglose(ctx, pinta, d, izq, der, y, anchoCuando) {
     ctx.font = '14px LiberationSans';
     ctx.fillStyle = RECD_COLOR.texto;
     const sitio = bordePlata - anchoPlata - 10 - izq;
-    ctx.fillText(recdRecortar(ctx, d.nombre || '(sin nombre)', sitio), izq, base);
+    ctx.fillText(recdRecortar(ctx, d.nombre || t('(sin nombre)'), sitio), izq, base);
   }
   return base + 8;
 }
 
 function recdCuandoDe(d) {
-  return d.meses === null ? '—' : String(d.mesesEnPalabras).replace(/^en /, '');
+  return d.meses === null ? '—' : String(d.mesesEnPalabras).replace(/^(en|in) /, '');
 }
 
 function recdVeredicto(ctx, pinta, v, izq, der, y) {
-  const t = RECD_TONO[v.tono] || RECD_TONO.bien;
+  const tono = RECD_TONO[v.tono] || RECD_TONO.bien;
   const relleno = 12;
   const xTexto = izq + relleno + 28;
   const anchoTexto = der - relleno - xTexto;
 
   const frase = { ancho: anchoTexto, fuente: 'bold 17px LiberationSans',
-                  color: t.letra, alto: 22 };
+                  color: tono.letra, alto: 22 };
   const porque = { ancho: anchoTexto, fuente: '14px LiberationSans',
                    color: 'rgba(43, 33, 24, 0.72)', alto: 19 };
 
@@ -446,23 +446,23 @@ function recdVeredicto(ctx, pinta, v, izq, der, y) {
   const arriba = y + (alto - contenido) / 2;
 
   if (pinta) {
-    ctx.fillStyle = t.fondo;
+    ctx.fillStyle = tono.fondo;
     recdCajaRedonda(ctx, izq, y, der - izq, alto, 9);
     ctx.fill();
-    ctx.fillStyle = t.linea;
+    ctx.fillStyle = tono.linea;
     recdCajaRedonda(ctx, izq, y, 5, alto, 2);
     ctx.fill();
 
     // La seña, en su redondel, a la altura del primer renglon
     ctx.beginPath();
     ctx.arc(izq + relleno + 11, arriba + 10, 10, 0, Math.PI * 2);
-    ctx.fillStyle = t.linea;
+    ctx.fillStyle = tono.linea;
     ctx.fill();
     ctx.font = 'bold 12px LiberationSans';
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(t.sena, izq + relleno + 11, arriba + 11);
+    ctx.fillText(tono.sena, izq + relleno + 11, arriba + 11);
 
     const finFrase = recdParrafo(ctx, true, v.frase,
                                  Object.assign({ x: xTexto, y: arriba }, frase));
@@ -539,11 +539,11 @@ function recdPartir(ctx, txt, ancho) {
 
 function recdRecortar(ctx, txt, ancho) {
   if (ctx.measureText(txt).width <= ancho) return txt;
-  let t = txt;
-  while (t.length > 1 && ctx.measureText(t + '…').width > ancho) {
-    t = t.slice(0, -1);
+  let corto = txt;
+  while (corto.length > 1 && ctx.measureText(corto + '…').width > ancho) {
+    corto = corto.slice(0, -1);
   }
-  return t + '…';
+  return corto + '…';
 }
 
 // La costura del recibo, de orilla a orilla.
@@ -643,7 +643,7 @@ function recdTextoDe(id) {
 
 function recdHoy() {
   try {
-    return new Date().toLocaleDateString('es-CO',
+    return new Date().toLocaleDateString(LOCALE_FECHAS,
       { day: 'numeric', month: 'long', year: 'numeric' });
   } catch (e) {
     return new Date().toLocaleDateString();

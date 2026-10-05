@@ -44,12 +44,20 @@ const AHORRO_PLAZOS = [3, 6, 12];
 // "una quincena entera" y "un mes entero". Sin esto la app decía "seis
 // quincenas enteros", que a este público le suena a que la escribió una
 // máquina — y es justo lo que no puede pasar.
+// `en1` y `enN`: el periodo en inglés (singular y plural). El inglés arma la
+// frase en otro orden ("two and a half months"), así que tiene su propia rama
+// en ahorroCantidadEnPalabras en vez de traducir pedacitos.
 const AHORRO_PERIODOS = {
-  dia:      { uno: 'día',      varios: 'días',      un: 'un',  entero: 'entero', enteros: 'enteros', medio: 'medio', alMes: 30 },
-  semana:   { uno: 'semana',   varios: 'semanas',   un: 'una', entero: 'entera', enteros: 'enteras', medio: 'media', alMes: 52 / 12 },
-  quincena: { uno: 'quincena', varios: 'quincenas', un: 'una', entero: 'entera', enteros: 'enteras', medio: 'media', alMes: 2 },
-  mes:      { uno: 'mes',      varios: 'meses',     un: 'un',  entero: 'entero', enteros: 'enteros', medio: 'medio', alMes: 1 }
+  dia:      { uno: 'día',      varios: 'días',      un: 'un',  entero: 'entero', enteros: 'enteros', medio: 'medio', en1: 'day',        enN: 'days',        alMes: 30 },
+  semana:   { uno: 'semana',   varios: 'semanas',   un: 'una', entero: 'entera', enteros: 'enteras', medio: 'media', en1: 'week',       enN: 'weeks',       alMes: 52 / 12 },
+  quincena: { uno: 'quincena', varios: 'quincenas', un: 'una', entero: 'entera', enteros: 'enteras', medio: 'media', en1: 'half-month', enN: 'half-months', alMes: 2 },
+  mes:      { uno: 'mes',      varios: 'meses',     un: 'un',  entero: 'entero', enteros: 'enteros', medio: 'medio', en1: 'month',      enN: 'months',      alMes: 1 }
 };
+
+// ¿La app está en inglés? (Con guarda por si este archivo se prueba solo.)
+function ahorroEnIngles() {
+  return typeof IDIOMA !== 'undefined' && IDIOMA === 'en';
+}
 
 // ----------------------------------------------------------------
 // 1. La hoja del mes: ¿cuánto gasta y cuánto le queda?
@@ -119,13 +127,13 @@ function ahorroTopes(a, ingreso, necesarios, otros, ahorro) {
   const tope = function (pct) { return Math.round(ingreso * pct / 100); };
   if (a.regla7030) {
     const pGustos = a.regla10 ? AHORRO_REGLA.gustos - AHORRO_REGLA.ahorro : AHORRO_REGLA.gustos;
-    lista.push({ que: 'necesarios', rotulo: 'Lo necesario', pct: AHORRO_REGLA.necesarios,
+    lista.push({ que: 'necesarios', rotulo: t('Lo necesario'), pct: AHORRO_REGLA.necesarios,
                  tope: tope(AHORRO_REGLA.necesarios), lleva: necesarios, esTecho: true });
-    lista.push({ que: 'gustos', rotulo: 'Sus gustos', pct: pGustos,
+    lista.push({ que: 'gustos', rotulo: t('Sus gustos'), pct: pGustos,
                  tope: tope(pGustos), lleva: otros, esTecho: true });
   }
   if (a.regla10) {
-    lista.push({ que: 'ahorro', rotulo: 'Para guardar', pct: AHORRO_REGLA.ahorro,
+    lista.push({ que: 'ahorro', rotulo: t('Para guardar'), pct: AHORRO_REGLA.ahorro,
                  tope: tope(AHORRO_REGLA.ahorro), lleva: ahorro, esTecho: false });
   }
   // esTecho: el tope es "hasta" (no pasarse). El ahorro es "por lo menos".
@@ -137,20 +145,20 @@ function ahorroTopes(a, ingreso, necesarios, otros, ahorro) {
 }
 
 function ahorroConsejoDeLaHoja(ingreso, necesarios, otros, ahorro, restante, vacio) {
-  if (ingreso <= 0) return 'Cuando me diga cuánto gana al mes, le digo cómo va.';
-  if (vacio) return 'Anote en qué se le va la plata y le digo cómo va, mijo.';
+  if (ingreso <= 0) return t('Cuando me diga cuánto gana al mes, le digo cómo va.');
+  if (vacio) return t('Anote en qué se le va la plata y le digo cómo va, mijo.');
   if (restante < 0) {
     return otros > 0
-      ? 'Está gastando más de lo que gana. Empiece por los otros gastos: ahí es donde más fácil se recorta.'
-      : 'Está gastando más de lo que gana. Mire las deudas y los servicios: son los que más se pueden bajar.';
+      ? t('Está gastando más de lo que gana. Empiece por los otros gastos: ahí es donde más fácil se recorta.')
+      : t('Está gastando más de lo que gana. Mire las deudas y los servicios: son los que más se pueden bajar.');
   }
   const pNec = necesarios / ingreso;
-  if (pNec >= 0.8) return 'Lo necesario se le lleva casi todo. Mire si alguna deuda o servicio se puede bajar.';
-  if (pNec >= 0.7) return 'Va justo, mijo. Un recorte chiquito en los otros gastos le da aire.';
+  if (pNec >= 0.8) return t('Lo necesario se le lleva casi todo. Mire si alguna deuda o servicio se puede bajar.');
+  if (pNec >= 0.7) return t('Va justo, mijo. Un recorte chiquito en los otros gastos le da aire.');
   if (ahorro < ingreso * AHORRO_REGLA.ahorro / 100) {
-    return 'Va bien. Si puede, aparte el 10 % de lo que gana: poquito a poco se vuelve su colchón.';
+    return t('Va bien. Si puede, aparte el 10 % de lo que gana: poquito a poco se vuelve su colchón.');
   }
-  return 'Va muy bien, mijo. Siga así y no le meta mano a lo que guarda.';
+  return t('Va muy bien, mijo. Siga así y no le meta mano a lo que guarda.');
 }
 
 // ----------------------------------------------------------------
@@ -220,17 +228,22 @@ function ahorroCuandoLoTiene(precio, capacidadAlMes, yaJuntado) {
 
 // Los meses, dichos como los diría una persona.
 function ahorroPlazoEnPalabras(meses) {
-  if (meses === null || meses === undefined) return 'no se sabe';
-  if (meses <= 0) return 'ya mismo';
-  if (meses === 1) return 'en un mes';
-  if (meses < 12) return 'en ' + meses + ' meses';
+  if (meses === null || meses === undefined) return t('no se sabe');
+  if (meses <= 0) return t('ya mismo');
+  return t('en {plazo}', { plazo: ahorroDuracion(meses) });
+}
+
+// El plazo pelado, sin el "en" adelante: "5 meses", "un año y 2 meses".
+function ahorroDuracion(meses) {
+  if (meses === 1) return t('un mes');
+  if (meses < 12) return t('{n} meses', { n: meses });
 
   const anios = Math.floor(meses / 12);
   const sobran = meses % 12;
-  const parteAnios = anios === 1 ? 'un año' : anios + ' años';
-  if (!sobran) return 'en ' + parteAnios;
-  const parteMeses = sobran === 1 ? 'un mes' : sobran + ' meses';
-  return 'en ' + parteAnios + ' y ' + parteMeses;
+  const parteAnios = anios === 1 ? t('un año') : t('{n} años', { n: anios });
+  if (!sobran) return parteAnios;
+  const parteMeses = sobran === 1 ? t('un mes') : t('{n} meses', { n: sobran });
+  return t('{anios} y {meses}', { anios: parteAnios, meses: parteMeses });
 }
 
 // La fecha, para el renglón de "o sea, para…".
@@ -238,6 +251,9 @@ function ahorroFechaTexto(meses, desde) {
   if (meses === null || meses === undefined) return '';
   const hoy = desde ? new Date(desde) : new Date();
   const d = new Date(hoy.getFullYear(), hoy.getMonth() + meses, 1);
+  if (ahorroEnIngles()) {
+    return d.toLocaleDateString(LOCALE_FECHAS, { month: 'long', year: 'numeric' });
+  }
   const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   return MESES[d.getMonth()] + ' de ' + d.getFullYear();
@@ -269,8 +285,8 @@ function ahorroVeredicto(datos) {
     return {
       caso: 'alcanza',
       tono: 'bien',
-      frase: 'Sí le alcanza, mijo',
-      porque: 'Con lo que ya tiene guardado.'
+      frase: t('Sí le alcanza, mijo'),
+      porque: t('Con lo que ya tiene guardado.')
     };
   }
 
@@ -281,10 +297,11 @@ function ahorroVeredicto(datos) {
     return {
       caso: 'no-alcanza',
       tono: 'no',
-      frase: 'Todavía no le alcanza',
-      porque: 'Para tenerlo en un año le tocaría juntar ' +
-              ahorroPlata(porMes) + ' al mes, o ' +
-              ahorroPlata(Math.ceil(porMes / 30)) + ' al día.',
+      frase: t('Todavía no le alcanza'),
+      porque: t('Para tenerlo en un año le tocaría juntar {porMes} al mes, o {porDia} al día.', {
+        porMes: ahorroPlata(porMes),
+        porDia: ahorroPlata(Math.ceil(porMes / 30))
+      }),
       necesitaAlMes: porMes
     };
   }
@@ -297,11 +314,12 @@ function ahorroVeredicto(datos) {
     return {
       caso: 'colchon',
       tono: 'ojo',
-      frase: 'Le alcanza, pero se gasta la reserva',
-      porque: 'Saca ' + ahorroPlata(delColchon) + ' y le quedan ' +
-              ahorroPlata(queda) + '. Esperando ' +
-              ahorroPlazoEnPalabras(cuando.meses).replace(/^en /, '') +
-              ' no lo toca.',
+      frase: t('Le alcanza, pero se gasta la reserva'),
+      porque: t('Saca {saca} y le quedan {queda}. Esperando {plazo} no lo toca.', {
+        saca: ahorroPlata(delColchon),
+        queda: ahorroPlata(queda),
+        plazo: ahorroDuracion(cuando.meses)
+      }),
       delColchon: delColchon,
       quedaDeColchon: queda
     };
@@ -314,9 +332,8 @@ function ahorroVeredicto(datos) {
     return {
       caso: 'lento',
       tono: 'lento',
-      frase: 'Le alcanza, pero se va a demorar',
-      porque: 'Con ' + ahorroPlata(paraElTope) +
-              ' al mes lo tendría en año y medio.',
+      frase: t('Le alcanza, pero se va a demorar'),
+      porque: t('Con {monto} al mes lo tendría en año y medio.', { monto: ahorroPlata(paraElTope) }),
       meses: cuando.meses,
       paraNoDemorarse: paraElTope
     };
@@ -330,8 +347,8 @@ function ahorroVeredicto(datos) {
   return {
     caso: 'alcanza',
     tono: 'bien',
-    frase: 'Sí le alcanza, mijo',
-    porque: colchon > 0 ? 'Sin tocar su colchón.' : '',
+    frase: t('Sí le alcanza, mijo'),
+    porque: colchon > 0 ? t('Sin tocar su colchón.') : '',
     meses: cuando.meses
   };
 }
@@ -354,34 +371,38 @@ function ahorroLoQuePesa(precio, capacidadAlMes, frecuencia) {
   const p = Math.max(0, precio || 0);
   const cap = capacidadAlMes || 0;
 
-  if (p === 0) return 'No cuesta nada, mijo.';
+  if (p === 0) return t('No cuesta nada, mijo.');
   if (cap <= 0) {
-    return 'Hoy no le queda nada para guardar, así que todo esto es cuesta arriba.';
+    return t('Hoy no le queda nada para guardar, así que todo esto es cuesta arriba.');
   }
 
   const per = AHORRO_PERIODOS[frecuencia] || AHORRO_PERIODOS.mes;
   // Lo que guarda en un periodo de los suyos
   const porPeriodo = cap / per.alMes;
   const veces = p / porPeriodo;
+  const ing = ahorroEnIngles();
+  // Los pedazos del periodo, ya en el idioma de la app
+  const periodo = ing ? per.en1 : per.uno;
+  const unPeriodo = ing ? 'a ' + per.en1 : per.un + ' ' + per.uno;
+  const unPeriodoEntero = ing ? 'a whole ' + per.en1 : per.un + ' ' + per.uno + ' ' + per.entero;
 
   if (veces < 0.2) {
-    return 'Es un pedacito de lo que usted guarda cada ' + per.uno + ': no lo va a sentir.';
+    return t('Es un pedacito de lo que usted guarda cada {periodo}: no lo va a sentir.', { periodo: periodo });
   }
   if (veces < 0.4) {
-    return 'Es como la cuarta parte de lo que guarda cada ' + per.uno + '.';
+    return t('Es como la cuarta parte de lo que guarda cada {periodo}.', { periodo: periodo });
   }
   if (veces < 0.7) {
-    return 'Se le lleva casi la mitad de lo que guarda cada ' + per.uno + '.';
+    return t('Se le lleva casi la mitad de lo que guarda cada {periodo}.', { periodo: periodo });
   }
   if (veces < 0.95) {
-    return 'Se le lleva casi todo lo que guarda en ' + per.un + ' ' + per.uno + '.';
+    return t('Se le lleva casi todo lo que guarda en {unPeriodo}.', { unPeriodo: unPeriodo });
   }
   if (veces < 1.3) {
-    return 'Es ' + per.un + ' ' + per.uno + ' ' + per.entero +
-           ' de todo lo que usted guarda.';
+    return t('Es {unPeriodoEntero} de todo lo que usted guarda.', { unPeriodoEntero: unPeriodoEntero });
   }
 
-  return 'Son ' + ahorroCantidadEnPalabras(veces, per) + ' de todo lo que usted guarda.';
+  return t('Son {cantidad} de todo lo que usted guarda.', { cantidad: ahorroCantidadEnPalabras(veces, per) });
 }
 
 // 2 -> "dos meses" · 4,25 -> "cuatro meses y medio" · 43 -> "43 meses"
@@ -392,6 +413,20 @@ function ahorroCantidadEnPalabras(cantidad, periodo) {
   const medios = Math.round(cantidad * 2) / 2;
   const entero = Math.floor(medios);
   const conMedio = medios - entero >= 0.5;
+
+  // En inglés el orden es otro: "two whole months", "two and a half months",
+  // "a month and a half".
+  if (ahorroEnIngles()) {
+    const NUM_EN = ['zero', 'one', 'two', 'three', 'four', 'five', 'six',
+                    'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+    if (entero > 12) return Math.round(medios) + ' whole ' + periodo.enN;
+    if (entero === 1) {
+      return conMedio ? 'a ' + periodo.en1 + ' and a half' : 'a whole ' + periodo.en1;
+    }
+    return conMedio
+      ? NUM_EN[entero] + ' and a half ' + periodo.enN
+      : NUM_EN[entero] + ' whole ' + periodo.enN;
+  }
 
   if (entero > 12) {
     return Math.round(medios) + ' ' + periodo.varios + ' ' + periodo.enteros;
@@ -421,26 +456,29 @@ function ahorroPorPlazo(precio, meses, capacidadAlMes, yaJuntado) {
   if (falta === 0) {
     return {
       meses: meses, porMes: 0, alcanza: true, faltaAlMes: 0,
-      dice: 'Ya lo tiene, mijo. No hay que guardar nada más.'
+      dice: t('Ya lo tiene, mijo. No hay que guardar nada más.')
     };
   }
 
   if (porMes <= cap) {
     return {
       meses: meses, porMes: porMes, alcanza: true, faltaAlMes: 0,
-      dice: 'Para tenerlo en ' + meses + ' meses tendría que guardar ' +
-            ahorroPlata(porMes) + ' al mes. Usted ya guarda ' +
-            ahorroPlata(cap) + ': le sobra.'
+      dice: t('Para tenerlo en {meses} meses tendría que guardar {porMes} al mes. Usted ya guarda {guarda}: le sobra.', {
+        meses: meses, porMes: ahorroPlata(porMes), guarda: ahorroPlata(cap)
+      })
     };
   }
 
   const faltaAlMes = porMes - cap;
   return {
     meses: meses, porMes: porMes, alcanza: false, faltaAlMes: faltaAlMes,
-    dice: 'Para tenerlo en ' + meses + ' meses tendría que guardar ' +
-          ahorroPlata(porMes) + ' al mes, y hoy guarda ' + ahorroPlata(cap) +
-          '. Le faltarían ' + ahorroPlata(faltaAlMes) + ' cada mes — serían ' +
-          ahorroPlata(Math.ceil(faltaAlMes / 30)) + ' al día.'
+    dice: t('Para tenerlo en {meses} meses tendría que guardar {porMes} al mes, y hoy guarda {guarda}. Le faltarían {falta} cada mes — serían {porDia} al día.', {
+      meses: meses,
+      porMes: ahorroPlata(porMes),
+      guarda: ahorroPlata(cap),
+      falta: ahorroPlata(faltaAlMes),
+      porDia: ahorroPlata(Math.ceil(faltaAlMes / 30))
+    })
   };
 }
 
@@ -485,8 +523,7 @@ function ahorroCuentaUnitaria(item, ajustes) {
     // La pantalla usa esto para poner el aviso de "estoy contando con que todo
     // lo que gana lo puede guardar".
     avisoPrellenado: cap.faltaPrellenado
-      ? 'Estoy contando con que todo lo que gana lo puede guardar. Dígame en ' +
-        'qué se le va la plata y le hago la cuenta de verdad.'
+      ? t('Estoy contando con que todo lo que gana lo puede guardar. Dígame en qué se le va la plata y le hago la cuenta de verdad.')
       : ''
   };
 }
@@ -541,10 +578,12 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
   const porDondeArrancar = alcanzables.length ? alcanzables[0] : null;
 
   if (porDondeArrancar && (veredicto.caso === 'lento' || veredicto.caso === 'no-alcanza')) {
-    veredicto.frase = 'Todo junto se va a demorar';
-    veredicto.porque = veredicto.porque +
-      ' Pero ' + (porDondeArrancar.nombre || 'la más barata') + ' la tiene ' +
-      porDondeArrancar.mesesEnPalabras + ': arranque por ahí.';
+    veredicto.frase = t('Todo junto se va a demorar');
+    veredicto.porque = veredicto.porque + ' ' +
+      t('Pero {cosa} la tiene {plazo}: arranque por ahí.', {
+        cosa: porDondeArrancar.nombre || t('la más barata'),
+        plazo: porDondeArrancar.mesesEnPalabras
+      });
   }
 
   return {
@@ -562,8 +601,7 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
     plazos: ahorroTodosLosPlazos(total, cap.alMes, jun.paraComprar),
     porDondeArrancar: porDondeArrancar,
     avisoPrellenado: cap.faltaPrellenado
-      ? 'Estoy contando con que todo lo que gana lo puede guardar. Dígame en ' +
-        'qué se le va la plata y le hago la cuenta de verdad.'
+      ? t('Estoy contando con que todo lo que gana lo puede guardar. Dígame en qué se le va la plata y le hago la cuenta de verdad.')
       : ''
   };
 }
@@ -572,13 +610,13 @@ function ahorroCuentaGrupal(nombreGrupo, items, ajustes) {
 function ahorroParteDelGrupo(precio, total) {
   if (!total || !precio) return '';
   const parte = precio / total;
-  if (parte >= 0.9) return 'es casi todo el grupo';
-  if (parte >= 0.7) return 'se lleva siete de cada diez pesos del grupo';
-  if (parte >= 0.55) return 'se lleva tres de cada cinco pesos del grupo';
-  if (parte >= 0.45) return 'es como la mitad del grupo';
-  if (parte >= 0.28) return 'es como la tercera parte del grupo';
-  if (parte >= 0.18) return 'es como la quinta parte del grupo';
-  return 'es una parte chiquita del grupo';
+  if (parte >= 0.9) return t('es casi todo el grupo');
+  if (parte >= 0.7) return t('se lleva siete de cada diez pesos del grupo');
+  if (parte >= 0.55) return t('se lleva tres de cada cinco pesos del grupo');
+  if (parte >= 0.45) return t('es como la mitad del grupo');
+  if (parte >= 0.28) return t('es como la tercera parte del grupo');
+  if (parte >= 0.18) return t('es como la quinta parte del grupo');
+  return t('es una parte chiquita del grupo');
 }
 
 // ----------------------------------------------------------------

@@ -75,8 +75,8 @@
 
     // Cargar las frases del JSON empaquetado en la extensión
     const url = (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL)
-      ? chrome.runtime.getURL("data/refranes.json")
-      : "data/refranes.json";
+      ? chrome.runtime.getURL(rutaDatos("data/refranes.json"))
+      : rutaDatos("data/refranes.json");
 
     fetch(url)
       .then(r => r.json())

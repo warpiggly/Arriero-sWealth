@@ -93,7 +93,7 @@ function deudaInicioDelDia(ts) {
 
 function deudaFechaCorta(ts) {
   try {
-    return new Date(ts).toLocaleDateString('es-CO',
+    return new Date(ts).toLocaleDateString(LOCALE_FECHAS,
       { day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '');
   } catch (e) { return new Date(ts).toLocaleDateString(); }
 }
@@ -212,9 +212,10 @@ function deudaVeredicto(plan, margen, plata) {
   if (plan.terminado) {
     return {
       tono: 'bien', mora: false, causas: causas, sugerencias: sugerencias,
-      frase: '¡Ya terminó de pagar, mijo!',
-      porque: 'Pagó ' + $(plan.totalPagar) + ' en ' + plan.mesesReales +
-              (plan.mesesReales === 1 ? ' cuota.' : ' cuotas.')
+      frase: t('¡Ya terminó de pagar, mijo!'),
+      porque: plan.mesesReales === 1
+        ? t('Pagó {total} en {n} cuota.', { total: $(plan.totalPagar), n: plan.mesesReales })
+        : t('Pagó {total} en {n} cuotas.', { total: $(plan.totalPagar), n: plan.mesesReales })
     };
   }
 
@@ -223,12 +224,10 @@ function deudaVeredicto(plan, margen, plata) {
   if (atrasadas.length) {
     const debe = atrasadas.reduce(function (t, f) { return t + f.pago; }, 0);
     causas.push(atrasadas.length === 1
-      ? 'La cuota del ' + deudaFechaCorta(atrasadas[0].fecha) + ' ya pasó y no está chuleada.'
-      : 'Tiene ' + atrasadas.length + ' cuotas vencidas sin chulear (' + $(debe) + ').');
-    sugerencias.push('Si ya las pagó, chulee las cuotas abajo. Si no, páguelas cuanto antes: ' +
-                     'cada día de atraso el banco cobra intereses de mora.');
-    sugerencias.push('Si no alcanza, llame al banco ANTES de que pase más tiempo y pida un ' +
-                     'acuerdo de pago: casi siempre sale más barato que la mora.');
+      ? t('La cuota del {fecha} ya pasó y no está chuleada.', { fecha: deudaFechaCorta(atrasadas[0].fecha) })
+      : t('Tiene {n} cuotas vencidas sin chulear ({debe}).', { n: atrasadas.length, debe: $(debe) }));
+    sugerencias.push(t('Si ya las pagó, chulee las cuotas abajo. Si no, páguelas cuanto antes: cada día de atraso el banco cobra intereses de mora.'));
+    sugerencias.push(t('Si no alcanza, llame al banco ANTES de que pase más tiempo y pida un acuerdo de pago: casi siempre sale más barato que la mora.'));
   }
 
   // 2. Pagó menos de la cuota
@@ -236,37 +235,33 @@ function deudaVeredicto(plan, margen, plata) {
   if (cortas.length) {
     const falto = cortas.reduce(function (t, f) { return t + f.corto; }, 0);
     causas.push(cortas.length === 1
-      ? 'En la cuota ' + cortas[0].n + ' pagó ' + $(cortas[0].corto) + ' menos de lo que tocaba.'
-      : 'En ' + cortas.length + ' cuotas pagó menos: le faltaron ' + $(falto) + '.');
-    sugerencias.push('Póngale esos ' + $(falto) + ' a la próxima cuota para quedar al día. ' +
-                     'Pagar incompleto también es mora para el banco.');
+      ? t('En la cuota {n} pagó {menos} menos de lo que tocaba.', { n: cortas[0].n, menos: $(cortas[0].corto) })
+      : t('En {n} cuotas pagó menos: le faltaron {falto}.', { n: cortas.length, falto: $(falto) }));
+    sugerencias.push(t('Póngale esos {falto} a la próxima cuota para quedar al día. Pagar incompleto también es mora para el banco.', { falto: $(falto) }));
   }
 
   // 3. La cuota no le cabe
   if (margen < plan.cuota) {
     causas.push(margen <= 0
-      ? 'Hoy no le sobra nada al mes para pagar la cuota de ' + $(plan.cuota) + '.'
-      : 'La cuota de ' + $(plan.cuota) + ' es más de lo que le sobra al mes (' + $(margen) + ').');
+      ? t('Hoy no le sobra nada al mes para pagar la cuota de {cuota}.', { cuota: $(plan.cuota) })
+      : t('La cuota de {cuota} es más de lo que le sobra al mes ({margen}).', { cuota: $(plan.cuota), margen: $(margen) }));
     const sug = deudaMesesSugeridos(plan.monto, plan.tasa, margen);
     if (sug && sug.meses > plan.mesesPedidos) {
-      sugerencias.push('Pídalo a ' + sug.meses + ' meses: la cuota baja a ' + $(sug.cuota) +
-                       ' y sí le cabe.');
+      sugerencias.push(t('Pídalo a {meses} meses: la cuota baja a {cuota} y sí le cabe.', { meses: sug.meses, cuota: $(sug.cuota) }));
     }
     if (margen > 0) {
       const puede = deudaMontoParaCuota(margen, plan.tasa, plan.mesesPedidos);
-      sugerencias.push('O pida menos plata: a ' + plan.mesesPedidos + ' meses, hasta ' +
-                       $(puede) + ' le cabe.');
-      sugerencias.push('O libere ' + $(plan.cuota - margen) + ' al mes en sus gastos antes de firmar.');
+      sugerencias.push(t('O pida menos plata: a {meses} meses, hasta {puede} le cabe.', { meses: plan.mesesPedidos, puede: $(puede) }));
+      sugerencias.push(t('O libere {monto} al mes en sus gastos antes de firmar.', { monto: $(plan.cuota - margen) }));
     } else {
-      sugerencias.push('Antes de sacar el crédito, mire sus gastos en la hoja del mes: ' +
-                       'hoy lo que gana no alcanza para una cuota más.');
+      sugerencias.push(t('Antes de sacar el crédito, mire sus gastos en la hoja del mes: hoy lo que gana no alcanza para una cuota más.'));
     }
   }
 
   if (causas.length) {
     return {
       tono: 'no', mora: true, causas: causas, sugerencias: sugerencias,
-      frase: atrasadas.length || cortas.length ? 'Ojo, mijo: va en mora' : 'Ojo, mijo: va para mora',
+      frase: atrasadas.length || cortas.length ? t('Ojo, mijo: va en mora') : t('Ojo, mijo: va para mora'),
       porque: causas.join(' ')
     };
   }
@@ -274,16 +269,16 @@ function deudaVeredicto(plan, margen, plata) {
   const queda = margen - plan.cuota;
   return {
     tono: 'bien', mora: false, causas: causas, sugerencias: sugerencias,
-    frase: 'La cuota le cabe, mijo',
-    porque: 'Después de pagarla le quedan ' + $(queda) + ' al mes.'
+    frase: t('La cuota le cabe, mijo'),
+    porque: t('Después de pagarla le quedan {queda} al mes.', { queda: $(queda) })
   };
 }
 
 // Cuánto cambió el final por lo que la persona pagó de más o de menos.
 function deudaCambioDelFinal(plan) {
   const d = plan.mesesReales - plan.mesesPedidos;
-  if (plan.sinFin) return 'Con estos pagos no termina nunca';
+  if (plan.sinFin) return t('Con estos pagos no termina nunca');
   if (d === 0) return '';
-  const cuantos = Math.abs(d) === 1 ? 'un mes' : Math.abs(d) + ' meses';
-  return d < 0 ? 'termina ' + cuantos + ' antes' : 'se demora ' + cuantos + ' más';
+  const cuantos = Math.abs(d) === 1 ? t('un mes') : t('{n} meses', { n: Math.abs(d) });
+  return d < 0 ? t('termina {cuantos} antes', { cuantos: cuantos }) : t('se demora {cuantos} más', { cuantos: cuantos });
 }

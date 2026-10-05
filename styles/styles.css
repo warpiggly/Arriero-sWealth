@@ -582,6 +582,19 @@ body::after {
   cursor: pointer;
 }
 .selector-moneda-wrap select:hover { border-color: var(--naranja-osc); }
+.selector-moneda-wrap { gap: 6px; }
+.btn-idioma {
+  padding: 2px 8px;
+  border: 1.5px solid var(--naranja);
+  border-radius: 12px;
+  background: var(--crema);
+  color: var(--texto);
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+.btn-idioma:hover { border-color: var(--naranja-osc); }
 
 /* ---------- Botón maestro (abre/cierra todo el cálculo) ---------- */
 .master-toggle-wrap { text-align: center; margin: 2px 0 14px; }

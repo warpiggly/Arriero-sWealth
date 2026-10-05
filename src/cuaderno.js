@@ -120,7 +120,7 @@ function cuaArmar() {
     if (r.guarda) {
       const tag = document.createElement('small');
       tag.className = 'cua-tag';
-      tag.textContent = 'se guarda';
+      tag.textContent = t('se guarda');
       rot.appendChild(tag);
     }
     cuaRenglon(cont, r.clave, r.rotulo, r.ayuda, rot, campo, null, r.guarda);
@@ -136,14 +136,13 @@ function cuaRenglonCreditos(cont) {
   valor.id = 'cua-creditos';
   const rot = document.createElement('span');
   rot.className = 'cua-fila-rot';
-  rot.textContent = 'Créditos';
+  rot.textContent = t('Créditos');
   const tag = document.createElement('small');
   tag.className = 'cua-tag';
-  tag.textContent = 'se suman solos';
+  tag.textContent = t('se suman solos');
   rot.appendChild(tag);
-  const fila = cuaRenglon(cont, 'deudas', 'Créditos',
-    'La cuota de este mes de los créditos que tiene apuntados. Se suma sola: ' +
-    'no la escriba otra vez en Deudas.', rot, valor, null, false);
+  const fila = cuaRenglon(cont, 'deudas', t('Créditos'),
+    t('La cuota de este mes de los créditos que tiene apuntados. Se suma sola: no la escriba otra vez en Deudas.'), rot, valor, null, false);
   fila.id = 'cua-creditos-fila';
   fila.classList.add('cua-fila-creditos', 'oculto');
 }
@@ -156,7 +155,7 @@ function cuaCampoMonto(id, rotulo) {
   campo.className = 'cua-tinta cua-monto';
   campo.id = id;
   campo.placeholder = '$ 0';
-  campo.setAttribute('aria-label', rotulo + ', cuánto al mes');
+  campo.setAttribute('aria-label', t('{rotulo}, cuánto al mes', { rotulo: rotulo }));
   recAtarMoneda(campo);
   return campo;
 }
@@ -175,7 +174,7 @@ function cuaRenglon(cont, clave, rotulo, ayuda, rot, campo, quitar, guarda) {
   ico.type = 'button';
   ico.className = 'cua-ico';
   ico.title = ayuda;
-  ico.setAttribute('aria-label', '¿Qué va en ' + rotulo + '?');
+  ico.setAttribute('aria-label', t('¿Qué va en {rotulo}?', { rotulo: rotulo }));
   ico.setAttribute('aria-expanded', 'false');
   ico.appendChild(cuaSvg(clave));
   ico.addEventListener('click', function () {
@@ -235,9 +234,9 @@ function cuaPintarOtros(a) {
 }
 
 function cuaRenglonOtro(cont, o, i) {
-  const cat = ajustesDelCatalogo(o.clave) || { rotulo: 'Otra cosa', ayuda: '' };
+  const cat = ajustesDelCatalogo(o.clave) || { rotulo: t('Otra cosa'), ayuda: '' };
   const esOtra = cuaBase(o.clave) === 'otra';
-  const rotulo = esOtra ? (o.nombre || 'Otra cosa') : cat.rotulo;
+  const rotulo = esOtra ? (o.nombre || t('Otra cosa')) : cat.rotulo;
 
   const campo = cuaCampoMonto('cua-o-' + i, rotulo);
   campo.addEventListener('input', function () {
@@ -251,9 +250,9 @@ function cuaRenglonOtro(cont, o, i) {
     rot.type = 'text';
     rot.id = 'cua-on-' + i;
     rot.className = 'cua-tinta cua-nombre';
-    rot.placeholder = '¿Qué es?';
+    rot.placeholder = t('¿Qué es?');
     rot.maxLength = 40;
-    rot.setAttribute('aria-label', 'Nombre del gasto');
+    rot.setAttribute('aria-label', t('Nombre del gasto'));
     rot.addEventListener('input', function () { cuaCambiarOtro(i, { nombre: rot.value }); });
   } else {
     rot = document.createElement('label');
@@ -266,8 +265,8 @@ function cuaRenglonOtro(cont, o, i) {
   quitar.type = 'button';
   quitar.className = 'cua-quitar';
   quitar.textContent = '×';
-  quitar.title = 'Borrar este renglón';
-  quitar.setAttribute('aria-label', 'Borrar ' + rotulo);
+  quitar.title = t('Borrar este renglón');
+  quitar.setAttribute('aria-label', t('Borrar {rotulo}', { rotulo: rotulo }));
   quitar.addEventListener('click', function () {
     const lista = recAjustes.otros.slice();
     lista.splice(i, 1);
@@ -378,7 +377,7 @@ function cuaPintarTopes(h) {
 
   const tit = document.createElement('p');
   tit.className = 'cua-topes-tit';
-  tit.textContent = 'Según la regla, le toca';
+  tit.textContent = t('Según la regla, le toca');
   caja.appendChild(tit);
 
   h.reglas.forEach(function (r) {
@@ -387,7 +386,7 @@ function cuaPintarTopes(h) {
 
     const rot = document.createElement('span');
     rot.className = 'cua-tope-rot';
-    rot.textContent = r.rotulo + (r.esTecho ? ' hasta' : '') + ' (' + r.pct + ' %)';
+    rot.textContent = cuaRotuloRegla(r);
     const val = document.createElement('span');
     val.className = 'cua-tope-val';
     val.textContent = recPlata(r.tope);
@@ -409,30 +408,37 @@ function cuaPintarTopes(h) {
 
 function cuaComoVaLaRegla(r) {
   if (r.esTecho) {
-    return r.cumple ? 'le quedan ' + recPlata(r.diferencia)
-                    : 'se pasa ' + recPlata(-r.diferencia);
+    return r.cumple ? t('le quedan {monto}', { monto: recPlata(r.diferencia) })
+                    : t('se pasa {monto}', { monto: recPlata(-r.diferencia) });
   }
-  return r.cumple ? 'ya lo aparta' : 'le faltan ' + recPlata(-r.diferencia);
+  return r.cumple ? t('ya lo aparta') : t('le faltan {monto}', { monto: recPlata(-r.diferencia) });
+}
+
+// "Necesidades hasta (70 %)": el rótulo de la regla, para la pantalla y la imagen.
+function cuaRotuloRegla(r) {
+  return r.esTecho ? t('{rotulo} hasta ({pct} %)', { rotulo: r.rotulo, pct: r.pct })
+                   : t('{rotulo} ({pct} %)', { rotulo: r.rotulo, pct: r.pct });
 }
 
 function cuaSelloNecesarios(h) {
-  if (h.pctNecesarios === null) return 'Anote lo que gana y le digo cuánto es.';
+  if (h.pctNecesarios === null) return t('Anote lo que gana y le digo cuánto es.');
   const p = h.pctNecesarios;
-  const palabra = h.tonoNecesarios === 'bien' ? 'va bien'
-    : h.tonoNecesarios === 'ojo' ? 'va justo'
-    : p >= 100 ? 'es más de lo que gana' : 'es muy alto';
-  return CUA_TONO[h.tonoNecesarios].sena + ' Es el ' + cuaNum(p) + ' % de lo que gana: ' + palabra + '.';
+  const palabra = h.tonoNecesarios === 'bien' ? t('va bien')
+    : h.tonoNecesarios === 'ojo' ? t('va justo')
+    : p >= 100 ? t('es más de lo que gana') : t('es muy alto');
+  return CUA_TONO[h.tonoNecesarios].sena + ' ' +
+    t('Es el {pct} % de lo que gana: {palabra}.', { pct: cuaNum(p), palabra: palabra });
 }
 
 function cuaSelloRestante(h) {
   if (h.ingreso <= 0) {
-    return h.gastado > 0 ? '× Sin lo que gana no hay de dónde salga esto.' : '';
+    return h.gastado > 0 ? '× ' + t('Sin lo que gana no hay de dónde salga esto.') : '';
   }
-  const gasta = 'Se gasta el ' + cuaNum(h.pctGastado) + ' % (' + recPlata(h.gastado) + ')';
-  const aparta = h.ahorro > 0 ? ', aparta el ' + cuaNum(h.pctAhorro) + ' %' : '';
-  if (h.restante > 0) return '✓ ' + gasta + aparta + ' y le queda el ' + cuaNum(h.pctRestante) + ' %.';
-  if (h.restante === 0) return '! ' + gasta + aparta + '. No le sobra nada.';
-  return '× ' + gasta + aparta + '. Le faltan ' + recPlata(-h.restante) + ' cada mes.';
+  const gasta = t('Se gasta el {pct} % ({monto})', { pct: cuaNum(h.pctGastado), monto: recPlata(h.gastado) });
+  const aparta = h.ahorro > 0 ? t(', aparta el {pct} %', { pct: cuaNum(h.pctAhorro) }) : '';
+  if (h.restante > 0) return '✓ ' + gasta + aparta + t(' y le queda el {pct} %.', { pct: cuaNum(h.pctRestante) });
+  if (h.restante === 0) return '! ' + gasta + aparta + t('. No le sobra nada.');
+  return '× ' + gasta + aparta + t('. Le faltan {monto} cada mes.', { monto: recPlata(-h.restante) });
 }
 
 function cuaPintarComoVoy(h) {
@@ -448,15 +454,14 @@ function cuaPintarComoVoy(h) {
   };
 
   if (h.ingreso > 0) {
-    renglon('Gasta el ' + cuaNum(h.pctGastado) + ' % de lo que gana: ' + recPlata(h.gastado) + '.');
-    if (h.ahorro > 0) renglon('Aparta el ' + cuaNum(h.pctAhorro) + ' % para guardar: ' + recPlata(h.ahorro) + '.');
+    renglon(t('Gasta el {pct} % de lo que gana: {monto}.', { pct: cuaNum(h.pctGastado), monto: recPlata(h.gastado) }));
+    if (h.ahorro > 0) renglon(t('Aparta el {pct} % para guardar: {monto}.', { pct: cuaNum(h.pctAhorro), monto: recPlata(h.ahorro) }));
     if (h.restante > 0) {
-      renglon('Le sobra el ' + cuaNum(h.pctRestante) + ' %: ' + recPlata(h.restante) + '.');
+      renglon(t('Le sobra el {pct} %: {monto}.', { pct: cuaNum(h.pctRestante), monto: recPlata(h.restante) }));
     } else if (h.restante === 0) {
-      renglon('No le sobra nada: toda la plata tiene dueño.');
+      renglon(t('No le sobra nada: toda la plata tiene dueño.'));
     } else {
-      renglon('Le faltan ' + recPlata(-h.restante) + ' (' + cuaNum(-h.pctRestante) +
-              ' %): está gastando más de lo que gana.');
+      renglon(t('Le faltan {monto} ({pct} %): está gastando más de lo que gana.', { monto: recPlata(-h.restante), pct: cuaNum(-h.pctRestante) }));
     }
   }
 
@@ -478,11 +483,11 @@ function cuaPintarComoVoy(h) {
 }
 
 function cuaNotaAhorro(a, h, cap) {
-  const comprar = 'Para comprar cosas le quedan ' + recPlata(Math.max(0, cap.alMes)) + ' al mes.';
+  const comprar = t('Para comprar cosas le quedan {monto} al mes.', { monto: recPlata(Math.max(0, cap.alMes)) });
   if (!h.ahorro) return comprar;
   return (a.ahorroDisponible
-    ? 'Su ahorro de ' + recPlata(h.ahorro) + ' cuenta para comprar. '
-    : 'Su ahorro de ' + recPlata(h.ahorro) + ' es su colchón: no se toca. ') + comprar;
+    ? t('Su ahorro de {monto} cuenta para comprar. ', { monto: recPlata(h.ahorro) })
+    : t('Su ahorro de {monto} es su colchón: no se toca. ', { monto: recPlata(h.ahorro) })) + comprar;
 }
 
 function cuaTotal(id, valor, tono) {
@@ -507,7 +512,7 @@ function cuaTexto(id, txt) {
 
 function cuaNum(p) {
   if (p === null || p === undefined) return '—';
-  if (p > 0 && p < 1) return 'menos del 1';
+  if (p > 0 && p < 1) return t('menos del 1');
   return String(Math.round(p));
 }
 
@@ -536,7 +541,7 @@ function cuaDescargar() {
     .then(function (r) {
       const hoy = new Date();
       const dos = function (n) { return String(n).padStart(2, '0'); };
-      const nombre = 'hoja-del-mes-' + hoy.getFullYear() + dos(hoy.getMonth() + 1) +
+      const nombre = t('hoja-del-mes-') + hoy.getFullYear() + dos(hoy.getMonth() + 1) +
                      dos(hoy.getDate()) + '.png';
       return recdBajar(cuaDibujar(recAjustes, r[1]), nombre).catch(function (e) {
         if (!r[1]) throw e;
@@ -545,7 +550,7 @@ function cuaDescargar() {
     })
     .catch(function (e) {
       console.error('No se pudo bajar la hoja:', e);
-      recAvisar('No se pudo bajar la hoja. Intente otra vez.');
+      recAvisar(t('No se pudo bajar la hoja. Intente otra vez.'));
     })
     .then(function () { if (boton) boton.disabled = false; });
 }
@@ -581,7 +586,7 @@ function cuaContenido(ctx, a, carriel, pinta) {
     centrado: true, espaciado: 1.7
   });
   y += 5;
-  y = recdLinea(ctx, pinta, 'mis cuentas del mes', {
+  y = recdLinea(ctx, pinta, t('mis cuentas del mes'), {
     x: centro, y: y, fuente: 'italic 13px LiberationSans',
     color: 'rgba(43, 33, 24, 0.55)', centrado: true
   });
@@ -589,7 +594,7 @@ function cuaContenido(ctx, a, carriel, pinta) {
   y = recdPuntos(ctx, pinta, izq, der, y);
 
   y += 18;
-  y = recdLinea(ctx, pinta, 'Lo que gano al mes', {
+  y = recdLinea(ctx, pinta, t('Lo que gano al mes'), {
     x: centro, y: y, fuente: '14px LiberationSans',
     color: 'rgba(43, 33, 24, 0.6)', centrado: true
   });
@@ -602,10 +607,10 @@ function cuaContenido(ctx, a, carriel, pinta) {
 
   if (h.reglas.length) {
     y += 14;
-    y = recdRotulito(ctx, pinta, 'Según la regla, le toca', izq, y);
+    y = recdRotulito(ctx, pinta, t('Según la regla, le toca'), izq, y);
     y += 8;
     h.reglas.forEach(function (r) {
-      y = recdRenglon(ctx, pinta, r.rotulo + (r.esTecho ? ' hasta' : '') + ' (' + r.pct + ' %)',
+      y = recdRenglon(ctx, pinta, cuaRotuloRegla(r),
                       recPlata(r.tope), '', false, izq, der, y);
     });
     y += 6;
@@ -613,26 +618,26 @@ function cuaContenido(ctx, a, carriel, pinta) {
   }
 
   y += 14;
-  y = recdRotulito(ctx, pinta, 'Lo necesario', izq, y);
+  y = recdRotulito(ctx, pinta, t('Lo necesario'), izq, y);
   y += 8;
   NECESARIOS.forEach(function (r) {
     cuaIcono(ctx, pinta, r.clave, izq, y);
-    y = recdRenglon(ctx, pinta, r.rotulo + (r.guarda ? ' (se guarda)' : ''),
+    y = recdRenglon(ctx, pinta, r.guarda ? t('{rotulo} (se guarda)', { rotulo: r.rotulo }) : r.rotulo,
                     recPlata(a.gastos[r.clave] || 0), '', false, conIcono, der, y, CUA_TINTA);
     if (r.clave === 'deudas' && a.cuotasCreditos) {
       cuaIcono(ctx, pinta, 'deudas', izq, y);
-      y = recdRenglon(ctx, pinta, 'Créditos (se suman solos)', recPlata(a.cuotasCreditos),
+      y = recdRenglon(ctx, pinta, t('Créditos (se suman solos)'), recPlata(a.cuotasCreditos),
                       '', false, conIcono, der, y);
     }
   });
 
   if (a.otros.length) {
     y += 10;
-    y = recdRotulito(ctx, pinta, 'Otros gastos', izq, y);
+    y = recdRotulito(ctx, pinta, t('Otros gastos'), izq, y);
     y += 8;
     a.otros.forEach(function (o) {
       const cat = ajustesDelCatalogo(o.clave);
-      const nombre = cuaBase(o.clave) === 'otra' ? (o.nombre || 'Otra cosa') : cat.rotulo;
+      const nombre = cuaBase(o.clave) === 'otra' ? (o.nombre || t('Otra cosa')) : cat.rotulo;
       cuaIcono(ctx, pinta, o.clave, izq, y);
       y = recdRenglon(ctx, pinta, nombre, recPlata(o.monto), '', false, conIcono, der, y, CUA_TINTA);
     });
@@ -642,25 +647,25 @@ function cuaContenido(ctx, a, carriel, pinta) {
   y += 8;
   y = cuaRaya(ctx, pinta, izq, der, y, false);
   y += 10;
-  y = recdRenglon(ctx, pinta, 'Total lo necesario', recPlata(h.necesarios), '', true,
+  y = recdRenglon(ctx, pinta, t('Total lo necesario'), recPlata(h.necesarios), '', true,
                   izq, der, y, CUA_TONO[h.tonoNecesarios].color);
   y = cuaSello(ctx, pinta, cuaSelloNecesarios(h), h.tonoNecesarios, izq, der, y);
   if (a.otros.length) {
     y += 4;
-    y = recdRenglon(ctx, pinta, 'Total otros gastos', recPlata(h.otros),
+    y = recdRenglon(ctx, pinta, t('Total otros gastos'), recPlata(h.otros),
                     cuaPct(h.pctOtros), false, izq, der, y);
   }
 
   y += 8;
   y = cuaRaya(ctx, pinta, izq, der, y, true);
   y += 10;
-  y = recdRenglon(ctx, pinta, 'Total restante', cuaPlataConSigno(h.restante), '', true,
+  y = recdRenglon(ctx, pinta, t('Total restante'), cuaPlataConSigno(h.restante), '', true,
                   izq, der, y, CUA_TONO[h.tonoRestante].color);
   y = cuaSello(ctx, pinta, cuaSelloRestante(h), h.tonoRestante, izq, der, y);
 
   y += 10;
   y = recdParrafo(ctx, pinta, (a.ahorroDisponible ? '☑ ' : '☐ ') +
-                  'Mi ahorro lo puedo usar para comprar cosas. ' + cuaNotaAhorro(a, h, cap), {
+                  t('Mi ahorro lo puedo usar para comprar cosas. ') + cuaNotaAhorro(a, h, cap), {
     x: izq, y: y, ancho: der - izq, fuente: '14px LiberationSans',
     color: 'rgba(43, 33, 24, 0.75)', alto: 19
   });
@@ -685,7 +690,7 @@ function cuaContenido(ctx, a, carriel, pinta) {
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });
   y += 6;
-  y = recdLinea(ctx, pinta, 'Cuenta hecha con Arriero’s Wealth', {
+  y = recdLinea(ctx, pinta, t('Cuenta hecha con Arriero’s Wealth|recibo'), {
     x: centro, y: y, fuente: '12px LiberationSans',
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });

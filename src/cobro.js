@@ -173,57 +173,69 @@ function cobroTono(c, t) {
 }
 
 // La frase de abajo del total. El color acompaña, la frase manda.
-function cobroSello(c, t) {
-  if (c.costo <= 0) return 'Anote el trabajo y le digo cuánto cobrar.';
+// (El trabajo se llama "tr" y no "t": t() es la del idioma, src/i18n.js.)
+function cobroSello(c, tr) {
+  if (c.costo <= 0) return t('Anote el trabajo y le digo cuánto cobrar.');
   if (c.limpio < 0) {
-    return '× Con ese descuento pierde ' + cobroPlata(-c.limpio) +
-           ': le estaría regalando su trabajo.';
+    return t('× Con ese descuento pierde {plata}: le estaría regalando su trabajo.',
+             { plata: cobroPlata(-c.limpio) });
   }
   if (c.tiempo > 0 && c.jornal <= 0) {
-    return '! Su tiempo no se está cobrando: dígame arriba cuánto vale su día.';
+    return t('! Su tiempo no se está cobrando: dígame arriba cuánto vale su día.');
   }
-  if (c.margen <= 0) return '! Sin ganancia: cobra lo que le cuesta y nada más.';
+  if (c.margen <= 0) return t('! Sin ganancia: cobra lo que le cuesta y nada más.');
   if (c.manoObra > 0) {
-    return '✓ Por su trabajo se lleva ' + cobroPlata(c.paraUsted) +
-           ', y de eso ' + cobroPlata(c.limpio) + ' son ganancia limpia.';
+    return t('✓ Por su trabajo se lleva {lleva}, y de eso {limpio} son ganancia limpia.',
+             { lleva: cobroPlata(c.paraUsted), limpio: cobroPlata(c.limpio) });
   }
-  return '✓ Se gana ' + cobroPlata(c.limpio) + ' limpios.';
+  return t('✓ Se gana {limpio} limpios.', { limpio: cobroPlata(c.limpio) });
 }
 
 // Lo que ve el cliente. La ganancia va dentro de la mano de obra.
-function cobroRenglonesCliente(c, t) {
+function cobroRenglonesCliente(c, tr) {
   const r = [];
   if (c.manoCliente > 0) {
     r.push({
-      rotulo: c.manoObra > 0 ? 'Mano de obra' + cobroTiempoEntreParentesis(t) : 'Servicio',
+      rotulo: c.manoObra > 0 ? t('Mano de obra') + cobroTiempoEntreParentesis(tr) : t('Servicio'),
       valor: c.manoCliente
     });
   }
-  (t.materiales || []).forEach(function (m) {
+  (tr.materiales || []).forEach(function (m) {
     const cant = cobroNumero(m.cantidad) || 1;
     const valor = cobroNumero(m.precio) * cant;
     if (valor <= 0) return;
-    r.push({ rotulo: (m.nombre || 'Material') + (cant !== 1 ? ' × ' + cobroCifra(cant) : ''), valor: valor });
+    r.push({ rotulo: (m.nombre || t('Material')) + (cant !== 1 ? ' × ' + cobroCifra(cant) : ''), valor: valor });
   });
-  if (cobroNumero(t.transporte) > 0) r.push({ rotulo: 'Transporte', valor: cobroNumero(t.transporte) });
-  (t.otros || []).forEach(function (o) {
+  if (cobroNumero(tr.transporte) > 0) r.push({ rotulo: t('Transporte'), valor: cobroNumero(tr.transporte) });
+  (tr.otros || []).forEach(function (o) {
     if (cobroNumero(o.monto) <= 0) return;
-    r.push({ rotulo: o.nombre || 'Otro gasto', valor: cobroNumero(o.monto) });
+    r.push({ rotulo: cobroNombreOtro(o), valor: cobroNumero(o.monto) });
   });
   return r;
 }
 
-function cobroTiempoEntreParentesis(t) {
-  const txt = cobroTiempoEnPalabras(t);
+// El nombre de un gasto de la lista se guarda en el idioma de ese día: se
+// vuelve a sacar por su clave (COB_OTROS, src/cobrar.js) para que salga en el
+// idioma de hoy. "Otra cosa" lleva el nombre que la persona escribió.
+function cobroNombreOtro(o) {
+  if (o.clave && o.clave !== 'otra' && typeof COB_OTROS !== 'undefined') {
+    const fijo = COB_OTROS.find(function (x) { return x.clave === o.clave; });
+    if (fijo) return fijo.rotulo;
+  }
+  return o.nombre || t('Otro gasto');
+}
+
+function cobroTiempoEntreParentesis(tr) {
+  const txt = cobroTiempoEnPalabras(tr);
   return txt ? ' (' + txt + ')' : '';
 }
 
-function cobroTiempoEnPalabras(t) {
-  const n = cobroNumero(t.tiempo);
+function cobroTiempoEnPalabras(tr) {
+  const n = cobroNumero(tr.tiempo);
   if (!n) return '';
-  if (t.unidad === 'horas') return cobroCifra(n) + (n === 1 ? ' hora' : ' horas');
-  if (n === 0.5) return 'medio día';
-  return cobroCifra(n) + (n === 1 ? ' día' : ' días');
+  if (tr.unidad === 'horas') return t(n === 1 ? '{n} hora' : '{n} horas', { n: cobroCifra(n) });
+  if (n === 0.5) return t('medio día');
+  return t(n === 1 ? '{n} día' : '{n} días', { n: cobroCifra(n) });
 }
 
 function cobroCifra(n) {
@@ -263,11 +275,11 @@ function cobroDiasDesde(fecha, hoy) {
 
 function cobroHaceCuanto(fecha, hoy) {
   const d = cobroDiasDesde(fecha, hoy);
-  if (d === 0) return 'hoy';
-  if (d === 1) return 'ayer';
-  if (d < 60) return 'hace ' + d + ' días';
+  if (d === 0) return t('hoy');
+  if (d === 1) return t('ayer');
+  if (d < 60) return t('hace {n} días', { n: d });
   const m = Math.floor(d / 30);
-  return 'hace ' + m + ' meses';
+  return t('hace {n} meses', { n: m });
 }
 
 // El siguiente número de cuenta: uno más que el más alto que haya.
@@ -278,7 +290,7 @@ function cobroSiguienteNumero(lista) {
 }
 
 function cobroNumeroBonito(n) {
-  return 'N° ' + String(Math.max(1, Math.round(n || 1))).padStart(4, '0');
+  return t('N°') + ' ' + String(Math.max(1, Math.round(n || 1))).padStart(4, '0');
 }
 
 // ----------------------------------------------------------------
@@ -346,6 +358,7 @@ function cobroEntero(n) {
 }
 
 function cobroEnLetras(valor, codigo) {
+  if (typeof IDIOMA !== 'undefined' && IDIOMA === 'en') return cobroEnLetrasIngles(valor, codigo);
   const n = Math.max(0, Number(valor) || 0);
   if (n >= 1e15) return '';
   const entero = Math.floor(n + 0.000001);
@@ -357,6 +370,61 @@ function cobroEnLetras(valor, codigo) {
   txt += ' ' + (entero === 1 ? nombre[0] : nombre[1]);
   if (centavos > 0) {
     txt += ' con ' + cobroApocope(cobroEntero(centavos)) + (centavos === 1 ? ' centavo' : ' centavos');
+  }
+  return txt.charAt(0).toUpperCase() + txt.slice(1);
+}
+
+// ----------------------------------------------------------------
+// La plata en letras, en inglés: "Seven hundred thousand pesos".
+// Con la app en inglés la cuenta de cobro sale toda en inglés.
+// ----------------------------------------------------------------
+const COBRO_MONEDA_NOMBRE_EN = {
+  COP: ['peso', 'pesos'], MXN: ['peso', 'pesos'], ARS: ['peso', 'pesos'],
+  CLP: ['peso', 'pesos'], USD: ['dollar', 'dollars'], EUR: ['euro', 'euros'],
+  PEN: ['sol', 'soles'], BRL: ['real', 'reais'], GBP: ['pound', 'pounds'],
+  CNY: ['yuan', 'yuan'], JPY: ['yen', 'yen']
+};
+
+const COBRO_UNIDADES_EN = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen',
+  'nineteen'];
+const COBRO_DECENAS_EN = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy',
+  'eighty', 'ninety'];
+
+function cobroMenosDeMilIngles(n) {
+  const c = Math.floor(n / 100);
+  const r = n % 100;
+  const partes = [];
+  if (c) partes.push(COBRO_UNIDADES_EN[c] + ' hundred');
+  if (r) {
+    partes.push(r < 20 ? COBRO_UNIDADES_EN[r]
+      : COBRO_DECENAS_EN[Math.floor(r / 10)] + (r % 10 ? '-' + COBRO_UNIDADES_EN[r % 10] : ''));
+  }
+  return partes.join(' ');
+}
+
+function cobroEnteroIngles(n) {
+  if (n === 0) return 'zero';
+  const escalas = [[1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million'], [1e3, 'thousand']];
+  const partes = [];
+  escalas.forEach(function (e) {
+    const q = Math.floor(n / e[0]);
+    if (q) { partes.push(cobroMenosDeMilIngles(q) + ' ' + e[1]); n -= q * e[0]; }
+  });
+  if (n) partes.push(cobroMenosDeMilIngles(n));
+  return partes.join(' ');
+}
+
+function cobroEnLetrasIngles(valor, codigo) {
+  const n = Math.max(0, Number(valor) || 0);
+  if (n >= 1e15) return '';
+  const entero = Math.floor(n + 0.000001);
+  const centavos = Math.round((n - entero) * 100);
+  const nombre = COBRO_MONEDA_NOMBRE_EN[codigo || 'COP'] || COBRO_MONEDA_NOMBRE_EN.COP;
+
+  let txt = cobroEnteroIngles(entero) + ' ' + (entero === 1 ? nombre[0] : nombre[1]);
+  if (centavos > 0) {
+    txt += ' and ' + cobroEnteroIngles(centavos) + (centavos === 1 ? ' cent' : ' cents');
   }
   return txt.charAt(0).toUpperCase() + txt.slice(1);
 }

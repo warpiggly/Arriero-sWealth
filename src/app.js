@@ -266,7 +266,7 @@ function actualizarCabecera() {
     if (typeof recPintarJornal === 'function') {
       recPintarJornal();
     } else {
-      pintarJornal('Puede guardar:', '—');
+      pintarJornal(t('Puede guardar:'), '—');
     }
     return;
   }
@@ -276,7 +276,7 @@ function actualizarCabecera() {
     cobPintarJornal();
     return;
   }
-  pintarJornal('Deberías cobrar:', '—');
+  pintarJornal(t('Deberías cobrar:'), '—');
 }
 
 // ----------------------------------------------------------------
@@ -295,17 +295,17 @@ function actualizarCabecera() {
 // Monedas disponibles en el selector. Para agregar una nueva, basta con añadir
 // aquí su código ISO 4217 y un locale (para que el formato se sienta nativo).
 const MONEDAS = [
-  { codigo: 'COP', nombre: 'Peso colombiano',       locale: 'es-CO' },
-  { codigo: 'USD', nombre: 'Dólar estadounidense',  locale: 'en-US' },
-  { codigo: 'EUR', nombre: 'Euro',                  locale: 'es-ES' },
-  { codigo: 'MXN', nombre: 'Peso mexicano',         locale: 'es-MX' },
-  { codigo: 'ARS', nombre: 'Peso argentino',        locale: 'es-AR' },
-  { codigo: 'CLP', nombre: 'Peso chileno',          locale: 'es-CL' },
-  { codigo: 'PEN', nombre: 'Sol peruano',           locale: 'es-PE' },
-  { codigo: 'BRL', nombre: 'Real brasileño',        locale: 'pt-BR' },
-  { codigo: 'GBP', nombre: 'Libra esterlina',       locale: 'en-GB' },
-  { codigo: 'CNY', nombre: 'Yuan chino',            locale: 'zh-CN' },
-  { codigo: 'JPY', nombre: 'Yen japonés',           locale: 'ja-JP' }
+  { codigo: 'COP', nombre: t('Peso colombiano'),  locale: 'es-CO' },
+  { codigo: 'USD', nombre: t('Dólar estadounidense'), locale: 'en-US' },
+  { codigo: 'EUR', nombre: t('Euro'),             locale: 'es-ES' },
+  { codigo: 'MXN', nombre: t('Peso mexicano'),    locale: 'es-MX' },
+  { codigo: 'ARS', nombre: t('Peso argentino'),   locale: 'es-AR' },
+  { codigo: 'CLP', nombre: t('Peso chileno'),     locale: 'es-CL' },
+  { codigo: 'PEN', nombre: t('Sol peruano'),      locale: 'es-PE' },
+  { codigo: 'BRL', nombre: t('Real brasileño'),   locale: 'pt-BR' },
+  { codigo: 'GBP', nombre: t('Libra esterlina'),  locale: 'en-GB' },
+  { codigo: 'CNY', nombre: t('Yuan chino'),       locale: 'zh-CN' },
+  { codigo: 'JPY', nombre: t('Yen japonés'),      locale: 'ja-JP' }
 ];
 
 // Moneda activa. Arranca en peso colombiano y se sobreescribe con lo que el

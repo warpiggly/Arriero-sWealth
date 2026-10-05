@@ -40,11 +40,11 @@ const COB_ICONOS = {
 // El + de "Anotar otro gasto". "Otra cosa" deja escribir el nombre y se puede
 // poner varias veces.
 const COB_OTROS = [
-  { clave: 'ayudante',    rotulo: 'Ayudante',           ayuda: 'Lo que le paga a quien le ayuda en este trabajo.' },
-  { clave: 'herramienta', rotulo: 'Uso de herramienta', ayuda: 'Lo que se gasta la herramienta, o el alquiler de un equipo.' },
-  { clave: 'comida',      rotulo: 'Almuerzos',          ayuda: 'La comida de los días que dura el trabajo.' },
-  { clave: 'envio',       rotulo: 'Envío o domicilio',  ayuda: 'Lo que cuesta llevar o traer las cosas.' },
-  { clave: 'otra',        rotulo: 'Otra cosa',          ayuda: 'Algo que no está en la lista: usted le pone el nombre.' }
+  { clave: 'ayudante',    rotulo: t('Ayudante'),           ayuda: t('Lo que le paga a quien le ayuda en este trabajo.') },
+  { clave: 'herramienta', rotulo: t('Uso de herramienta'), ayuda: t('Lo que se gasta la herramienta, o el alquiler de un equipo.') },
+  { clave: 'comida',      rotulo: t('Almuerzos'),          ayuda: t('La comida de los días que dura el trabajo.') },
+  { clave: 'envio',       rotulo: t('Envío o domicilio'),  ayuda: t('Lo que cuesta llevar o traer las cosas.') },
+  { clave: 'otra',        rotulo: t('Otra cosa'),          ayuda: t('Algo que no está en la lista: usted le pone el nombre.') }
 ];
 
 const COB_CHIPS_TIEMPO = { dias: [0.5, 1, 2, 3, 5], horas: [1, 2, 4, 8] };
@@ -67,16 +67,16 @@ let cobAntesDelEjemplo = null;
 
 // El trabajo de mentiras para practicar. Don Julio es el mismo de la guía.
 const COB_EJEMPLO = {
-  cliente: 'Don Julio',
-  trabajo: 'Pintar la sala y el comedor',
+  cliente: t('Don Julio'),
+  trabajo: t('Pintar la sala y el comedor'),
   unidad: 'dias',
   tiempo: 2,
   materiales: [
-    { nombre: 'Pintura (galón)', cantidad: 3, precio: 90000 },
-    { nombre: 'Rodillo y brocha', cantidad: 1, precio: 25000 }
+    { nombre: t('Pintura (galón)'), cantidad: 3, precio: 90000 },
+    { nombre: t('Rodillo y brocha'), cantidad: 1, precio: 25000 }
   ],
   transporte: 30000,
-  otros: [{ clave: 'ayudante', nombre: 'Ayudante', monto: 80000 }],
+  otros: [{ clave: 'ayudante', nombre: t('Ayudante'), monto: 80000 }],
   margen: 30,
   descuento: 0,
   tipo: 'cobro'
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
   cobAtar('cob-r-g-guardar', 'click', cobGuardar);
   cobAtar('cob-r-g-dejar', 'click', function () {
     cobEsconderRecibo();
-    cobAvisar('Listo: no guardé nada. La hoja sigue ahí.');
+    cobAvisar(t('Listo: no guardé nada. La hoja sigue ahí.'));
   });
   cobAtar('cob-r-tipo-btn', 'click', cobCambiarTipo);
   cobAtar('cob-r-descargar', 'click', function () {
@@ -285,19 +285,21 @@ function cobPintarYo() {
   if (vale) {
     vale.innerHTML = '';
     if (jornal > 0) {
-      cobFuerte(vale, 'Su día vale ' + cobPlataRedonda(jornal));
-      vale.appendChild(document.createTextNode(' y su hora ' + cobPlataRedonda(jornal / COBRO_HORAS_DIA) +
-        (p.diasMes ? '.' : ' (contando ' + dias + ' días de trabajo al mes).')));
+      cobFuerte(vale, t('Su día vale {monto}', { monto: cobPlataRedonda(jornal) }));
+      const hora = cobPlataRedonda(jornal / COBRO_HORAS_DIA);
+      vale.appendChild(document.createTextNode(' ' + (p.diasMes
+        ? t('y su hora {monto}.', { monto: hora })
+        : t('y su hora {monto} (contando {n} días de trabajo al mes).', { monto: hora, n: dias }))));
     } else {
-      vale.textContent = 'Escriba cuánto se quiere ganar y le digo cuánto vale su día.';
+      vale.textContent = t('Escriba cuánto se quiere ganar y le digo cuánto vale su día.');
     }
     const gastos = cobGastosDelMes();
     if (gastos > 0) {
       const p2 = document.createElement('span');
       p2.className = 'cob-vale-ojo';
       p2.textContent = p.ganarMes > 0 && p.ganarMes < gastos
-        ? '! Eso no le alcanza: sus gastos del mes (en Ahorro) son ' + recPlata(gastos) + '.'
-        : 'Sus gastos del mes (en Ahorro) son ' + recPlata(gastos) + ': no se quiera ganar menos que eso.';
+        ? t('! Eso no le alcanza: sus gastos del mes (en Ahorro) son {monto}.', { monto: recPlata(gastos) })
+        : t('Sus gastos del mes (en Ahorro) son {monto}: no se quiera ganar menos que eso.', { monto: recPlata(gastos) });
       vale.appendChild(p2);
     }
   }
@@ -309,9 +311,9 @@ function cobPintarYo() {
   const txt = document.getElementById('cob-yo-resumen-txt');
   if (txt) {
     txt.textContent = jornal > 0
-      ? 'Su día de trabajo vale ' + cobPlataRedonda(jornal) +
-        (b.tono === 'no' ? ' · menos del básico' : '')
-      : 'Todavía no me ha dicho cuánto vale su día';
+      ? t('Su día de trabajo vale {monto}', { monto: cobPlataRedonda(jornal) }) +
+        (b.tono === 'no' ? ' · ' + t('menos del básico') : '')
+      : t('Todavía no me ha dicho cuánto vale su día');
     txt.classList.toggle('cob-bajo-basico', b.tono === 'no');
   }
 }
@@ -325,14 +327,14 @@ function cobPintarBasico(b) {
   dice.classList.toggle('cob-basico-bien', b.tono === 'bien');
   if (b.tono === 'nada') { dice.textContent = ''; return; }
 
-  const hora = 'Su hora sale a ' + cobPlataRedonda(b.hora) + ' y el básico es ' + cobPlataRedonda(b.basico);
+  const hora = t('Su hora sale a {hora} y el básico es {basico}', { hora: cobPlataRedonda(b.hora), basico: cobPlataRedonda(b.basico) });
   if (b.tono === 'no') {
-    dice.textContent = '× Está ganando menos del básico. ' + hora + ': le faltan ' +
-      cobPlataRedonda(-b.diferencia) + ' la hora (' + (-b.pct) + ' % menos). Súbale a lo que se quiere ganar.';
+    dice.textContent = '× ' + t('Está ganando menos del básico. {hora}: le faltan {falta} la hora ({pct} % menos). Súbale a lo que se quiere ganar.',
+      { hora: hora, falta: cobPlataRedonda(-b.diferencia), pct: -b.pct });
   } else if (b.pct === 0) {
-    dice.textContent = '✓ ' + hora + ': está justo en el básico.';
+    dice.textContent = '✓ ' + t('{hora}: está justo en el básico.', { hora: hora });
   } else {
-    dice.textContent = '✓ ' + hora + ': está ' + b.pct + ' % por encima.';
+    dice.textContent = '✓ ' + t('{hora}: está {pct} % por encima.', { hora: hora, pct: b.pct });
   }
 }
 
@@ -362,34 +364,34 @@ function cobPintarTodo() {
 }
 
 function cobPintarHoja() {
-  const t = cobTrabajo;
-  cobPonerTexto('cob-cliente', t.cliente);
-  cobPonerTexto('cob-trabajo', t.trabajo);
-  cobPonerTexto('cob-tiempo', t.tiempo ? cobroCifra(t.tiempo) : '');
-  recPonerValor('cob-transporte', t.transporte);
+  const hoja = cobTrabajo;
+  cobPonerTexto('cob-cliente', hoja.cliente);
+  cobPonerTexto('cob-trabajo', hoja.trabajo);
+  cobPonerTexto('cob-tiempo', hoja.tiempo ? cobroCifra(hoja.tiempo) : '');
+  recPonerValor('cob-transporte', hoja.transporte);
 
   document.querySelectorAll('.cob-unidad-btn').forEach(function (b) {
-    const si = b.dataset.unidad === t.unidad;
+    const si = b.dataset.unidad === hoja.unidad;
     b.classList.toggle('prendida', si);
     b.setAttribute('aria-pressed', si ? 'true' : 'false');
   });
 
-  cobPintarChips('cob-chips-tiempo', COB_CHIPS_TIEMPO[t.unidad], t.tiempo, function (v) {
-    return v === 0.5 ? '½ día' : cobroCifra(v) + (t.unidad === 'horas' ? ' h' : (v === 1 ? ' día' : ' días'));
+  cobPintarChips('cob-chips-tiempo', COB_CHIPS_TIEMPO[hoja.unidad], hoja.tiempo, function (v) {
+    return v === 0.5 ? t('½ día') : cobroCifra(v) + (hoja.unidad === 'horas' ? ' h' : ' ' + (v === 1 ? t('día') : t('días')));
   }, function (v) {
     cobCambiar({ tiempo: v });
   });
-  cobPintarChips('cob-chips-margen', COB_CHIPS_MARGEN, t.margen, function (v) { return v + ' %'; },
+  cobPintarChips('cob-chips-margen', COB_CHIPS_MARGEN, hoja.margen, function (v) { return v + ' %'; },
     function (v) { cobCambiar({ margen: v }); }, 'margen');
-  cobPintarChips('cob-chips-descuento', COB_CHIPS_DESCUENTO, t.descuento,
-    function (v) { return v ? v + ' %' : 'Sin'; },
+  cobPintarChips('cob-chips-descuento', COB_CHIPS_DESCUENTO, hoja.descuento,
+    function (v) { return v ? v + ' %' : t('Sin'); },
     function (v) { cobCambiar({ descuento: v }); }, 'descuento');
 
   cobPintarMateriales();
   cobPintarSiempre();
   cobPintarOtros();
 
-  const c = cobroCuenta(t, cobPerfil);
+  const c = cobroCuenta(hoja, cobPerfil);
   cobTexto('cob-mano', cobPlataRedonda(c.manoObra));
   cobPintarNotaMano(c);
   cobTexto('cob-costo', cobPlataRedonda(c.costo));
@@ -422,31 +424,31 @@ function cobPintarNotaMano(c) {
   if (!nota) return;
   nota.innerHTML = '';
   if (!c.tiempo) {
-    nota.textContent = 'Escriba arriba cuánto le lleva el trabajo.';
+    nota.textContent = t('Escriba arriba cuánto le lleva el trabajo.');
     return;
   }
   if (c.jornal <= 0) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'cob-enlace';
-    b.textContent = 'Dígame cuánto vale su día';
+    b.textContent = t('Dígame cuánto vale su día');
     b.addEventListener('click', function () {
       cobAbrirYo(true);
       const g = document.getElementById('cob-ganar');
       if (g) g.focus();
     });
     nota.appendChild(b);
-    nota.appendChild(document.createTextNode(' y le cobro su tiempo.'));
+    nota.appendChild(document.createTextNode(' ' + t('y le cobro su tiempo.')));
     return;
   }
-  const t = cobTrabajo;
-  nota.textContent = t.unidad === 'horas'
-    ? cobroTiempoEnPalabras(t) + ' × ' + cobPlataRedonda(c.jornal / COBRO_HORAS_DIA) + ' que vale su hora.'
-    : cobroTiempoEnPalabras(t) + ' × ' + cobPlataRedonda(c.jornal) + ' que vale su día.';
+  const hoja = cobTrabajo;
+  nota.textContent = hoja.unidad === 'horas'
+    ? t('{tiempo} × {monto} que vale su hora.', { tiempo: cobroTiempoEnPalabras(hoja), monto: cobPlataRedonda(c.jornal / COBRO_HORAS_DIA) })
+    : t('{tiempo} × {monto} que vale su día.', { tiempo: cobroTiempoEnPalabras(hoja), monto: cobPlataRedonda(c.jornal) });
   if (cobroFrenteAlBasico(cobPerfil, cobMoneda()).tono === 'no') {
     const ojo = document.createElement('span');
     ojo.className = 'cob-nota-ojo';
-    ojo.textContent = ' × Su hora está por debajo del básico.';
+    ojo.textContent = ' ' + t('× Su hora está por debajo del básico.');
     nota.appendChild(ojo);
   }
 }
@@ -477,7 +479,7 @@ function cobPintarChips(id, valores, actual, rotulo, alTocar, conCampo) {
       campo.className = 'cua-tinta';
       campo.id = id + '-campo';
       campo.maxLength = 3;
-      campo.setAttribute('aria-label', conCampo === 'margen' ? 'Otro porcentaje de ganancia' : 'Otro porcentaje de descuento');
+      campo.setAttribute('aria-label', conCampo === 'margen' ? t('Otro porcentaje de ganancia') : t('Otro porcentaje de descuento'));
       campo.addEventListener('input', function () {
         alTocar(Math.min(conCampo === 'descuento' ? 100 : 500, parseInt(soloDigitos(campo.value), 10) || 0));
       });
@@ -527,7 +529,7 @@ function cobPintarMateriales() {
       const ya = cobEnSiempre(m.nombre);
       est.textContent = ya ? '★' : '☆';
       est.classList.toggle('prendida', ya);
-      est.title = ya ? 'Ya está en "lo que siempre uso"' : 'Guardarlo para la próxima vez';
+      est.title = ya ? t('Ya está en "lo que siempre uso"') : t('Guardarlo para la próxima vez');
     }
   });
 }
@@ -540,9 +542,9 @@ function cobRenglonMaterial(cont, m, i) {
   nombre.type = 'text';
   nombre.id = 'cob-m-n-' + i;
   nombre.className = 'cua-tinta cua-nombre cob-mat-nombre';
-  nombre.placeholder = '¿Qué compra?';
+  nombre.placeholder = t('¿Qué compra?');
   nombre.maxLength = 60;
-  nombre.setAttribute('aria-label', 'Qué material');
+  nombre.setAttribute('aria-label', t('Qué material'));
   nombre.addEventListener('input', function () { cobCambiarMaterial(i, { nombre: nombre.value }); });
 
   const por = document.createElement('span');
@@ -557,8 +559,8 @@ function cobRenglonMaterial(cont, m, i) {
   cant.className = 'cua-tinta cob-mat-cant';
   cant.placeholder = '1';
   cant.maxLength = 5;
-  cant.title = '¿Cuántos?';
-  cant.setAttribute('aria-label', 'Cuántos');
+  cant.title = t('¿Cuántos?');
+  cant.setAttribute('aria-label', t('Cuántos'));
   cant.addEventListener('input', function () { cobCambiarMaterial(i, { cantidad: cobDecimal(cant.value) || 1 }); });
 
   const precio = document.createElement('input');
@@ -567,8 +569,8 @@ function cobRenglonMaterial(cont, m, i) {
   precio.id = 'cob-m-p-' + i;
   precio.className = 'cua-tinta cua-monto cob-mat-precio';
   precio.placeholder = '$ 0';
-  precio.title = '¿A cómo cada uno?';
-  precio.setAttribute('aria-label', 'A cómo cada uno');
+  precio.title = t('¿A cómo cada uno?');
+  precio.setAttribute('aria-label', t('A cómo cada uno'));
   recAtarMoneda(precio);
   precio.addEventListener('input', function () { cobCambiarMaterial(i, { precio: recNumero(precio.value) }); });
 
@@ -576,10 +578,10 @@ function cobRenglonMaterial(cont, m, i) {
   estrella.type = 'button';
   estrella.id = 'cob-m-s-' + i;
   estrella.className = 'cob-estrella';
-  estrella.setAttribute('aria-label', 'Guardarlo en lo que siempre uso');
+  estrella.setAttribute('aria-label', t('Guardarlo en lo que siempre uso'));
   estrella.addEventListener('click', function () { cobGuardarEnSiempre(cobTrabajo.materiales[i]); });
 
-  const quitar = cobBotonQuitar('Borrar este material', function () {
+  const quitar = cobBotonQuitar(t('Borrar este material'), function () {
     const lista = cobTrabajo.materiales.slice();
     lista.splice(i, 1);
     cobCambiar({ materiales: lista });
@@ -619,16 +621,16 @@ function cobEnSiempre(nombre) {
 function cobGuardarEnSiempre(m) {
   if (!m) return;
   const nombre = String(m.nombre || '').trim();
-  if (!nombre) { cobAvisar('Primero escríbale el nombre, mijo.'); return; }
+  if (!nombre) { cobAvisar(t('Primero escríbale el nombre, mijo.')); return; }
   const lista = cobPerfil.siempre.filter(function (s) { return s.nombre.toLowerCase() !== nombre.toLowerCase(); });
   const yaEstaba = lista.length !== cobPerfil.siempre.length;
   if (!yaEstaba) {
     lista.unshift({ nombre: nombre, precio: Number(m.precio) || 0 });
     cobCambiarPerfil({ siempre: lista.slice(0, COB_TOPE_SIEMPRE) });
-    cobAvisar('Listo: "' + nombre + '" quedó en lo que siempre usa.');
+    cobAvisar(t('Listo: "{nombre}" quedó en lo que siempre usa.', { nombre: nombre }));
   } else {
     cobCambiarPerfil({ siempre: lista });
-    cobAvisar('Lo saqué de lo que siempre usa.');
+    cobAvisar(t('Lo saqué de lo que siempre usa.'));
   }
 }
 
@@ -647,7 +649,7 @@ function cobPintarSiempre() {
     b.type = 'button';
     b.className = 'cob-siempre-usar';
     b.textContent = s.nombre + (s.precio ? ' · ' + recPlata(s.precio) : '');
-    b.title = 'Anotarlo en este trabajo';
+    b.title = t('Anotarlo en este trabajo');
     b.addEventListener('click', function () {
       cobAgregarMaterial({ nombre: s.nombre, cantidad: 1, precio: s.precio }, false);
     });
@@ -656,8 +658,8 @@ function cobPintarSiempre() {
     x.type = 'button';
     x.className = 'cob-siempre-x';
     x.textContent = '×';
-    x.title = 'Ya no lo uso';
-    x.setAttribute('aria-label', 'Quitar ' + s.nombre + ' de lo que siempre uso');
+    x.title = t('Ya no lo uso');
+    x.setAttribute('aria-label', t('Quitar {nombre} de lo que siempre uso', { nombre: s.nombre }));
     x.addEventListener('click', function () {
       cobCambiarPerfil({ siempre: cobPerfil.siempre.filter(function (o) { return o !== s; }) });
     });
@@ -703,9 +705,9 @@ function cobRenglonOtro(cont, o, i) {
     rot.type = 'text';
     rot.id = 'cob-on-' + i;
     rot.className = 'cua-tinta cua-nombre';
-    rot.placeholder = '¿Qué es?';
+    rot.placeholder = t('¿Qué es?');
     rot.maxLength = 40;
-    rot.setAttribute('aria-label', 'Nombre del gasto');
+    rot.setAttribute('aria-label', t('Nombre del gasto'));
     rot.addEventListener('input', function () { cobCambiarOtro(i, { nombre: rot.value }); });
   } else {
     rot = document.createElement('label');
@@ -723,11 +725,11 @@ function cobRenglonOtro(cont, o, i) {
   monto.id = 'cob-o-' + i;
   monto.className = 'cua-tinta cua-monto';
   monto.placeholder = '$ 0';
-  monto.setAttribute('aria-label', cat.rotulo + ', cuánto');
+  monto.setAttribute('aria-label', t('{rotulo}, cuánto', { rotulo: cat.rotulo }));
   recAtarMoneda(monto);
   monto.addEventListener('input', function () { cobCambiarOtro(i, { monto: recNumero(monto.value) }); });
 
-  const quitar = cobBotonQuitar('Borrar este gasto', function () {
+  const quitar = cobBotonQuitar(t('Borrar este gasto'), function () {
     const lista = cobTrabajo.otros.slice();
     lista.splice(i, 1);
     cobCambiar({ otros: lista });
@@ -852,7 +854,7 @@ function cobQuitarEjemplo() {
   cobPintarHoja();
   cobPintarEditando();
   cobPintarEjemplo();
-  cobAvisar('Listo: borré el ejemplo. Su hoja quedó como estaba.');
+  cobAvisar(t('Listo: borré el ejemplo. Su hoja quedó como estaba.'));
 }
 
 function cobPintarEjemplo() {
@@ -866,12 +868,13 @@ function cobPintarEditando() {
   p.classList.toggle('oculto', !cuenta);
   p.innerHTML = '';
   if (!cuenta) return;
-  p.appendChild(document.createTextNode('Está corrigiendo la cuenta ' + cobroNumeroBonito(cuenta.numero) +
-    (cuenta.cliente ? ' de ' + cuenta.cliente : '') + '. '));
+  p.appendChild(document.createTextNode((cuenta.cliente
+    ? t('Está corrigiendo la cuenta {numero} de {cliente}.', { numero: cobroNumeroBonito(cuenta.numero), cliente: cuenta.cliente })
+    : t('Está corrigiendo la cuenta {numero}.', { numero: cobroNumeroBonito(cuenta.numero) })) + ' '));
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'cob-enlace';
-  b.textContent = 'Mejor empezar otro';
+  b.textContent = t('Mejor empezar otro');
   b.addEventListener('click', cobEmpezarOtro);
   p.appendChild(b);
 }
@@ -882,7 +885,7 @@ function cobPintarEditando() {
 function cobHacerLaCuenta() {
   const c = cobroCuenta(cobTrabajo, cobPerfil);
   if (c.total <= 0) {
-    cobAvisar('Anote primero el trabajo: su tiempo, lo que compra o los gastos.');
+    cobAvisar(t('Anote primero el trabajo: su tiempo, lo que compra o los gastos.'));
     return;
   }
   cobArmarCuenta();
@@ -930,15 +933,15 @@ function cobPintarRecibo() {
   if (!c) return;
   const esPres = c.tipo === 'presupuesto';
 
-  cobTexto('cob-r-tipo', (esPres ? 'Presupuesto' : 'Cuenta de cobro') + ' · ' + cobroNumeroBonito(c.numero));
+  cobTexto('cob-r-tipo', (esPres ? t('Presupuesto') : t('Cuenta de cobro')) + ' · ' + cobroNumeroBonito(c.numero));
   cobTexto('cob-r-fecha', cobFecha(c.fecha));
 
   const partes = document.getElementById('cob-r-partes');
   if (partes) {
     partes.innerHTML = '';
-    cobParte(partes, esPres ? 'Para' : 'Señor(a)', c.cliente);
-    cobParte(partes, esPres ? 'De' : 'Debe a', c.yo);
-    if (c.trabajo) cobParte(partes, 'Por', c.trabajo);
+    cobParte(partes, esPres ? t('Para') : t('Señor(a)'), c.cliente);
+    cobParte(partes, esPres ? t('De') : t('Debe a'), c.yo);
+    if (c.trabajo) cobParte(partes, t('Por'), c.trabajo);
   }
 
   cobTexto('cob-r-total', recPlata(c.total));
@@ -949,17 +952,17 @@ function cobPintarRecibo() {
     cont.innerHTML = '';
     c.renglones.forEach(function (r) { cont.appendChild(cobRenglon(r.rotulo, recPlata(r.valor), false)); });
     if (c.descuento > 0) {
-      cont.appendChild(cobRenglon('Descuento (' + cobroCifra(c.descuentoPct) + ' %)',
+      cont.appendChild(cobRenglon(t('Descuento ({pct} %)', { pct: cobroCifra(c.descuentoPct) }),
         '− ' + cobPlataRedonda(c.descuento), false));
     }
-    cont.appendChild(cobRenglon('Total', recPlata(c.total), true));
+    cont.appendChild(cobRenglon(t('Total'), recPlata(c.total), true));
   }
 
   cobPintarEstado(c);
   cobPintarAbonos(c);
 
   const guardar = document.getElementById('cob-r-g-guardar');
-  if (guardar) guardar.textContent = c.id ? 'Guardar los cambios' : 'Guárdemela en mis cuentas';
+  if (guardar) guardar.textContent = c.id ? t('Guardar los cambios') : t('Guárdemela en mis cuentas');
   cobMostrar('cob-r-guardar', !c.guardada);
   cobMostrar('cob-abonar', c.guardada && !esPres && cobroSaldo(c) > 0);
   cobMostrar('cob-r-corregir', c.guardada);
@@ -968,8 +971,8 @@ function cobPintarRecibo() {
   const tipo = document.getElementById('cob-r-tipo-btn');
   if (tipo) {
     tipo.textContent = esPres
-      ? '✓ El cliente dijo que sí: volverla cuenta de cobro'
-      : 'Mejor mandarla como presupuesto';
+      ? t('✓ El cliente dijo que sí: volverla cuenta de cobro')
+      : t('Mejor mandarla como presupuesto');
     tipo.classList.toggle('oculto', !esPres && c.abonos.length > 0);
   }
 }
@@ -1030,20 +1033,21 @@ function cobEstadoEnPalabras(c) {
   if (estado === 'presupuesto') {
     return {
       tono: 'lento',
-      titulo: 'Presupuesto',
-      detalle: 'Vale por ' + COBRO_VALE_DIAS + ' días, hasta el ' +
-               cobFecha(Number(c.fecha) + COBRO_VALE_DIAS * 86400000) + '.'
+      titulo: t('Presupuesto'),
+      detalle: t('Vale por {n} días, hasta el {fecha}.', {
+        n: COBRO_VALE_DIAS, fecha: cobFecha(Number(c.fecha) + COBRO_VALE_DIAS * 86400000)
+      })
     };
   }
-  if (estado === 'pagada') return { tono: 'bien', titulo: 'Pagado ✓', detalle: 'Gracias por su pago.' };
+  if (estado === 'pagada') return { tono: 'bien', titulo: t('Pagado ✓'), detalle: t('Gracias por su pago.') };
   if (estado === 'abonada') {
     return {
       tono: 'ojo',
-      titulo: 'Queda debiendo ' + recPlata(cobroSaldo(c)),
-      detalle: 'Ha abonado ' + recPlata(cobroAbonado(c)) + ' de ' + recPlata(c.total) + '.'
+      titulo: t('Queda debiendo {monto}', { monto: recPlata(cobroSaldo(c)) }),
+      detalle: t('Ha abonado {abonado} de {total}.', { abonado: recPlata(cobroAbonado(c)), total: recPlata(c.total) })
     };
   }
-  return { tono: 'ojo', titulo: 'Pendiente de pago', detalle: '' };
+  return { tono: 'ojo', titulo: t('Pendiente de pago'), detalle: '' };
 }
 
 function cobPintarAbonos(c) {
@@ -1053,12 +1057,12 @@ function cobPintarAbonos(c) {
   if (!c.abonos.length) return;
   const tit = document.createElement('p');
   tit.className = 'cua-rotulo';
-  tit.textContent = 'Lo que ha pagado';
+  tit.textContent = t('Lo que ha pagado');
   cont.appendChild(tit);
   c.abonos.forEach(function (a, i) {
-    const fila = cobRenglon('Abono del ' + cobFechaCorta(a.fecha), recPlata(a.monto), false);
+    const fila = cobRenglon(t('Abono del {fecha}', { fecha: cobFechaCorta(a.fecha) }), recPlata(a.monto), false);
     if (c.guardada) {
-      fila.appendChild(cobBotonQuitar('Borrar este abono', function () { cobBorrarAbono(i); }));
+      fila.appendChild(cobBotonQuitar(t('Borrar este abono'), function () { cobBorrarAbono(i); }));
     }
     cont.appendChild(fila);
   });
@@ -1068,7 +1072,7 @@ function cobGuardar() {
   const c = cobAhora;
   if (!c) return;
   if (cobAntesDelEjemplo && !c.guardada) {
-    cobAvisar('Esto es de práctica, mijo: no se guarda. Pero así mismito se hace con uno de verdad.');
+    cobAvisar(t('Esto es de práctica, mijo: no se guarda. Pero así mismito se hace con uno de verdad.'));
     return;
   }
   const esNueva = !c.id;
@@ -1083,14 +1087,17 @@ function cobGuardar() {
     cobGuardarYa();
     cobPintarHoja();
     cobPintarRecibo();
-    cobAvisar(esNueva
-      ? 'Quedó guardada: ' + (c.tipo === 'presupuesto' ? 'presupuesto ' : 'cuenta ') +
-        cobroNumeroBonito(c.numero) + (c.cliente ? ' de ' + c.cliente : '') + '.'
-      : 'Listo: guardé los cambios de la cuenta ' + cobroNumeroBonito(c.numero) + '.');
+    const num = { numero: cobroNumeroBonito(c.numero), cliente: c.cliente };
+    const esPres = c.tipo === 'presupuesto';
+    cobAvisar(!esNueva
+      ? t('Listo: guardé los cambios de la cuenta {numero}.', num)
+      : c.cliente
+        ? (esPres ? t('Quedó guardada: presupuesto {numero} de {cliente}.', num) : t('Quedó guardada: cuenta {numero} de {cliente}.', num))
+        : (esPres ? t('Quedó guardada: presupuesto {numero}.', num) : t('Quedó guardada: cuenta {numero}.', num)));
     return cobCargarCuentas();
   }).catch(function (e) {
     console.error('No se pudo guardar la cuenta:', e);
-    cobAvisar('No se pudo guardar. Intente otra vez.');
+    cobAvisar(t('No se pudo guardar. Intente otra vez.'));
   });
 }
 
@@ -1115,8 +1122,8 @@ function cobCambiarTipo() {
   // desde hoy es que le deben.
   if (aCobro) c.fecha = Date.now();
   cobActualizarGuardada().then(function () {
-    cobAvisar(aCobro ? 'Listo: ahora es una cuenta de cobro. Ya le puede anotar abonos.'
-                     : 'Listo: la volví presupuesto.');
+    cobAvisar(aCobro ? t('Listo: ahora es una cuenta de cobro. Ya le puede anotar abonos.')
+                     : t('Listo: la volví presupuesto.'));
   });
 }
 
@@ -1126,7 +1133,7 @@ function cobAnotarAbono(monto) {
   const campo = document.getElementById('cob-abono');
   let n = monto !== undefined ? monto : recNumero(campo ? campo.value : '');
   if (!(n > 0)) {
-    cobAvisar('Escriba cuánto le pagaron.');
+    cobAvisar(t('Escriba cuánto le pagaron.'));
     if (campo) campo.focus();
     return;
   }
@@ -1134,15 +1141,15 @@ function cobAnotarAbono(monto) {
   let aviso = '';
   if (n > saldo) {
     n = saldo;
-    aviso = 'Le pagaron de más: anoté solo lo que debía (' + recPlata(saldo) + ').';
+    aviso = t('Le pagaron de más: anoté solo lo que debía ({monto}).', { monto: recPlata(saldo) });
   }
   c.abonos.push({ monto: n, fecha: Date.now() });
   if (campo) campo.value = '';
   cobActualizarGuardada().then(function () {
     const falta = cobroSaldo(c);
     cobAvisar(aviso || (falta > 0
-      ? 'Anotado. Le quedan debiendo ' + recPlata(falta) + '.'
-      : '¡Le pagaron todo! Quedó sellada como pagada.'));
+      ? t('Anotado. Le quedan debiendo {monto}.', { monto: recPlata(falta) })
+      : t('¡Le pagaron todo! Quedó sellada como pagada.')));
   });
 }
 
@@ -1151,8 +1158,8 @@ function cobBorrarAbono(i) {
   if (!c || !c.abonos[i]) return;
   const quitado = c.abonos.splice(i, 1)[0];
   cobActualizarGuardada().then(function () {
-    cobAvisar('Borré el abono de ' + recPlata(quitado.monto) + '.', {
-      texto: 'Deshacer',
+    cobAvisar(t('Borré el abono de {monto}.', { monto: recPlata(quitado.monto) }), {
+      texto: t('Deshacer'),
       hacer: function () {
         if (cobAhora !== c) return;
         c.abonos.splice(i, 0, quitado);
@@ -1165,7 +1172,7 @@ function cobBorrarAbono(i) {
 function cobCorregir() {
   const c = cobAhora;
   if (!c || !c.datos) {
-    cobAvisar('Esta cuenta no se puede abrir en la hoja.');
+    cobAvisar(t('Esta cuenta no se puede abrir en la hoja.'));
     return;
   }
   cobTrabajo = cobTrabajoNormal(c.datos);
@@ -1189,8 +1196,8 @@ function cobQuitar() {
     if (cobEditando === c.id) cobEditando = null;
     cobEsconderRecibo();
     cobCargarCuentas();
-    cobAvisar('Quité la cuenta ' + cobroNumeroBonito(c.numero) + '.', {
-      texto: 'Deshacer',
+    cobAvisar(t('Quité la cuenta {numero}.', { numero: cobroNumeroBonito(c.numero) }), {
+      texto: t('Deshacer'),
       hacer: function () { dbActualizarCobro(copia.id, copia).then(cobCargarCuentas); }
     });
   });
@@ -1215,20 +1222,20 @@ function cobPintarLibreta() {
   const pepita = document.getElementById('cob-libreta-cuenta');
   if (pepita) {
     pepita.classList.toggle('oculto', !cobCuentas.length);
-    pepita.textContent = leDeben > 0 ? 'le deben ' + recPlata(leDeben) : String(cobCuentas.length);
+    pepita.textContent = leDeben > 0 ? t('le deben {monto}', { monto: recPlata(leDeben) }) : String(cobCuentas.length);
   }
 
   if (!cobCuentas.length) {
     const p = document.createElement('p');
     p.className = 'cob-lib-vacia';
-    p.textContent = 'Todavía no ha guardado ninguna cuenta, mijo. Haga la primera arriba.';
+    p.textContent = t('Todavía no ha guardado ninguna cuenta, mijo. Haga la primera arriba.');
     cont.appendChild(p);
     return;
   }
 
-  cobSeccion(cont, 'Me deben', deben);
-  cobSeccion(cont, 'Presupuestos que mandé', pres);
-  cobSeccion(cont, 'Ya me pagaron', pagadas.slice(0, 15));
+  cobSeccion(cont, t('Me deben'), deben);
+  cobSeccion(cont, t('Presupuestos que mandé'), pres);
+  cobSeccion(cont, t('Ya me pagaron'), pagadas.slice(0, 15));
 }
 
 function cobSeccion(cont, titulo, lista) {
@@ -1250,7 +1257,7 @@ function cobLibRenglon(c) {
   izq.className = 'ah-lib-izq';
   const nom = document.createElement('span');
   nom.className = 'ah-lib-nombre';
-  nom.textContent = c.cliente || 'Sin nombre';
+  nom.textContent = c.cliente || t('Sin nombre');
   const sub = document.createElement('span');
   sub.className = 'ah-lib-sub';
   sub.textContent = [c.trabajo, cobroNumeroBonito(c.numero), cobroHaceCuanto(c.fecha)]
@@ -1285,13 +1292,13 @@ function cobLibRenglon(c) {
 // Más de un mes sin pagar se pone rojo: ahí ya toca ir a cobrar.
 function cobPildora(c, estado) {
   const dias = cobroDiasDesde(c.fecha);
-  if (estado === 'pagada') return { tono: 'bien', txt: 'pagada ✓' };
+  if (estado === 'pagada') return { tono: 'bien', txt: t('pagada ✓') };
   if (estado === 'presupuesto') {
-    return dias > COBRO_VALE_DIAS ? { tono: 'no', txt: 'ya se venció' } : { tono: 'lento', txt: 'presupuesto' };
+    return dias > COBRO_VALE_DIAS ? { tono: 'no', txt: t('ya se venció') } : { tono: 'lento', txt: t('presupuesto') };
   }
-  if (dias > 30) return { tono: 'no', txt: 'hace ' + dias + ' días' };
-  if (estado === 'abonada') return { tono: 'lento', txt: 'abonó ' + recPlata(cobroAbonado(c)) };
-  return { tono: 'lento', txt: 'le debe todo' };
+  if (dias > 30) return { tono: 'no', txt: t('hace {n} días', { n: dias }) };
+  if (estado === 'abonada') return { tono: 'lento', txt: t('abonó {monto}', { monto: recPlata(cobroAbonado(c)) }) };
+  return { tono: 'lento', txt: t('le debe todo') };
 }
 
 function cobVerCuenta(id) {
@@ -1311,7 +1318,7 @@ function cobPintarJornal() {
   cobPintarYo();
   // En Cobrar el número de arriba es lo que se quiere ganar al mes (pedido por
   // David): lo que hay que cobrar por ESTE trabajo ya sale grande en la hoja.
-  pintarJornal('Quiere ganar al mes:', cobPerfil.ganarMes > 0 ? recPlata(cobPerfil.ganarMes) : '—');
+  pintarJornal(t('Quiere ganar al mes:'), cobPerfil.ganarMes > 0 ? recPlata(cobPerfil.ganarMes) : '—');
   const num = document.getElementById('jornal-num');
   if (num) num.classList.toggle('jornal-rojo', cobroFrenteAlBasico(cobPerfil, cobMoneda()).tono === 'no');
 }
@@ -1381,7 +1388,7 @@ function cobFuerte(padre, txt) {
 
 function cobFecha(ms) {
   try {
-    return new Date(ms).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(ms).toLocaleDateString(LOCALE_FECHAS, { day: 'numeric', month: 'long', year: 'numeric' });
   } catch (e) {
     return new Date(ms).toLocaleDateString();
   }
@@ -1389,7 +1396,7 @@ function cobFecha(ms) {
 
 function cobFechaCorta(ms) {
   try {
-    return new Date(ms).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+    return new Date(ms).toLocaleDateString(LOCALE_FECHAS, { day: 'numeric', month: 'short' });
   } catch (e) {
     return new Date(ms).toLocaleDateString();
   }

@@ -22,11 +22,11 @@ function cobdDescargar(c) {
       return recdBajar(cobdDibujar(c), cobdNombreArchivo(c));
     })
     .then(function () {
-      if (typeof cobAvisar === 'function') cobAvisar('Listo: la cuenta quedó en sus Descargas. Mándela por WhatsApp.');
+      if (typeof cobAvisar === 'function') cobAvisar(t('Listo: la cuenta quedó en sus Descargas. Mándela por WhatsApp.'));
     })
     .catch(function (e) {
       console.error('No se pudo bajar la cuenta:', e);
-      if (typeof cobAvisar === 'function') cobAvisar('No se pudo bajar la cuenta. Intente otra vez.');
+      if (typeof cobAvisar === 'function') cobAvisar(t('No se pudo bajar la cuenta. Intente otra vez.'));
     })
     .then(function () { if (boton) boton.disabled = false; });
 }
@@ -38,7 +38,7 @@ function cobdNombreArchivo(c) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 30);
-  const tipo = c.tipo === 'presupuesto' ? 'presupuesto' : 'cuenta-de-cobro';
+  const tipo = c.tipo === 'presupuesto' ? t('presupuesto') : t('cuenta-de-cobro');
   return tipo + '-' + String(c.numero).padStart(4, '0') + (limpio ? '-' + limpio : '') + '.png';
 }
 
@@ -75,7 +75,7 @@ function cobdContenido(ctx, c, pinta) {
     });
     y += 8;
   }
-  y = recdLinea(ctx, pinta, (esPres ? 'PRESUPUESTO' : 'CUENTA DE COBRO'), {
+  y = recdLinea(ctx, pinta, (esPres ? t('PRESUPUESTO') : t('CUENTA DE COBRO')), {
     x: centro, y: y, fuente: '17px ScothBrace', color: RECD_COLOR.marron,
     centrado: true, espaciado: 1.7
   });
@@ -88,15 +88,15 @@ function cobdContenido(ctx, c, pinta) {
 
   // --- A quién y por qué ---
   y += 14;
-  y = cobdParte(ctx, pinta, esPres ? 'Para' : 'Señor(a)', c.cliente, izq, der, y);
-  if (c.yo) y = cobdParte(ctx, pinta, esPres ? 'De' : 'Debe a', c.yo, izq, der, y);
-  if (c.trabajo) y = cobdParte(ctx, pinta, 'Por', c.trabajo, izq, der, y);
+  y = cobdParte(ctx, pinta, esPres ? t('Para') : t('Señor(a)'), c.cliente, izq, der, y);
+  if (c.yo) y = cobdParte(ctx, pinta, esPres ? t('De') : t('Debe a'), c.yo, izq, der, y);
+  if (c.trabajo) y = cobdParte(ctx, pinta, t('Por'), c.trabajo, izq, der, y);
 
   // --- La suma, en números y en letras ---
   y += 10;
   y = recdPuntos(ctx, pinta, izq, der, y);
   y += 16;
-  y = recdLinea(ctx, pinta, 'LA SUMA DE', {
+  y = recdLinea(ctx, pinta, t('LA SUMA DE'), {
     x: centro, y: y, fuente: 'bold 11px LiberationSans', color: 'rgba(43, 33, 24, 0.5)',
     centrado: true, espaciado: 1.1
   });
@@ -114,13 +114,13 @@ function cobdContenido(ctx, c, pinta) {
 
   // --- Renglón por renglón ---
   y += 14;
-  y = recdRotulito(ctx, pinta, 'El detalle', izq, y);
+  y = recdRotulito(ctx, pinta, t('El detalle'), izq, y);
   y += 8;
   c.renglones.forEach(function (r) {
     y = cobdRenglon(ctx, pinta, r.rotulo, recdPlata(r.valor), false, izq, der, y);
   });
   if (c.descuento > 0) {
-    y = cobdRenglon(ctx, pinta, 'Descuento (' + cobroCifra(c.descuentoPct) + ' %)',
+    y = cobdRenglon(ctx, pinta, t('Descuento ({pct} %)', { pct: cobroCifra(c.descuentoPct) }),
                     '− ' + recdPlata(c.descuento), false, izq, der, y);
   }
   y += 4;
@@ -135,15 +135,15 @@ function cobdContenido(ctx, c, pinta) {
     ctx.restore();
   }
   y += 8;
-  y = recdRenglon(ctx, pinta, 'Total', recdPlata(c.total), '', true, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Total'), recdPlata(c.total), '', true, izq, der, y);
 
   // --- Los abonos ---
   if (c.abonos && c.abonos.length) {
     y += 8;
-    y = recdRotulito(ctx, pinta, 'Lo que ha pagado', izq, y);
+    y = recdRotulito(ctx, pinta, t('Lo que ha pagado'), izq, y);
     y += 8;
     c.abonos.forEach(function (a) {
-      y = recdRenglon(ctx, pinta, 'Abono del ' + cobFechaCorta(a.fecha), recdPlata(a.monto),
+      y = recdRenglon(ctx, pinta, t('Abono del {fecha}', { fecha: cobFechaCorta(a.fecha) }), recdPlata(a.monto),
                       '', false, izq, der, y);
     });
   }
@@ -156,14 +156,14 @@ function cobdContenido(ctx, c, pinta) {
   y += 34;
   if (pinta) recdPuntosCortos(ctx, centro - 120, centro + 120, y, 'rgba(43, 33, 24, 0.5)', [1, 0]);
   y += 6;
-  y = recdLinea(ctx, pinta, 'Firma', {
+  y = recdLinea(ctx, pinta, t('Firma'), {
     x: centro, y: y, fuente: '12px LiberationSans', color: 'rgba(43, 33, 24, 0.5)', centrado: true
   });
 
   y += 18;
   y = recdPuntos(ctx, pinta, izq, der, y);
   y += 14;
-  y = recdLinea(ctx, pinta, 'Cuenta hecha con Arriero’s Wealth', {
+  y = recdLinea(ctx, pinta, t('Cuenta hecha con Arriero’s Wealth'), {
     x: centro, y: y, fuente: '12px LiberationSans', color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });
   return y + 16 + RECD_DESGARRO;

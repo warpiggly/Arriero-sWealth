@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
   credAtar('cre-g-dejar', 'click', function () {
     credEsconder();
     credLimpiarFormulario();
-    recAvisar('Listo: no guardé nada. Ahí tenía su cuenta.');
+    recAvisar(t('Listo: no guardé nada. Ahí tenía su cuenta.'));
   });
   credAtar('cre-quitar', 'click', credQuitar);
   credAtar('cre-descargar', 'click', credDescargar);
@@ -163,7 +163,7 @@ function credSugerir() {
 
   const a = recAjustes || ajustesVacios();
   if (!ajustesTieneIngreso(a)) {
-    caja.textContent = 'Dígame cuánto gana (arriba) y le digo en cuántos meses le conviene.';
+    caja.textContent = t('Dígame cuánto gana (arriba) y le digo en cuántos meses le conviene.');
     return;
   }
 
@@ -172,33 +172,38 @@ function credSugerir() {
 
   const p = document.createElement('p');
   if (margen <= 0) {
-    p.textContent = 'Hoy no le sobra nada al mes, mijo. Cualquier cuota lo pondría en ' +
-                    'aprietos: mire primero sus gastos en la hoja del mes.';
+    p.textContent = t('Hoy no le sobra nada al mes, mijo. Cualquier cuota lo pondría en ' +
+                      'aprietos: mire primero sus gastos en la hoja del mes.');
     caja.appendChild(p);
     return;
   }
   if (!sug) {
-    p.textContent = 'Ni a 10 años le cabe la cuota con lo que le sobra (' + recPlata(margen) +
-                    '). Pida menos plata: a 24 meses, hasta ' +
-                    recPlata(deudaMontoParaCuota(margen, f.tasa, 24)) + '.';
+    p.textContent = t('Ni a 10 años le cabe la cuota con lo que le sobra ({margen}). ' +
+                      'Pida menos plata: a 24 meses, hasta {hasta}.', {
+      margen: recPlata(margen),
+      hasta: recPlata(deudaMontoParaCuota(margen, f.tasa, 24))
+    });
     caja.appendChild(p);
     return;
   }
 
   p.innerHTML = '';
-  p.appendChild(document.createTextNode('Le sobran ' + recPlata(margen) + ' al mes. '));
+  p.appendChild(document.createTextNode(t('Le sobran {plata} al mes. ', { plata: recPlata(margen) })));
   const fuerte = document.createElement('strong');
-  fuerte.textContent = 'Le recomiendo mínimo ' + sug.meses + (sug.meses === 1 ? ' mes' : ' meses');
+  fuerte.textContent = t(sug.meses === 1 ? 'Le recomiendo mínimo {n} mes' : 'Le recomiendo mínimo {n} meses',
+                         { n: sug.meses });
   p.appendChild(fuerte);
-  p.appendChild(document.createTextNode(': cuota de ' + recPlata(sug.cuota) +
-    (f.tasaTexto ? '.' : ' (sin contar interés: escríbalo para que la cuenta sea de verdad).')));
+  p.appendChild(document.createTextNode(f.tasaTexto
+    ? t(': cuota de {plata}.', { plata: recPlata(sug.cuota) })
+    : t(': cuota de {plata} (sin contar interés: escríbalo para que la cuenta sea de verdad).',
+        { plata: recPlata(sug.cuota) })));
   caja.appendChild(p);
 
   if (f.meses !== sug.meses) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'ah-sug-usar';
-    b.textContent = 'Usar ' + sug.meses + (sug.meses === 1 ? ' mes' : ' meses');
+    b.textContent = t(sug.meses === 1 ? 'Usar {n} mes' : 'Usar {n} meses', { n: sug.meses });
     b.addEventListener('click', function () {
       const m = document.getElementById('cre-meses');
       if (m) m.value = String(sug.meses);
@@ -226,9 +231,9 @@ function credFormularioCambio() {
 
 function credHacerLaCuenta() {
   const f = credLeerFormulario();
-  const falta = !f.monto ? ['cre-monto', 'Escríbame cuánto le prestan, mijo.']
-    : !f.meses ? ['cre-meses', '¿En cuántos meses lo va a pagar?']
-    : !f.tasaTexto ? ['cre-tasa', 'Escriba el interés al mes. Si no le cobran nada, ponga 0.']
+  const falta = !f.monto ? ['cre-monto', t('Escríbame cuánto le prestan, mijo.')]
+    : !f.meses ? ['cre-meses', t('¿En cuántos meses lo va a pagar?')]
+    : !f.tasaTexto ? ['cre-tasa', t('Escriba el interés al mes. Si no le cobran nada, ponga 0.')]
     : null;
   if (falta) {
     recAvisar(falta[1]);
@@ -324,7 +329,7 @@ function credGuardar() {
   dbGuardarCredito(credAhora).then(function (id) {
     credAhora.id = id;
     credLimpiarFormulario();
-    recAvisar('Quedó apuntado en sus deudas, mijo.');
+    recAvisar(t('Quedó apuntado en sus deudas, mijo.'));
     return credSincronizarCuotas();
   }).then(function () {
     credPintar();
@@ -340,12 +345,12 @@ function credQuitar() {
     return credSincronizarCuotas();
   }).then(function () {
     recPintarLibreta();
-    recAvisar('Lo quité de sus deudas.', {
-      texto: 'Deshacer',
+    recAvisar(t('Lo quité de sus deudas.'), {
+      texto: t('Deshacer'),
       hacer: function () {
         delete copia.id;
         dbGuardarCredito(copia).then(credSincronizarCuotas).then(function () {
-          recAvisar('Listo, volvió a sus deudas.');
+          recAvisar(t('Listo, volvió a sus deudas.'));
           recPintarLibreta();
         });
       }
@@ -386,27 +391,28 @@ function credPintar() {
   // Rojo si va en mora. La frase lo dice también: el color solo acompaña.
   caja.classList.toggle('cre-roja', v.mora);
 
-  credTexto('cre-nombre-rec', c.nombre || 'Mi crédito');
+  credTexto('cre-nombre-rec', c.nombre || t('Mi crédito'));
   credTexto('cre-monto-rec', recPlata(plan.monto));
-  credTexto('cre-condiciones', 'al ' + credPct(plan.tasa) + ' mensual · ' +
-            plan.mesesPedidos + (plan.mesesPedidos === 1 ? ' mes' : ' meses'));
+  credTexto('cre-condiciones', t(plan.mesesPedidos === 1 ? 'al {pct} mensual · {n} mes' : 'al {pct} mensual · {n} meses',
+            { pct: credPct(plan.tasa), n: plan.mesesPedidos }));
 
   // --- Los renglones ---
   const r = document.getElementById('cre-renglones');
   r.innerHTML = '';
-  r.appendChild(recRenglon('Cuota al mes', recPlata(plan.cuota), '', true));
-  r.appendChild(recRenglon('Plata prestada', recPlata(plan.monto)));
-  r.appendChild(recRenglon('Intereses', recPlata(plan.intereses)));
-  r.appendChild(recRenglon('Total a pagar', recPlata(plan.totalPagar), '', true));
+  r.appendChild(recRenglon(t('Cuota al mes'), recPlata(plan.cuota), '', true));
+  r.appendChild(recRenglon(t('Plata prestada'), recPlata(plan.monto)));
+  r.appendChild(recRenglon(t('Intereses'), recPlata(plan.intereses)));
+  r.appendChild(recRenglon(t('Total a pagar'), recPlata(plan.totalPagar), '', true));
   if (plan.totalPagar !== plan.totalOriginal) {
     const d = plan.totalPagar - plan.totalOriginal;
-    r.appendChild(recRenglon('Al sacarlo era', recPlata(plan.totalOriginal),
-      d < 0 ? '(se ahorra ' + recPlata(-d) + ')' : '(paga ' + recPlata(d) + ' más)'));
+    r.appendChild(recRenglon(t('Al sacarlo era'), recPlata(plan.totalOriginal),
+      d < 0 ? t('(se ahorra {plata})', { plata: recPlata(-d) })
+            : t('(paga {plata} más)', { plata: recPlata(d) })));
   }
   if (plan.sinFin) {
-    r.appendChild(recRenglon('Termina', 'no termina nunca', '', false));
+    r.appendChild(recRenglon(t('Termina'), t('no termina nunca'), '', false));
   } else if (plan.ultima) {
-    r.appendChild(recRenglon('Termina', deudaFechaCorta(plan.ultima.fecha),
+    r.appendChild(recRenglon(t('Termina'), deudaFechaCorta(plan.ultima.fecha),
                              deudaCambioDelFinal(plan)));
   }
 
@@ -430,19 +436,21 @@ function credPintar() {
   document.getElementById('cre-guardar').classList.toggle('oculto', !!c.id);
   const quitar = document.getElementById('cre-quitar');
   quitar.classList.toggle('oculto', !c.id);
-  quitar.textContent = plan.terminado ? 'Ya lo pagué: quitarlo de mis deudas'
-                                      : 'Quitarlo de mis deudas';
+  quitar.textContent = plan.terminado ? t('Ya lo pagué: quitarlo de mis deudas')
+                                      : t('Quitarlo de mis deudas');
 
   credPintarHoja(plan);
 }
 
-function credTexto(id, t) {
+function credTexto(id, txt) {
   const el = document.getElementById(id);
-  if (el) el.textContent = t;
+  if (el) el.textContent = txt;
 }
 
+// Solo para mostrar: en inglés el punto decimal va como punto (2.5 %).
 function credPct(n) {
-  return String(Math.round((Number(n) || 0) * 100) / 100).replace('.', ',') + ' %';
+  const txt = String(Math.round((Number(n) || 0) * 100) / 100);
+  return (IDIOMA === 'en' ? txt : txt.replace('.', ',')) + ' %';
 }
 
 function credPintarAvance(plan) {
@@ -452,11 +460,11 @@ function credPintarAvance(plan) {
 
   const dice = document.createElement('p');
   dice.className = 'cre-avance-dice';
-  dice.appendChild(document.createTextNode('Lleva pagado '));
+  dice.appendChild(document.createTextNode(t('Lleva pagado') + ' '));
   const b = document.createElement('strong');
   b.textContent = recPlata(plan.pagado);
   dice.appendChild(b);
-  dice.appendChild(document.createTextNode(' de ' + recPlata(plan.totalPagar)));
+  dice.appendChild(document.createTextNode(t(' de {total}', { total: recPlata(plan.totalPagar) })));
   cont.appendChild(dice);
 
   const barra = document.createElement('div');
@@ -474,9 +482,10 @@ function credPintarAvance(plan) {
   falta.className = 'cre-avance-falta';
   const quedan = plan.mesesReales - plan.cuotasPagadas;
   falta.textContent = plan.terminado
-    ? 'Pagó todas las cuotas.'
-    : 'Le faltan ' + quedan + (quedan === 1 ? ' cuota' : ' cuotas') + ': ' + recPlata(plan.falta) +
-      (plan.proxima ? ' · la próxima, el ' + deudaFechaCorta(plan.proxima.fecha) : '');
+    ? t('Pagó todas las cuotas.')
+    : t(quedan === 1 ? 'Le falta {n} cuota: {plata}' : 'Le faltan {n} cuotas: {plata}',
+        { n: quedan, plata: recPlata(plan.falta) }) +
+      (plan.proxima ? t(' · la próxima, el {fecha}', { fecha: deudaFechaCorta(plan.proxima.fecha) }) : '');
   cont.appendChild(falta);
 }
 
@@ -515,9 +524,9 @@ function credPintarCuotas(plan) {
   // Con pocas, abiertas de una. Con muchas, plegadas — salvo que la persona
   // ya las haya abierto: no se le cierran en la cara al chulear.
   if (credCuotasAbiertas === null) credCuotasAbiertas = plan.filas.length <= 6;
-  credTexto('cre-cuotas-tit-txt', 'Las ' + plan.filas.length +
-    (plan.filas.length === 1 ? ' cuota' : ' cuotas') +
-    (plan.cuotasPagadas ? ' · ' + plan.cuotasPagadas + ' pagadas' : ''));
+  credTexto('cre-cuotas-tit-txt',
+    t(plan.filas.length === 1 ? 'La {n} cuota' : 'Las {n} cuotas', { n: plan.filas.length }) +
+    (plan.cuotasPagadas ? t(' · {n} pagadas', { n: plan.cuotasPagadas }) : ''));
   credMarcarCuotas();
 
   plan.filas.forEach(function (f) {
@@ -532,7 +541,7 @@ function credPintarCuotas(plan) {
     const check = document.createElement('input');
     check.type = 'checkbox';
     check.checked = f.pagado;
-    check.setAttribute('aria-label', 'Ya pagué la cuota ' + f.n);
+    check.setAttribute('aria-label', t('Ya pagué la cuota {n}', { n: f.n }));
     check.addEventListener('change', function () {
       credCambiar(function (c) {
         c.pagados = c.pagados || {};
@@ -550,7 +559,7 @@ function credPintarCuotas(plan) {
     const que = document.createElement('span');
     que.className = 'cre-cuota-que';
     const n = document.createElement('strong');
-    n.textContent = 'Cuota ' + f.n;
+    n.textContent = t('Cuota {n}', { n: f.n });
     que.appendChild(n);
     const fecha = document.createElement('small');
     fecha.textContent = deudaFechaCorta(f.fecha) + credEstado(f);
@@ -563,10 +572,10 @@ function credPintarCuotas(plan) {
 }
 
 function credEstado(f) {
-  if (f.pagado) return ' · pagada';
-  if (f.atrasada) return ' · ¡vencida!';
-  if (f.corto) return ' · faltaron ' + recPlata(f.corto);
-  if (f.corregido && f.pago > f.cuota) return ' · pagó de más';
+  if (f.pagado) return t(' · pagada');
+  if (f.atrasada) return t(' · ¡vencida!');
+  if (f.corto) return t(' · faltaron {plata}', { plata: recPlata(f.corto) });
+  if (f.corregido && f.pago > f.cuota) return t(' · pagó de más');
   return '';
 }
 
@@ -577,7 +586,7 @@ function credCampoPago(f, clase) {
   input.inputMode = 'numeric';
   input.className = clase;
   input.value = Math.round(f.pago).toLocaleString('es-CO');
-  input.setAttribute('aria-label', 'Lo que pagó en la cuota ' + f.n);
+  input.setAttribute('aria-label', t('Lo que pagó en la cuota {n}', { n: f.n }));
   recAtarMoneda(input);
   input.addEventListener('change', function () {
     const txt = input.value.trim();
@@ -614,7 +623,7 @@ function credPintarHoja(plan) {
   const dos = function (n) { return String(n).padStart(2, '0'); };
   poner('cre-a-primera', d.getFullYear() + '-' + dos(d.getMonth() + 1) + '-' + dos(d.getDate()));
 
-  credTexto('cre-atras-cuantas', plan.filas.length + (plan.filas.length === 1 ? ' cuota' : ' cuotas'));
+  credTexto('cre-atras-cuantas', t(plan.filas.length === 1 ? '{n} cuota' : '{n} cuotas', { n: plan.filas.length }));
 
   const cuerpo = document.getElementById('cre-hoja-cuerpo');
   cuerpo.innerHTML = '';
@@ -645,7 +654,7 @@ function credPintarHoja(plan) {
     const check = document.createElement('input');
     check.type = 'checkbox';
     check.checked = f.pagado;
-    check.setAttribute('aria-label', 'Ya pagué la cuota ' + f.n);
+    check.setAttribute('aria-label', t('Ya pagué la cuota {n}', { n: f.n }));
     check.addEventListener('change', function () {
       credCambiar(function (c2) {
         c2.pagados = c2.pagados || {};
@@ -660,7 +669,7 @@ function credPintarHoja(plan) {
 
   const tr = document.createElement('tr');
   tr.className = 'rec-hoja-total';
-  [['', 'rec-hoja-num'], ['Total', ''], [recPlata(plan.totalPagar), 'rec-hoja-plata'],
+  [['', 'rec-hoja-num'], [t('Total'), ''], [recPlata(plan.totalPagar), 'rec-hoja-plata'],
    [recPlata(plan.intereses), 'rec-hoja-plata'], [recPlata(plan.monto), 'rec-hoja-plata'],
    ['', ''], ['', '']].forEach(function (x) {
     const td = document.createElement('td');
@@ -680,23 +689,25 @@ function credPintarEnLibreta(cont, creditos) {
   const a = recAjustes || ajustesVacios();
   const alMes = ahorroCapacidad(a).alMes;
 
-  cont.appendChild(recLibTitulo('Deudas'));
+  cont.appendChild(recLibTitulo(t('Deudas')));
   creditos.forEach(function (c) {
     const plan = deudaPlan(c);
     const v = deudaVeredicto(plan, alMes + deudaCuotaDelMes(plan), recPlata);
-    const plazo = plan.terminado ? { tono: 'bien', texto: 'Pagado ✓' }
+    // Sin el año: "5 de oct" / "Oct 5" (el patrón sirve para las dos lenguas).
+    const plazo = plan.terminado ? { tono: 'bien', texto: t('Pagado ✓') }
       : v.mora ? { tono: 'no', texto: plan.filas.some(function (f) { return f.atrasada || f.corto; })
-                   ? 'En mora' : 'No le cabe' }
-      : { tono: 'bien', texto: 'Próxima: ' + deudaFechaCorta(plan.proxima.fecha).replace(/ de \d{4}$/, '') };
+                   ? t('En mora') : t('No le cabe') }
+      : { tono: 'bien', texto: t('Próxima: {fecha}', {
+          fecha: deudaFechaCorta(plan.proxima.fecha).replace(/,? (de )?\d{4}$/, '') }) };
 
     const b = recLibRenglon({
-      nombre: c.nombre || 'Mi crédito',
-      sub: plan.cuotasPagadas + ' de ' + plan.mesesReales + ' cuotas pagadas',
+      nombre: c.nombre || t('Mi crédito'),
+      sub: t('{pagadas} de {total} cuotas pagadas', { pagadas: plan.cuotasPagadas, total: plan.mesesReales }),
       precio: plan.falta,
       plazo: plazo
     });
     b.classList.add('ah-lib-deuda');
-    b.title = 'Le falta por pagar ' + recPlata(plan.falta);
+    b.title = t('Le falta por pagar {plata}', { plata: recPlata(plan.falta) });
     b.addEventListener('click', function () { credVer(c.id); });
     cont.appendChild(b);
   });
@@ -727,13 +738,13 @@ function credDescargar() {
     credDibujo(ctx, plan, v, true);
     recdOrillaArrancada(ctx, alto);
 
-    const limpio = String(credAhora.nombre || 'credito').toLowerCase()
+    const limpio = String(credAhora.nombre || t('credito')).toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'credito';
-    return recdBajar(lienzo, 'credito-' + limpio + '.png');
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || t('credito');
+    return recdBajar(lienzo, t('credito') + '-' + limpio + '.png');
   }).catch(function (e) {
     console.error('No se pudo bajar el recibo del crédito:', e);
-    recAvisar('No se pudo bajar el recibo. Intente otra vez.');
+    recAvisar(t('No se pudo bajar el recibo. Intente otra vez.'));
   }).then(function () {
     if (boton) boton.disabled = false;
   });
@@ -751,7 +762,7 @@ function credDibujo(ctx, plan, v, pinta) {
     centrado: true, espaciado: 1.7
   });
   y += 5;
-  y = recdLinea(ctx, pinta, 'su crédito, mijo', {
+  y = recdLinea(ctx, pinta, t('su crédito, mijo'), {
     x: centro, y: y, fuente: 'italic 13px LiberationSans',
     color: 'rgba(43, 33, 24, 0.55)', centrado: true
   });
@@ -759,12 +770,12 @@ function credDibujo(ctx, plan, v, pinta) {
   y = recdPuntos(ctx, pinta, izq, der, y);
 
   y += 22;
-  y = recdParrafo(ctx, pinta, credAhora.nombre || 'Mi crédito', {
+  y = recdParrafo(ctx, pinta, credAhora.nombre || t('Mi crédito'), {
     x: centro, y: y, ancho: der - izq, fuente: 'bold 25px LiberationSans',
     color: RECD_COLOR.texto, centrado: true, alto: 30
   });
   y += 8;
-  y = recdLinea(ctx, pinta, 'Le prestan', {
+  y = recdLinea(ctx, pinta, t('Le prestan|recibo'), {
     x: centro, y: y, fuente: '13px LiberationSans',
     color: 'rgba(43, 33, 24, 0.6)', centrado: true
   });
@@ -774,7 +785,8 @@ function credDibujo(ctx, plan, v, pinta) {
     color: v.mora ? rojo : RECD_COLOR.verdeOscuro, centrado: true
   });
   y += 8;
-  y = recdLinea(ctx, pinta, 'al ' + credPct(plan.tasa) + ' mensual · ' + plan.mesesPedidos + ' meses', {
+  y = recdLinea(ctx, pinta, t(plan.mesesPedidos === 1 ? 'al {pct} mensual · {n} mes' : 'al {pct} mensual · {n} meses',
+                                { pct: credPct(plan.tasa), n: plan.mesesPedidos }), {
     x: centro, y: y, fuente: '13px LiberationSans',
     color: 'rgba(43, 33, 24, 0.5)', centrado: true
   });
@@ -782,13 +794,13 @@ function credDibujo(ctx, plan, v, pinta) {
   y = recdPuntos(ctx, pinta, izq, der, y);
 
   y += 14;
-  y = recdRenglon(ctx, pinta, 'Cuota al mes', recdPlata(plan.cuota), '', true, izq, der, y);
-  y = recdRenglon(ctx, pinta, 'Plata prestada', recdPlata(plan.monto), '', false, izq, der, y);
-  y = recdRenglon(ctx, pinta, 'Intereses', recdPlata(plan.intereses), '', false, izq, der, y);
-  y = recdRenglon(ctx, pinta, 'Total a pagar', recdPlata(plan.totalPagar), '', true, izq, der, y);
-  y = recdRenglon(ctx, pinta, 'Lleva pagado', recdPlata(plan.pagado), '', false, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Cuota al mes'), recdPlata(plan.cuota), '', true, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Plata prestada'), recdPlata(plan.monto), '', false, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Intereses'), recdPlata(plan.intereses), '', false, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Total a pagar'), recdPlata(plan.totalPagar), '', true, izq, der, y);
+  y = recdRenglon(ctx, pinta, t('Lleva pagado'), recdPlata(plan.pagado), '', false, izq, der, y);
   if (plan.ultima && !plan.sinFin) {
-    y = recdRenglon(ctx, pinta, 'Termina', deudaFechaCorta(plan.ultima.fecha),
+    y = recdRenglon(ctx, pinta, t('Termina'), deudaFechaCorta(plan.ultima.fecha),
                     deudaCambioDelFinal(plan), false, izq, der, y);
   }
   y += 14;
@@ -799,7 +811,7 @@ function credDibujo(ctx, plan, v, pinta) {
 
   if (v.sugerencias.length) {
     y += 14;
-    y = recdRotulito(ctx, pinta, 'Para no quedar en mora', izq, y);
+    y = recdRotulito(ctx, pinta, t('Para no quedar en mora'), izq, y);
     v.sugerencias.forEach(function (s) {
       y += 8;
       y = recdParrafo(ctx, pinta, '• ' + s, {
@@ -810,11 +822,11 @@ function credDibujo(ctx, plan, v, pinta) {
   }
 
   y += 18;
-  y = recdRotulito(ctx, pinta, 'Las cuotas', izq, y);
+  y = recdRotulito(ctx, pinta, t('Las cuotas'), izq, y);
   y += 8;
   plan.filas.forEach(function (f) {
     const marca = f.pagado ? '✓ ' : '☐ ';
-    y = recdRenglon(ctx, pinta, marca + 'Cuota ' + f.n + ' · ' + deudaFechaCorta(f.fecha),
+    y = recdRenglon(ctx, pinta, marca + t('Cuota {n}', { n: f.n }) + ' · ' + deudaFechaCorta(f.fecha),
                     recdPlata(f.pago), '', false, izq, der, y,
                     f.atrasada || f.corto ? rojo : null);
   });
@@ -827,7 +839,7 @@ function credDibujo(ctx, plan, v, pinta) {
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });
   y += 6;
-  y = recdLinea(ctx, pinta, 'Cuenta hecha con Arriero’s Wealth', {
+  y = recdLinea(ctx, pinta, t('Cuenta hecha con Arriero’s Wealth|credito'), {
     x: centro, y: y, fuente: '12px LiberationSans',
     color: 'rgba(43, 33, 24, 0.45)', centrado: true
   });

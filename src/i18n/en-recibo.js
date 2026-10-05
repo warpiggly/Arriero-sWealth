@@ -1,0 +1,108 @@
+// Inglés de: recibo. Llave = frase exacta en español (ver src/i18n.js).
+Object.assign(EN, {
+  // Las llaves que ya traen en-base / en-ahorro / en-cobrar (p. ej. 'ya mismo',
+  // 'Total restante', 'Lo necesario') se usan de allá: no se repiten aquí.
+  // --- recibo.js: lo que gana ---
+  'Todavía no me ha dicho cuánto gana': 'You haven\'t told me what you earn yet',
+  'Usted gana {monto} al mes': 'You earn {monto} a month',
+  'Escríbame cuánto cuesta, mijo.': 'Tell me how much it costs, kiddo.',
+
+  // --- recibo.js: la cara del recibo ---
+  '{n} cosa apuntada': '{n} thing written down',
+  '{n} cosas en un grupo': '{n} things in a group',
+  'Mi grupo': 'My group',
+  'Lo que usted quiere': 'What you want',
+  '{n} cosas, todo junto': '{n} things, all together',
+  'Lo que le pesa': 'What it costs you',
+  'Voltear para corregir los precios': 'Flip over to fix the prices',
+  'Usted ahorra': 'You save',
+  '/ mes': '/ month',
+  'Ya tiene': 'You already have',
+  'Todo junto': 'All together',
+  'Lo tendrá': 'You\'ll have it',
+  'no se sabe todavía': 'can\'t tell yet',
+  'O sea, para': 'That means by',
+  'Cosa por cosa': 'Item by item',
+  '(sin nombre)': '(no name)',
+  'Toque un plazo y le digo cuánto tendría que guardar.': 'Tap a time and I\'ll tell you how much you\'d need to save.',
+
+  // --- recibo.js: consejo de emergencia (si no cargan los JSON) ---
+  'El que guarda siempre tiene, mijo. Pero el que guarda con fecha, llega.': 'Folks who save always have, mijo. But folks who save with a date in mind get there.',
+  'La reserva es para la tormenta, no para el antojo. Piénselo dos veces.': 'The cushion is for the storm, not for a cravin\'. Think it over twice, darlin\'.',
+  'No cargue la mula con todo de una. De a bulto se llega igual, y sin lastimarla.': 'Don\'t load the mule all at once. One sack at a time gets you there just the same, and without hurtin\' her.',
+  'Antes de cargar la mula hay que darle de comer. Primero cuadre el mes.': 'Before you load the mule, you\'ve got to feed her. Square up the month first, kiddo.',
+
+  // --- recibo.js: el reverso (la hoja para corregir) ---
+  'la fila de este recibo': 'the row for this receipt',
+  'las {n} filas de este grupo': 'the {n} rows in this group',
+  'a mano': 'by hand',
+
+  // --- recibo.js: guardar ---
+  'Quedó apuntado, mijo.': 'Got it written down, sugar.',
+  '{n} cosa': '{n} thing',
+  '{n} cosas': '{n} things',
+  'Quedó apuntado en "{nombre}".': 'Written down in "{nombre}".',
+  'Listo: no guardé nada. Ahí tenía su cuenta.': 'All right, I didn\'t save a thing. There\'s your figurin\' anyhow.',
+
+  // --- recibo.js: la libreta ---
+  'Todavía no ha apuntado nada, mijo. Escriba un precio arriba, o señale uno en cualquier página con el clic derecho.': 'You haven\'t written anything down yet, kiddo. Type a price up top, or point to one on any web page with a right-click.',
+  'Grupos': 'Groups',
+  'Sueltas': 'Single items',
+  'No pude abrir la libreta: {error}': 'I couldn\'t open the notebook: {error}',
+  'Ya lo puede comprar': 'You can buy it now',
+  'Todavía no alcanza': 'Not enough yet',
+  'Lo quité de la libreta.': 'I took it out of the notebook.',
+  'Listo, volvió a la libreta.': 'There you go, it\'s back in the notebook.',
+
+  // --- recibo-descargar.js: la imagen del recibo ---
+  'No se pudo bajar el recibo. Intente otra vez.': 'Couldn\'t download the receipt. Try again, sugar.',
+  'mi grupo': 'my group',
+  'recibo': 'receipt',
+  'Listo: el recibo quedó en sus Descargas.': 'Done! The receipt is in your Downloads.',
+  'Ojo con esta cuenta, mijo: {aviso}': 'Careful with this figurin\', kiddo: {aviso}',
+  'Cuenta hecha con Arriero’s Wealth|recibo': 'Figured with Arriero’s Wealth',
+
+  // --- cuaderno.js: la hoja del mes ---
+  'se guarda': 'saved',
+  'Créditos': 'Loans',
+  'se suman solos': 'adds up by itself',
+  'La cuota de este mes de los créditos que tiene apuntados. Se suma sola: no la escriba otra vez en Deudas.': 'This month\'s payment on the loans you\'ve written down. It adds itself up, so don\'t write it again under Debts.',
+  '{rotulo}, cuánto al mes': '{rotulo}, how much a month',
+  '¿Qué va en {rotulo}?': 'What goes in {rotulo}?',
+  'Borrar este renglón': 'Delete this line',
+  'Borrar {rotulo}': 'Delete {rotulo}',
+  'Según la regla, le toca': 'By the rule, here\'s your share',
+  '{rotulo} hasta ({pct} %)': '{rotulo} up to ({pct} %)',
+  '{rotulo} ({pct} %)': '{rotulo} ({pct} %)',
+  'le quedan {monto}': '{monto} to spare',
+  'se pasa {monto}': '{monto} over',
+  'ya lo aparta': 'already set aside',
+  'le faltan {monto}': '{monto} short',
+  'Anote lo que gana y le digo cuánto es.': 'Write down what you earn and I\'ll tell you how much that is.',
+  'va bien': 'that\'s fine',
+  'va justo': 'that\'s tight',
+  'es más de lo que gana': 'that\'s more than you earn',
+  'es muy alto': 'that\'s too high',
+  'Es el {pct} % de lo que gana: {palabra}.': 'That\'s {pct} % of what you earn: {palabra}.',
+  'Sin lo que gana no hay de dónde salga esto.': 'Without knowin\' what you earn, there\'s nowhere for this to come from.',
+  'Se gasta el {pct} % ({monto})': 'You spend {pct} % ({monto})',
+  ', aparta el {pct} %': ', set aside {pct} %',
+  ' y le queda el {pct} %.': ' and have {pct} % left.',
+  '. No le sobra nada.': '. Nothin\' left over.',
+  '. Le faltan {monto} cada mes.': '. You\'re {monto} short every month.',
+  'Gasta el {pct} % de lo que gana: {monto}.': 'You spend {pct} % of what you earn: {monto}.',
+  'Aparta el {pct} % para guardar: {monto}.': 'You set aside {pct} % to save: {monto}.',
+  'Le sobra el {pct} %: {monto}.': 'You\'ve got {pct} % left over: {monto}.',
+  'No le sobra nada: toda la plata tiene dueño.': 'Nothin\' left over: every dollar\'s already spoken for.',
+  'Le faltan {monto} ({pct} %): está gastando más de lo que gana.': 'You\'re {monto} short ({pct} %): you\'re spendin\' more than you earn, darlin\'.',
+  'Para comprar cosas le quedan {monto} al mes.': 'For buyin\' things you\'ve got {monto} a month.',
+  'Su ahorro de {monto} cuenta para comprar. ': 'Your savings of {monto} count toward buyin\'. ',
+  'Su ahorro de {monto} es su colchón: no se toca. ': 'Your savings of {monto} are your cushion: hands off. ',
+  'menos del 1': 'less than 1',
+  'No se pudo bajar la hoja. Intente otra vez.': 'Couldn\'t download the sheet. Try again, sugar.',
+  'hoja-del-mes-': 'monthly-sheet-',
+  'mis cuentas del mes': 'my money this month',
+  '{rotulo} (se guarda)': '{rotulo} (saved)',
+  'Créditos (se suman solos)': 'Loans (add up by themselves)',
+  'Mi ahorro lo puedo usar para comprar cosas. ': 'I can use my savings to buy things. '
+});

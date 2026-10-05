@@ -36,30 +36,30 @@ const AJUSTES_KEY = 'ajustesArriero';
 // necesario ni al porcentaje gastado (se guarda, no se gasta). Se compara
 // contra el 10 % de la regla.
 const NECESARIOS = [
-  { clave: 'mercado',    rotulo: 'Mercado',     ayuda: 'La comida y las cosas de la casa: arroz, carne, jabón, papel…' },
-  { clave: 'casa',       rotulo: 'Casa',        ayuda: 'El arriendo o la cuota de la casa.' },
-  { clave: 'servicios',  rotulo: 'Servicios',   ayuda: 'Luz, agua, gas, internet y teléfono fijo.' },
-  { clave: 'transporte', rotulo: 'Transporte',  ayuda: 'Bus, taxi, gasolina o pasajes para moverse.' },
-  { clave: 'deudas',     rotulo: 'Deudas',      ayuda: 'Cuotas de préstamos, tarjetas o lo que le debe a alguien.' },
-  { clave: 'ahorro',     rotulo: 'Ahorro',      ayuda: 'Lo que aparta cada mes para guardar. No es un gasto: se guarda.', guarda: true }
+  { clave: 'mercado',    rotulo: t('Mercado'),     ayuda: t('La comida y las cosas de la casa: arroz, carne, jabón, papel…') },
+  { clave: 'casa',       rotulo: t('Casa'),        ayuda: t('El arriendo o la cuota de la casa.') },
+  { clave: 'servicios',  rotulo: t('Servicios'),   ayuda: t('Luz, agua, gas, internet y teléfono fijo.') },
+  { clave: 'transporte', rotulo: t('Transporte'),  ayuda: t('Bus, taxi, gasolina o pasajes para moverse.') },
+  { clave: 'deudas',     rotulo: t('Deudas'),      ayuda: t('Cuotas de préstamos, tarjetas o lo que le debe a alguien.') },
+  { clave: 'ahorro',     rotulo: t('Ahorro'),      ayuda: t('Lo que aparta cada mes para guardar. No es un gasto: se guarda.'), guarda: true }
 ];
 
 // LOS OTROS GASTOS: lo que se tiene en una casa pero no es vital. Cuentan como
 // los "gustos" de la regla 70 / 30. La persona escoge de esta lista con el +;
 // "otra" deja escribir el nombre y se puede poner varias veces.
 const OTROS_CATALOGO = [
-  { clave: 'gym',       rotulo: 'Gimnasio',                 ayuda: 'La mensualidad del gimnasio o de algún deporte.' },
-  { clave: 'mascotas',  rotulo: 'Mascotas',                 ayuda: 'Comida, veterinario y cositas del perro o el gato.' },
-  { clave: 'celular',   rotulo: 'Plan de celular',          ayuda: 'Lo que paga cada mes por el celular.' },
-  { clave: 'tele',      rotulo: 'Televisión y plataformas', ayuda: 'Cable, Netflix, música y parecidos.' },
-  { clave: 'salidas',   rotulo: 'Salidas y comer afuera',   ayuda: 'Restaurantes, paseos, cine, rumba.' },
-  { clave: 'ropa',      rotulo: 'Ropa y zapatos',           ayuda: 'Lo que se va en ropa y zapatos.' },
-  { clave: 'cuidado',   rotulo: 'Peluquería y cuidado',     ayuda: 'Peluquería, barbería, uñas, cremas.' },
-  { clave: 'regalos',   rotulo: 'Regalos',                  ayuda: 'Cumpleaños, navidad y detalles.' },
-  { clave: 'estudio',   rotulo: 'Cursos y estudio',         ayuda: 'Cursos, útiles y matrículas.' },
-  { clave: 'familia',   rotulo: 'Ayuda a la familia',       ayuda: 'Lo que le manda a los papás, a los hijos o a quien ayude.' },
-  { clave: 'chance',    rotulo: 'Chance y lotería',         ayuda: 'Lo que juega en chance, lotería o rifas.' },
-  { clave: 'otra',      rotulo: 'Otra cosa',                ayuda: 'Algo que no está en la lista: usted le pone el nombre.' }
+  { clave: 'gym',       rotulo: t('Gimnasio'),                 ayuda: t('La mensualidad del gimnasio o de algún deporte.') },
+  { clave: 'mascotas',  rotulo: t('Mascotas'),                 ayuda: t('Comida, veterinario y cositas del perro o el gato.') },
+  { clave: 'celular',   rotulo: t('Plan de celular'),          ayuda: t('Lo que paga cada mes por el celular.') },
+  { clave: 'tele',      rotulo: t('Televisión y plataformas'), ayuda: t('Cable, Netflix, música y parecidos.') },
+  { clave: 'salidas',   rotulo: t('Salidas y comer afuera'),   ayuda: t('Restaurantes, paseos, cine, rumba.') },
+  { clave: 'ropa',      rotulo: t('Ropa y zapatos'),           ayuda: t('Lo que se va en ropa y zapatos.') },
+  { clave: 'cuidado',   rotulo: t('Peluquería y cuidado'),     ayuda: t('Peluquería, barbería, uñas, cremas.') },
+  { clave: 'regalos',   rotulo: t('Regalos'),                  ayuda: t('Cumpleaños, navidad y detalles.') },
+  { clave: 'estudio',   rotulo: t('Cursos y estudio'),         ayuda: t('Cursos, útiles y matrículas.') },
+  { clave: 'familia',   rotulo: t('Ayuda a la familia'),       ayuda: t('Lo que le manda a los papás, a los hijos o a quien ayude.') },
+  { clave: 'chance',    rotulo: t('Chance y lotería'),         ayuda: t('Lo que juega en chance, lotería o rifas.') },
+  { clave: 'otra',      rotulo: t('Otra cosa'),                ayuda: t('Algo que no está en la lista: usted le pone el nombre.') }
 ];
 
 function ajustesVacios() {

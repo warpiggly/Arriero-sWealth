@@ -235,12 +235,12 @@ function calcAplicar(a, operador, b) {
     case '−': r = a - b; break;
     case '×': r = a * b; break;
     case '÷':
-      if (b === 0) { calcAviso('No se puede'); return null; }
+      if (b === 0) { calcAviso(t('No se puede')); return null; }
       r = a / b;
       break;
     default: return null;
   }
-  if (!isFinite(r) || Math.abs(r) >= 1e15) { calcAviso('Muy grande'); return null; }
+  if (!isFinite(r) || Math.abs(r) >= 1e15) { calcAviso(t('Muy grande')); return null; }
   return r;
 }
 
@@ -289,14 +289,14 @@ function calcAtajo(tipo) {
   let r, texto;
 
   switch (tipo) {
-    case 'mes':  r = n / 12;  texto = visto + ' ÷ 12 (al mes)'; break;
-    case 'dia':  r = n / 30;  texto = visto + ' ÷ 30 (al día)'; break;
-    case 'anio': r = n * 12;  texto = visto + ' × 12 (al año)'; break;
-    case 'diez': r = n * 0.1; texto = '10 % de ' + visto;       break;
+    case 'mes':  r = n / 12;  texto = t('{n} ÷ 12 (al mes)', { n: visto }); break;
+    case 'dia':  r = n / 30;  texto = t('{n} ÷ 30 (al día)', { n: visto }); break;
+    case 'anio': r = n * 12;  texto = t('{n} × 12 (al año)', { n: visto }); break;
+    case 'diez': r = n * 0.1; texto = t('10 % de {n}', { n: visto }); break;
     default: return;
   }
 
-  if (!isFinite(r) || Math.abs(r) >= 1e15) { calcAviso('Muy grande'); return; }
+  if (!isFinite(r) || Math.abs(r) >= 1e15) { calcAviso(t('Muy grande')); return; }
 
   // El atajo cancela lo que estuviera a medias: trabaja sobre la pantalla.
   calcAcumulado = null;

@@ -20,9 +20,9 @@
 // =================================================================
 
 const GUIA_SALUDOS = [
-  'Siéntese aquí, mijo, que le voy a enseñar. Esto no es difícil: es el mismo cuaderno de toda la vida, pero que suma solito.',
-  'Pregunte sin pena, mijo. El que pregunta no se pierde; el que no pregunta termina pagando dos veces.',
-  'Vamos despacio, que de afán no queda sino el cansancio. Un paso, y después el otro.'
+  t('Siéntese aquí, mijo, que le voy a enseñar. Esto no es difícil: es el mismo cuaderno de toda la vida, pero que suma solito.'),
+  t('Pregunte sin pena, mijo. El que pregunta no se pierde; el que no pregunta termina pagando dos veces.'),
+  t('Vamos despacio, que de afán no queda sino el cansancio. Un paso, y después el otro.')
 ];
 
 // Los sitios de la app a los que "Muéstreme" sabe llevar.
@@ -40,119 +40,119 @@ const GUIA_DESTINOS = {
 
 const GUIA_PASOS = [
   {
-    tit: 'Saber cuánto le queda al mes',
-    dice: 'Primero lo primero, mijo: uno no puede guardar lo que no sabe que tiene.',
+    tit: t('Saber cuánto le queda al mes'),
+    dice: t('Primero lo primero, mijo: uno no puede guardar lo que no sabe que tiene.'),
     pasos: [
-      'Toque la mula de Ahorro.',
-      'Escriba lo que gana al mes.',
-      'Anote en cada renglón lo que gasta: mercado, casa, servicios, transporte.',
-      'Abajo, en "Total restante", está lo que le queda.'
+      t('Toque la mula de Ahorro.'),
+      t('Escriba lo que gana al mes.'),
+      t('Anote en cada renglón lo que gasta: mercado, casa, servicios, transporte.'),
+      t('Abajo, en "Total restante", está lo que le queda.')
     ],
     ir: 'ahorro-hoja'
   },
   {
-    tit: '¿Cuándo puedo comprar algo?',
-    dice: 'Antojarse no es pecado. Comprar sin saber si le alcanza, sí.',
+    tit: t('¿Cuándo puedo comprar algo?'),
+    dice: t('Antojarse no es pecado. Comprar sin saber si le alcanza, sí.'),
     pasos: [
-      'En Ahorro, escriba qué es y cuánto cuesta.',
-      'Toque "Hágame la cuenta".',
-      'El recibo le dice en cuántos meses lo tiene y cuánto le pesa.',
-      'Si le gusta, "Guárdemelo" y queda en su libreta.'
+      t('En Ahorro, escriba qué es y cuánto cuesta.'),
+      t('Toque "Hágame la cuenta".'),
+      t('El recibo le dice en cuántos meses lo tiene y cuánto le pesa.'),
+      t('Si le gusta, "Guárdemelo" y queda en su libreta.')
     ],
     ir: 'ahorro-comprar'
   },
   {
-    tit: '¿Me conviene este crédito?',
-    dice: 'La plata prestada se paga dos veces: con plata y con sueño. Mire bien antes de firmar.',
+    tit: t('¿Me conviene este crédito?'),
+    dice: t('La plata prestada se paga dos veces: con plata y con sueño. Mire bien antes de firmar.'),
     pasos: [
-      'En Ahorro, toque "Sacar un crédito".',
-      'Escriba cuánto le prestan, en cuántos meses y el interés que dice el papel del banco.',
-      'La app le dice si la cuota le cabe en lo que le sobra.',
-      'Si lo saca, guárdelo y chulee cada cuota cuando la pague.'
+      t('En Ahorro, toque "Sacar un crédito".'),
+      t('Escriba cuánto le prestan, en cuántos meses y el interés que dice el papel del banco.'),
+      t('La app le dice si la cuota le cabe en lo que le sobra.'),
+      t('Si lo saca, guárdelo y chulee cada cuota cuando la pague.')
     ],
     ir: 'ahorro-credito'
   },
   {
-    tit: 'Un precio que vio en internet',
-    dice: 'En internet todo se ve baratico. Haga la cuenta antes de darle "comprar".',
+    tit: t('Un precio que vio en internet'),
+    dice: t('En internet todo se ve baratico. Haga la cuenta antes de darle "comprar".'),
     pasos: [
-      'En la página de la tienda, señale el precio con el mouse.',
-      'Haga clic derecho y escoja "Arriero: ¿cuándo puedo comprarlo?".',
-      'Abra la app: el precio ya está puesto y el recibo sale solo.'
+      t('En la página de la tienda, señale el precio con el mouse.'),
+      t('Haga clic derecho y escoja "Arriero: ¿cuándo puedo comprarlo?".'),
+      t('Abra la app: el precio ya está puesto y el recibo sale solo.')
     ],
     ir: 'clic-derecho'
   },
   {
-    tit: 'Cuánto vale su día de trabajo',
-    dice: 'Su tiempo vale, mijo. El que no le pone precio a su trabajo, lo regala.',
+    tit: t('Cuánto vale su día de trabajo'),
+    dice: t('Su tiempo vale, mijo. El que no le pone precio a su trabajo, lo regala.'),
     pasos: [
-      'Toque la mula de Cobrar.',
-      'Escriba cuánto se quiere ganar al mes y cuántos días trabaja.',
-      'Mire su hora al lado del básico. Si sale en rojo, súbale: está trabajando barato.'
+      t('Toque la mula de Cobrar.'),
+      t('Escriba cuánto se quiere ganar al mes y cuántos días trabaja.'),
+      t('Mire su hora al lado del básico. Si sale en rojo, súbale: está trabajando barato.')
     ],
     ir: 'cobrar-dia'
   },
   {
-    tit: 'Cuánto cobrar por un trabajo',
-    dice: 'Cuente todo, hasta el pasaje del bus. Lo que no se anota, se pierde.',
+    tit: t('Cuánto cobrar por un trabajo'),
+    dice: t('Cuente todo, hasta el pasaje del bus. Lo que no se anota, se pierde.'),
     pasos: [
-      'En la hoja del trabajo, escriba para quién es y qué trabajo va a hacer.',
-      'Diga cuántos días u horas le lleva.',
-      'Anote lo que tiene que comprar y los otros gastos.',
-      'Escoja su ganancia. Abajo sale grande: "Cóbrele".'
+      t('En la hoja del trabajo, escriba para quién es y qué trabajo va a hacer.'),
+      t('Diga cuántos días u horas le lleva.'),
+      t('Anote lo que tiene que comprar y los otros gastos.'),
+      t('Escoja su ganancia. Abajo sale grande: "Cóbrele".')
     ],
     ir: 'cobrar-hoja'
   },
   {
-    tit: 'Mandarle la cuenta al cliente',
-    dice: 'Cuentas claras, amistades largas. Hasta al compadre se le pasa la cuenta por escrito.',
+    tit: t('Mandarle la cuenta al cliente'),
+    dice: t('Cuentas claras, amistades largas. Hasta al compadre se le pasa la cuenta por escrito.'),
     pasos: [
-      'Toque "Hágame la cuenta de cobro".',
-      'Revísela tranquilo: el cliente no ve su ganancia.',
-      'Toque "Guárdemela" y después "Descárguemela como imagen".',
-      'Mándela por WhatsApp como si fuera una foto.'
+      t('Toque "Hágame la cuenta de cobro".'),
+      t('Revísela tranquilo: el cliente no ve su ganancia.'),
+      t('Toque "Guárdemela" y después "Descárguemela como imagen".'),
+      t('Mándela por WhatsApp como si fuera una foto.')
     ],
     ir: 'cobrar-cuenta'
   },
   {
-    tit: 'Anotar lo que le van pagando',
-    dice: 'Al que fía y no anota, se le olvida hasta a quién le fió.',
+    tit: t('Anotar lo que le van pagando'),
+    dice: t('Al que fía y no anota, se le olvida hasta a quién le fió.'),
     pasos: [
-      'En "Mis cuentas de cobro", toque la cuenta del cliente.',
-      'Escriba lo que le pagaron y toque "Anotar abono".',
-      'Cuando le paguen todo, la cuenta sale con el sello PAGADO.'
+      t('En "Mis cuentas de cobro", toque la cuenta del cliente.'),
+      t('Escriba lo que le pagaron y toque "Anotar abono".'),
+      t('Cuando le paguen todo, la cuenta sale con el sello PAGADO.')
     ],
     ir: 'cobrar-fiados'
   },
   {
-    tit: 'La calculadora',
-    dice: 'Para esas cuentas de cabeza que ya no salen como antes. A todos nos pasa.',
+    tit: t('La calculadora'),
+    dice: t('Para esas cuentas de cabeza que ya no salen como antes. A todos nos pasa.'),
     pasos: [
-      'En Ahorro, al fondo, toque "Saque la calculadora".',
-      'Funciona como la de siempre.',
-      'Los botones de arriba hacen las cuentas del arriero: al mes, al día, al año.'
+      t('En Ahorro, al fondo, toque "Saque la calculadora".'),
+      t('Funciona como la de siempre.'),
+      t('Los botones de arriba hacen las cuentas del arriero: al mes, al día, al año.')
     ],
     ir: 'calculadora'
   }
 ];
 
 const GUIA_PREGUNTAS = [
-  ['¿El cliente ve mi ganancia?',
-   'No, mijo. En la cuenta de cobro la ganancia va dentro de la mano de obra, que es como cobra cualquier maestro. Los materiales salen a lo que le costaron.'],
-  ['¿Dónde quedan mis datos?',
-   'En este computador. No se mandan a ninguna parte. Lo que gana y su hoja del mes viajan con su cuenta de Chrome; las cosas apuntadas y las cuentas de cobro se quedan aquí.'],
-  ['¿Necesito internet?',
-   'No. La app hace todas las cuentas sin internet.'],
-  ['¿Qué es el básico?',
-   'Lo menos que debería valer una hora de trabajo: el salario mínimo repartido en las horas del mes. Si su hora sale por debajo, la app se lo dice en rojo.'],
-  ['¿Por qué mi hora sale en ese número?',
-   'Porque es lo que se quiere ganar al mes, dividido en los días que trabaja, dividido en 8 horas. Si quiere ganar más por hora, súbale a lo que se quiere ganar o trabaje menos días.'],
-  ['¿Y si me equivoco?',
-   'Todo se corrige. El recibo se voltea para cambiar el precio, la cuenta de cobro se vuelve a abrir en la hoja, y lo que borra trae un botón de "Deshacer".'],
-  ['¿Puedo usar otra moneda?',
-   'Sí: arriba, al lado del número grande, escoja la suya. La app no convierte de una moneda a otra: el número que usted escribe es el que vale.'],
-  ['¿Cómo mando la cuenta por WhatsApp?',
-   'Descárguela como imagen: queda en la carpeta de Descargas. En WhatsApp toque el clip, escoja la foto y listo.']
+  [t('¿El cliente ve mi ganancia?'),
+   t('No, mijo. En la cuenta de cobro la ganancia va dentro de la mano de obra, que es como cobra cualquier maestro. Los materiales salen a lo que le costaron.')],
+  [t('¿Dónde quedan mis datos?'),
+   t('En este computador. No se mandan a ninguna parte. Lo que gana y su hoja del mes viajan con su cuenta de Chrome; las cosas apuntadas y las cuentas de cobro se quedan aquí.')],
+  [t('¿Necesito internet?'),
+   t('No. La app hace todas las cuentas sin internet.')],
+  [t('¿Qué es el básico?'),
+   t('Lo menos que debería valer una hora de trabajo: el salario mínimo repartido en las horas del mes. Si su hora sale por debajo, la app se lo dice en rojo.')],
+  [t('¿Por qué mi hora sale en ese número?'),
+   t('Porque es lo que se quiere ganar al mes, dividido en los días que trabaja, dividido en 8 horas. Si quiere ganar más por hora, súbale a lo que se quiere ganar o trabaje menos días.')],
+  [t('¿Y si me equivoco?'),
+   t('Todo se corrige. El recibo se voltea para cambiar el precio, la cuenta de cobro se vuelve a abrir en la hoja, y lo que borra trae un botón de "Deshacer".')],
+  [t('¿Puedo usar otra moneda?'),
+   t('Sí: arriba, al lado del número grande, escoja la suya. La app no convierte de una moneda a otra: el número que usted escribe es el que vale.')],
+  [t('¿Cómo mando la cuenta por WhatsApp?'),
+   t('Descárguela como imagen: queda en la carpeta de Descargas. En WhatsApp toque el clip, escoja la foto y listo.')]
 ];
 
 let guiaEscribiendo = null;
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (ver) {
     let v = '';
     try { v = chrome.runtime.getManifest().version; } catch (e) { /* abierta suelta */ }
-    ver.textContent = v ? 'Versión ' + v : '';
+    ver.textContent = v ? t('Versión {v}', { v: v }) : '';
   }
 
   // El abuelo saluda cada vez que se abre su estrella.
@@ -246,7 +246,7 @@ function guiaPintarPasos() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'abu-muestreme';
-    b.textContent = 'Muéstreme dónde es';
+    b.textContent = t('Muéstreme dónde es');
     b.addEventListener('click', function () { guiaMostrar(p.ir); });
     cuerpo.appendChild(b);
 

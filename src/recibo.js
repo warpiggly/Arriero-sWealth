@@ -236,10 +236,10 @@ function recPintarYo() {
   const txt = document.getElementById('ah-yo-resumen-txt');
   if (txt) {
     if (!ajustesTieneIngreso(a)) {
-      txt.textContent = 'Todavía no me ha dicho cuánto gana';
+      txt.textContent = t('Todavía no me ha dicho cuánto gana');
     } else {
       // Lo que puede guardar no se repite: ya está grande en la cabecera.
-      txt.textContent = 'Usted gana ' + recPlata(a.ingreso) + ' al mes';
+      txt.textContent = t('Usted gana {monto} al mes', { monto: recPlata(a.ingreso) });
     }
   }
 
@@ -266,12 +266,12 @@ function recPintarJornal() {
 
   const a = recAjustes;
   if (!a || !ajustesTieneIngreso(a)) {
-    pintarJornal('Puede guardar:', '—');
+    pintarJornal(t('Puede guardar:'), '—');
     return;
   }
 
   const cap = ahorroCapacidad(a);
-  pintarJornal('Puede guardar:', recPlata(Math.max(0, cap.alMes)));
+  pintarJornal(t('Puede guardar:'), recPlata(Math.max(0, cap.alMes)));
 }
 
 function recPonerValor(id, valor) {
@@ -342,7 +342,7 @@ function recAbrirAhorroDeUna() {
 function recHacerLaCuenta() {
   const campo = document.getElementById('ah-precio');
   if (!recNumero(campo ? campo.value : 0)) {
-    recAvisar('Escríbame cuánto cuesta, mijo.');
+    recAvisar(t('Escríbame cuánto cuesta, mijo.'));
     if (campo) campo.focus();
     return;
   }
@@ -428,16 +428,16 @@ function recPintarRecibo() {
 
   // --- Cabecera y qué es ---
   recTexto('rec-sub', esGrupo
-    ? c.cuantos + (c.cuantos === 1 ? ' cosa apuntada' : ' cosas en un grupo')
-    : '¿cuándo puedo comprarlo, mijo?');
-  recTexto('rec-nombre', esGrupo ? (c.grupo || 'Mi grupo')
-                                 : (c.nombre || 'Lo que usted quiere'));
+    ? t(c.cuantos === 1 ? '{n} cosa apuntada' : '{n} cosas en un grupo', { n: c.cuantos })
+    : t('¿cuándo puedo comprarlo, mijo?'));
+  recTexto('rec-nombre', esGrupo ? (c.grupo || t('Mi grupo'))
+                                 : (c.nombre || t('Lo que usted quiere')));
   recTexto('rec-precio', recPlata(esGrupo ? c.total : c.precio));
 
   const donde = document.getElementById('rec-donde');
   if (donde) {
     if (esGrupo) {
-      donde.textContent = c.cuantos + ' cosas, todo junto';
+      donde.textContent = t('{n} cosas, todo junto', { n: c.cuantos });
     } else if (c.link) {
       donde.textContent = recDominio(c.link);
     } else {
@@ -467,7 +467,7 @@ function recPintarRecibo() {
     afecta.innerHTML = '';
     const rot = document.createElement('span');
     rot.className = 'rec-rot-chico';
-    rot.textContent = 'Lo que le pesa';
+    rot.textContent = t('Lo que le pesa');
     afecta.appendChild(rot);
     const p = document.createElement('p');
     p.textContent = c.loQuePesa;
@@ -492,8 +492,8 @@ function recPintarRecibo() {
   recPintarHoja(c, esGrupo);
 
   recTexto('rec-voltear-txt', esGrupo
-    ? 'Voltear para corregir los precios'
-    : 'Voltear para corregir el precio');
+    ? t('Voltear para corregir los precios')
+    : t('Voltear para corregir el precio'));
 }
 
 function recTexto(id, texto) {
@@ -519,22 +519,22 @@ function recPintarRenglones(c, esGrupo) {
 
   const cap = c.capacidad;
 
-  cont.appendChild(recRenglon('Usted ahorra', recPlata(cap.alMes), '/ mes'));
+  cont.appendChild(recRenglon(t('Usted ahorra'), recPlata(cap.alMes), t('/ mes')));
 
   if (c.juntado && c.juntado.paraComprar > 0) {
-    cont.appendChild(recRenglon('Ya tiene', recPlata(c.juntado.paraComprar)));
+    cont.appendChild(recRenglon(t('Ya tiene'), recPlata(c.juntado.paraComprar)));
   }
 
   if (c.cuando.yaLoTiene) {
-    cont.appendChild(recRenglon(esGrupo ? 'Todo junto' : 'Lo tendrá', 'ya mismo', '', true));
+    cont.appendChild(recRenglon(esGrupo ? t('Todo junto') : t('Lo tendrá'), t('ya mismo'), '', true));
   } else if (c.cuando.meses === null) {
     // Sin capacidad no hay plazo. No se deja el renglón vacío: se dice.
-    cont.appendChild(recRenglon(esGrupo ? 'Todo junto' : 'Lo tendrá',
-                                'no se sabe todavía', '', true));
+    cont.appendChild(recRenglon(esGrupo ? t('Todo junto') : t('Lo tendrá'),
+                                t('no se sabe todavía'), '', true));
   } else {
-    cont.appendChild(recRenglon(esGrupo ? 'Todo junto' : 'Lo tendrá',
-                                c.cuandoEnPalabras.replace(/^en /, 'en '), '', true));
-    cont.appendChild(recRenglon('O sea, para', c.fecha));
+    cont.appendChild(recRenglon(esGrupo ? t('Todo junto') : t('Lo tendrá'),
+                                c.cuandoEnPalabras, '', true));
+    cont.appendChild(recRenglon(t('O sea, para'), c.fecha));
   }
 }
 
@@ -611,7 +611,7 @@ function recPintarDesglose(c) {
 
   const rot = document.createElement('span');
   rot.className = 'rec-rot-chico';
-  rot.textContent = 'Cosa por cosa';
+  rot.textContent = t('Cosa por cosa');
   cont.appendChild(rot);
 
   c.desglose.forEach(function (d) {
@@ -620,7 +620,7 @@ function recPintarDesglose(c) {
 
     const cosa = document.createElement('span');
     cosa.className = 'rec-d-cosa';
-    cosa.textContent = d.nombre || '(sin nombre)';
+    cosa.textContent = d.nombre || t('(sin nombre)');
     fila.appendChild(cosa);
 
     const plata = document.createElement('span');
@@ -630,7 +630,7 @@ function recPintarDesglose(c) {
 
     const cuanto = document.createElement('span');
     cuanto.className = 'rec-d-cuanto';
-    cuanto.textContent = d.meses === null ? '—' : d.mesesEnPalabras.replace(/^en /, '');
+    cuanto.textContent = d.meses === null ? '—' : d.mesesEnPalabras.replace(/^(en|in) /, '');
     fila.appendChild(cuanto);
 
     cont.appendChild(fila);
@@ -639,7 +639,7 @@ function recPintarDesglose(c) {
   const total = document.createElement('div');
   total.className = 'rec-desglose-total';
   const t1 = document.createElement('span');
-  t1.textContent = 'Todo junto';
+  t1.textContent = t('Todo junto');
   const t2 = document.createElement('span');
   t2.className = 'rec-d-plata';
   t2.textContent = recPlata(c.total);
@@ -654,14 +654,14 @@ function recPintarPlazos(c) {
   if (!fila) return;
 
   fila.innerHTML = '';
-  if (dice) dice.textContent = 'Toque un plazo y le digo cuánto tendría que guardar.';
+  if (dice) dice.textContent = t('Toque un plazo y le digo cuánto tendría que guardar.');
 
   c.plazos.forEach(function (p) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'rec-plazo-btn';
     b.setAttribute('aria-pressed', 'false');
-    b.textContent = p.meses + ' meses';
+    b.textContent = t('{n} meses', { n: p.meses });
     b.addEventListener('click', function () {
       fila.querySelectorAll('.rec-plazo-btn').forEach(function (o) {
         o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
@@ -695,7 +695,7 @@ const REC_COLOR_DEL_CASO = {
   'no-alcanza': 'negro'
 };
 
-const REC_ARCHIVOS_CONSEJOS = ['data/consejos.json', 'data/consejos_masivos.json'];
+const REC_ARCHIVOS_CONSEJOS = ['data/consejos.json', 'data/consejos_masivos.json'].map(rutaDatos);
 
 // La bolsa cargada: { verde: [...], amarillo: [...], rojo: [...], negro: [...] }
 let recConsejos = null;
@@ -705,10 +705,10 @@ const REC_MS_POR_LETRA = 18;   // el consejo es largo, va más rápido que el re
 
 // Red de seguridad: si los JSON no cargan, el recibo no se queda mudo.
 const REC_CONSEJO_DE_EMERGENCIA = {
-  verde: 'El que guarda siempre tiene, mijo. Pero el que guarda con fecha, llega.',
-  amarillo: 'La reserva es para la tormenta, no para el antojo. Piénselo dos veces.',
-  rojo: 'No cargue la mula con todo de una. De a bulto se llega igual, y sin lastimarla.',
-  negro: 'Antes de cargar la mula hay que darle de comer. Primero cuadre el mes.'
+  verde: t('El que guarda siempre tiene, mijo. Pero el que guarda con fecha, llega.'),
+  amarillo: t('La reserva es para la tormenta, no para el antojo. Piénselo dos veces.'),
+  rojo: t('No cargue la mula con todo de una. De a bulto se llega igual, y sin lastimarla.'),
+  negro: t('Antes de cargar la mula hay que darle de comer. Primero cuadre el mes.')
 };
 
 function recCargarConsejos() {
@@ -817,8 +817,8 @@ function recPintarHoja(c, esGrupo) {
          precio: c.precio, link: c.link || '' }];
 
   recTexto('rec-atras-cuantas', filas.length === 1
-    ? 'la fila de este recibo'
-    : 'las ' + filas.length + ' filas de este grupo');
+    ? t('la fila de este recibo')
+    : t('las {n} filas de este grupo', { n: filas.length }));
 
   filas.forEach(function (f, i) {
     const tr = document.createElement('tr');
@@ -842,7 +842,7 @@ function recPintarHoja(c, esGrupo) {
     vacio.className = 'rec-hoja-num';
     tr.appendChild(vacio);
     const rot = document.createElement('td');
-    rot.textContent = 'Todo junto';
+    rot.textContent = t('Todo junto');
     tr.appendChild(rot);
     const val = document.createElement('td');
     val.className = 'rec-hoja-plata';
@@ -869,7 +869,7 @@ function recCeldaDonde(fila) {
     td.appendChild(a);
   } else {
     td.className += ' rec-hoja-sin';
-    td.textContent = 'a mano';
+    td.textContent = t('a mano');
   }
   return td;
 }
@@ -887,7 +887,7 @@ function recCelda(fila, campo, modo) {
   input.value = campo === 'precio'
     ? Math.round(fila.precio).toLocaleString('es-CO')
     : (fila.nombre || '');
-  input.setAttribute('aria-label', campo === 'precio' ? 'Cuánto cuesta' : 'Qué es');
+  input.setAttribute('aria-label', campo === 'precio' ? t('Cuánto cuesta') : t('Qué es'));
   // El nombre completo, para el que no cabe en la columna.
   if (campo === 'nombre' && input.value) input.title = input.value;
   if (campo === 'precio') recAtarMoneda(input);
@@ -982,7 +982,7 @@ function recGuardarSuelto() {
   const d = recDatosParaGuardar('');
   if (!d) return;
   dbGuardarItem(d).then(function () {
-    recAvisar('Quedó apuntado, mijo.');
+    recAvisar(t('Quedó apuntado, mijo.'));
     recLimpiarPregunta();
   });
 }
@@ -1003,7 +1003,7 @@ function recMostrarGrupos() {
       b.textContent = g.nombre;
       const cuantos = document.createElement('span');
       cuantos.className = 'rec-grupo-btn-cuantos';
-      cuantos.textContent = g.cuantos + (g.cuantos === 1 ? ' cosa' : ' cosas');
+      cuantos.textContent = t(g.cuantos === 1 ? '{n} cosa' : '{n} cosas', { n: g.cuantos });
       b.appendChild(cuantos);
       b.addEventListener('click', function () { recGuardarEnGrupo(g.nombre); });
       lista.appendChild(b);
@@ -1018,7 +1018,7 @@ function recGuardarEnGrupo(nombre) {
   const d = recDatosParaGuardar(nombre);
   if (!d) return;
   dbGuardarItem(d).then(function () {
-    recAvisar('Quedó apuntado en "' + nombre + '".');
+    recAvisar(t('Quedó apuntado en "{nombre}".', { nombre: nombre }));
     const nuevo = document.getElementById('rec-grupo-nuevo');
     if (nuevo) nuevo.value = '';
     recLimpiarPregunta();
@@ -1026,7 +1026,7 @@ function recGuardarEnGrupo(nombre) {
 }
 
 function recDejarloAsi() {
-  recAvisar('Listo: no guardé nada. Ahí tenía su cuenta.');
+  recAvisar(t('Listo: no guardé nada. Ahí tenía su cuenta.'));
   recLimpiarPregunta();
 }
 
@@ -1091,7 +1091,7 @@ function recPintarLibreta() {
     if (cuenta) {
       cuenta.textContent = total ? String(total) : '';
       cuenta.classList.toggle('oculto', !total);
-      cuenta.title = total + (total === 1 ? ' cosa' : ' cosas');
+      cuenta.title = t(total === 1 ? '{n} cosa' : '{n} cosas', { n: total });
     }
 
     cont.innerHTML = '';
@@ -1104,8 +1104,7 @@ function recPintarLibreta() {
     if (!items.length) {
       const p = document.createElement('p');
       p.className = 'ah-guia';
-      p.textContent = 'Todavía no ha apuntado nada, mijo. Escriba un precio ' +
-                      'arriba, o señale uno en cualquier página con el clic derecho.';
+      p.textContent = t('Todavía no ha apuntado nada, mijo. Escriba un precio arriba, o señale uno en cualquier página con el clic derecho.');
       cont.appendChild(p);
       return;
     }
@@ -1115,12 +1114,12 @@ function recPintarLibreta() {
     sueltos.sort(function (x, y) { return x.precio - y.precio; });
 
     if (grupos.length) {
-      cont.appendChild(recLibTitulo('Grupos'));
+      cont.appendChild(recLibTitulo(t('Grupos')));
       grupos.forEach(function (g) {
         const b = recLibRenglon({
           grupo: true,
           nombre: g.nombre,
-          sub: g.cuantos + (g.cuantos === 1 ? ' cosa' : ' cosas'),
+          sub: t(g.cuantos === 1 ? '{n} cosa' : '{n} cosas', { n: g.cuantos }),
           precio: g.total,
           plazo: conIngreso ? recLibPlazo(g.total, a) : null
         });
@@ -1130,10 +1129,10 @@ function recPintarLibreta() {
     }
 
     if (sueltos.length) {
-      if (grupos.length || deudas.length) cont.appendChild(recLibTitulo('Sueltas'));
+      if (grupos.length || deudas.length) cont.appendChild(recLibTitulo(t('Sueltas')));
       sueltos.forEach(function (it) {
         const b = recLibRenglon({
-          nombre: recNombreCorto(it.nombre) || '(sin nombre)',
+          nombre: recNombreCorto(it.nombre) || t('(sin nombre)'),
           sub: recTienda(it.link),
           precio: it.precio,
           plazo: conIngreso ? recLibPlazo(it.precio, a) : null
@@ -1147,7 +1146,7 @@ function recPintarLibreta() {
     cont.innerHTML = '';
     const p = document.createElement('p');
     p.className = 'ah-guia';
-    p.textContent = 'No pude abrir la libreta: ' + e.message;
+    p.textContent = t('No pude abrir la libreta: {error}', { error: e.message });
     cont.appendChild(p);
   });
 }
@@ -1217,8 +1216,8 @@ function recLibRenglon(d) {
 function recLibPlazo(precio, ajustes) {
   const v = ahorroCuentaUnitaria({ precio: precio }, ajustes);
   const c = v.cuando;
-  if (c.yaLoTiene) return { tono: 'bien', texto: 'Ya lo puede comprar' };
-  if (!c.alcanzable) return { tono: 'no', texto: 'Todavía no alcanza' };
+  if (c.yaLoTiene) return { tono: 'bien', texto: t('Ya lo puede comprar') };
+  if (!c.alcanzable) return { tono: 'no', texto: t('Todavía no alcanza') };
   const dicho = ahorroPlazoEnPalabras(c.meses);
   return {
     tono: v.veredicto.caso === 'lento' ? 'lento' : 'bien',
@@ -1247,9 +1246,9 @@ function recTienda(link) {
     const host = new URL(link).hostname.replace(/^www\./, '');
     const m = host.match(REC_TIENDAS);
     if (!m) return host;
-    const t = m[0].toLowerCase().replace(/\s/g, '');
-    if (t === 'mercadolibre') return 'Mercado Libre';
-    return t.charAt(0).toUpperCase() + t.slice(1);
+    const tienda = m[0].toLowerCase().replace(/\s/g, '');
+    if (tienda === 'mercadolibre') return 'Mercado Libre';
+    return tienda.charAt(0).toUpperCase() + tienda.slice(1);
   } catch (e) { return ''; }
 }
 
@@ -1264,11 +1263,11 @@ function recQuitarDeLaLibreta() {
       recViendo = null;
       recAhora = null;
       recPintarLibreta();
-      recAvisar('Lo quité de la libreta.', {
-        texto: 'Deshacer',
+      recAvisar(t('Lo quité de la libreta.'), {
+        texto: t('Deshacer'),
         hacer: function () {
           dbGuardarItem(it).then(function () {
-            recAvisar('Listo, volvió a la libreta.');
+            recAvisar(t('Listo, volvió a la libreta.'));
             recPintarLibreta();
           });
         }

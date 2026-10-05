@@ -50,7 +50,7 @@ function dbAbrir() {
 
   dbPromesa = new Promise(function (resolver, rechazar) {
     if (typeof indexedDB === 'undefined') {
-      rechazar(new Error('Este navegador no tiene IndexedDB'));
+      rechazar(new Error(t('Este navegador no tiene IndexedDB')));
       return;
     }
 
@@ -191,7 +191,7 @@ function dbActualizarItem(id, cambios) {
       const pet = s.get(Number(id));
       pet.onsuccess = function () {
         const item = pet.result;
-        if (!item) { rechazar(new Error('No existe el ítem ' + id)); return; }
+        if (!item) { rechazar(new Error(t('No existe el ítem {id}', { id: id }))); return; }
         const c = cambios || {};
         if (c.nombre !== undefined) item.nombre = dbLimpiarTexto(c.nombre, 120);
         if (c.precio !== undefined) item.precio = dbLimpiarPrecio(c.precio);
